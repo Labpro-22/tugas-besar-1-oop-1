@@ -35,6 +35,9 @@ add_library(
 add_library(
   nimonspoli_ui STATIC 
   src/ui/Widgets.cpp
+  src/ui/ActionPanel.cpp
+  src/ui/BoardPanel.cpp
+  src/ui/PlayerInfoPanel.cpp
   src/ui/GameWindow.cpp
   # etc.
 )

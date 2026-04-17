@@ -1,55 +1,43 @@
 #pragma once
 
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/View.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
 #include <memory>
 
 #include "logic/Game.hpp"
-#include "ui/Widgets.hpp"
+#include "ui/ActionPanel.hpp"
+#include "ui/BoardPanel.hpp"
+#include "ui/Constants.hpp"
+#include "ui/DialogManager.hpp"
+#include "ui/PlayerInfoPanel.hpp"
 
 namespace ui {
-
-// Ini masih stub nanti diganti class
-
-struct BoardPanel : public Panel {
-  BoardPanel() : Panel({0, 0}, {200, 200}, sf::Color::Green) {}
-  ~BoardPanel() override = default;
-};
-
-struct LogPanel : public Panel {
-  LogPanel() : Panel({200, 0}, {200, 200}, sf::Color::Yellow) {}
-  ~LogPanel() override = default;
-};
-
-struct PlayerInfoPanel : public Panel {
-  PlayerInfoPanel() : Panel({0, 200}, {200, 200}, sf::Color::Cyan) {}
-  ~PlayerInfoPanel() override = default;
-};
-
-struct ActionPanel : public Panel {
-  ActionPanel() : Panel({200, 200}, {200, 200}, sf::Color::Magenta) {}
-  ~ActionPanel() override = default;
-};
-
-struct DialogManager {};
-
 class GameWindow : public sf::RenderWindow {
  public:
   GameWindow();
   ~GameWindow();
 
-  void onCreate() override;
   void onResize() override;
   void run();
   void close();
 
  private:
+  // Size
+  const sf::Vector2f virtualSize_{dim::width, dim::height};
+  const sf::Vector2f mainBoardSize_{dim::height, dim::height};
+  const sf::Vector2f sideBarSize_{dim::sideWidth, dim::height};
+
+  // SFML View
   sf::Event event_;
+  sf::View mainView_;
+
+  // Components
   logic::Game game_;
-  BoardPanel boardPanel_;
-  LogPanel logPanel_;
-  PlayerInfoPanel playerInfoPanel_;
-  ActionPanel actionPanel_;
+  BoardPanel boardPanel_;           /**< Main (center) panel */
+  PlayerInfoPanel playerInfoPanel_; /**< Right Panel */
+  ActionPanel actionPanel_;         /**< Left Panel */
   std::unique_ptr<DialogManager> dialogManager_;
 };
 
