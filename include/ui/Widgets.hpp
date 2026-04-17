@@ -31,7 +31,7 @@ class Widget {
   bool isVisible() const { return isVisible_; }
   bool isActive() const { return isActive_; }
 
- private:
+ protected:
   sf::Vector2f position_;
   sf::Vector2f size_;
   bool isVisible_ = true;

@@ -74,6 +74,8 @@ ImagePanel::ImagePanel(const std::string& imagePath) : Widget() {
     throw std::runtime_error("Failed to load image: " + imagePath);
   }
   sprite_.setTexture(texture_);
+  size_.x = sprite_.getTexture()->getSize().x;
+  size_.y = sprite_.getTexture()->getSize().y;
 }
 
 ImagePanel::~ImagePanel() = default;
