@@ -2,10 +2,16 @@
 
 #include <string> 
 #include "Player.hpp" 
+#include "ColorGroup.hpp"
 #include "../logic/Game.hpp" 
 #include <vector> 
+#include <map>
+
 using namespace std; 
+namespace logic {class Game;}
+namespace core {class Player;}
 namespace core { 
+
 class Property { 
 	private: 
 		string name_; 
@@ -15,33 +21,49 @@ class Property {
 		int mortgageValue_; 
 	public: 
 		Property();
-		Property(string name, Player* owner, bool isMortagegd, int price, int mortgageVallue);
-		virtual void calculateRent(logic::Game& g); 
-		virtual string getType(); 
+		Property(string name, int price, int mortgageValue);
+
+		virtual int calculateRent(logic::Game& g) = 0; 
+		virtual string getType() const = 0; 
 		void mortgage(); 
 		void unmortgage(); 
-		void setOwner(Player*); 
-		Player* GetOwner(); 
-		bool isOwned(); 
-		bool isAvailable(); 
+		void setOwner(Player* p); 
+		Player* GetOwner() const; 
+		bool isOwned() const; 
+		bool isAvailable() const; 
+		bool isMortgagedStatus() const;
+		string getName() const;
+		int getPrice() const;
+		int getMortgageValue() const;
+		virtual ~Property() = default;
 }; 
 class Street : public Property { 
 	private: 
-		// ColorGroup colorGroup 
+		ColorGroup colorGroup_; 
 		int houseCount_; 
 		int hotelCount_; 
 		vector<int> rentValues_; 
 		int houseCost_; 
 		int hotelCost_; 
-		bool hasFestival_; 
+		int festivalMultiplier_;
+		int festivalDuration_;
 	public: 
-		void calculateRent(logic::Game& g) override; 
-		string getType() override ; 
+		Street(string name, int price, int mortgageValue, ColorGroup colorGroup, vector<int> rentValues, int houseCost, int hotelCost);
+		int calculateRent(logic::Game& g) override; 
+		string getType() const override ; 
 		void buildHouse(); 
 		void buildHotel(); 
-		void demolish(); // there's an int in the class diagram but the variable isn't shown. jadi ubah aja ya 
-		bool canBuild(logic::Game&) ; 
-		bool hasMonopoly(logic::Game&) ; 
+		void demolish(int n);
+		bool canBuild(logic::Game& g) const; 
+		bool hasMonopoly(logic::Game& g) const; 
+		void applyFestival();
+		void tickFestival();
+		ColorGroup getColorGroup() const;
+    	int getHouseCount() const;
+    	int getHotelCount() const;
+    	int getFestivalMultiplier() const;
+    	int getFestivalDuration() const;
+    	void setFestivalState(int mult, int dur);
 
 };
 
@@ -49,17 +71,21 @@ class Railroad : public Property {
 	private: 
 		int baseFare_; 
 	public: 
-		void calculateRent(logic::Game& g) override; 
-		string getType() override ; 
+		Railroad(string name, int mortgageValue, int baseFare);
+		int calculateRent(logic::Game& g) override; 
+		string getType() const override ; 
+		int getBaseFare() const;
 		
 };
 
 class Utility : public Property { 
 	private: 
-		int multiplier_; 
+		map<int, int> multiplierTable_; // jmlh utility -> faktor pengali
 	public: 
-		void calculateRent(logic::Game& g) override; 
-		string getType() override ; 
+		Utility(string name, int mortgageValue, map<int, int> multiplierTable);
+		int calculateRent(logic::Game& g) override; 
+		string getType() const override ; 
+		int getCurrentMultiplier(logic::Game& g) const;
 	
 
 }; 
