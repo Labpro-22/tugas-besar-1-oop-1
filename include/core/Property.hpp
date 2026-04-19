@@ -28,7 +28,7 @@ class Property {
 		void mortgage(); 
 		void unmortgage(); 
 		void setOwner(Player* p); 
-		Player* GetOwner() const; 
+		Player* getOwner() const; 
 		bool isOwned() const; 
 		bool isAvailable() const; 
 		bool isMortgagedStatus() const;
