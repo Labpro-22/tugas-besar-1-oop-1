@@ -34,7 +34,7 @@ void Property::setOwner(Player* p){
     owner_ = p;
 }; 
 
-Player* Property::GetOwner() const{
+Player* Property::getOwner() const{
     return owner_;
 }; 
 
