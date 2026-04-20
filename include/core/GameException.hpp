@@ -95,20 +95,3 @@ private:
     string filename_;
     string operation_;
 };
-
-class BankruptcyException : public GameException {
-public:
-    explicit BankruptcyException(core::Player* bankrupt) : bankrupt_(bankrupt) {}
-
-    string getMessage() const override{
-        string name = bankrupt_ ? bankrupt_->getName() : "Unknown";
-        return "BankruptcyException: Player '" + name + "' has gone bankrupt";
-    };
-
-    core::Player* getBankrupt() const { 
-        return bankrupt_; 
-    }
-
-private:
-    core::Player* bankrupt_;
-};
