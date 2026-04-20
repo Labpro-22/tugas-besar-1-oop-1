@@ -3,14 +3,14 @@
 namespace core {
 
 enum class ColorGroup {
-    COKLAT,
-    BIRU_MUDA,
-    MERAH_MUDA,
+    BROWN,
+    LIGHT_BLUE,
+    PINK,
     ORANGE,
-    MERAH,
-    KUNING,
-    HIJAU,
-    BIRU_TUA,
+    RED,
+    YELLOW,
+    GREEN,
+    DARK_BLUE,
     DEFAULT  // utk Railroad, Utility, petak aksi
 };
 
