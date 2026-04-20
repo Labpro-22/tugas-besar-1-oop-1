@@ -2,8 +2,7 @@
 
 #include <string> 
 #include "Player.hpp" 
-#include "ColorGroup.hpp"
-#include "../logic/Game.hpp" 
+#include "Game.hpp" 
 #include <vector> 
 #include <map>
 
@@ -11,6 +10,23 @@ using namespace std;
 namespace logic {class Game;}
 namespace core {class Player;}
 namespace core { 
+enum class ColorGroup {
+    BROWN,
+    LIGHT_BLUE,
+    PINK,
+    ORANGE,
+    RED,
+    YELLOW,
+    GREEN,
+    DARK_BLUE,
+    DEFAULT  // utk Railroad, Utility, petak aksi
+};
+
+enum class PropertyType { 
+	STREET, 
+	RAILROAD, 
+	UTILITY
+};
 
 class Property { 
 	private: 
