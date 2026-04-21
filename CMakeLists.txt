@@ -12,11 +12,16 @@ else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
-find_package(SFML 3.0 REQUIRED COMPONENTS System Window Graphics REQUIRED)
+find_package(SFML 2.5 REQUIRED COMPONENTS system window graphics REQUIRED)
 
 add_library(
   nimonspoli_core STATIC
   src/core/Tiles.cpp 
+  src/core/Player.cpp
+  src/core/Property.cpp
+  src/core/Railroad.cpp
+  src/core/Street.cpp
+  src/core/Utility.cpp
   # etc. lanjut sendiri
 )
 
@@ -52,6 +57,22 @@ target_include_directories(nimonspoli_ui PUBLIC include)
 target_link_libraries(nimonspoli_data PUBLIC nimonspoli_core)
 target_link_libraries(nimonspoli_logic PUBLIC nimonspoli_core nimonspoli_data)
 target_link_libraries(nimonspoli_ui PUBLIC nimonspoli_core nimonspoli_data nimonspoli_logic)
-target_link_libraries(nimonspoli_ui PUBLIC SFML::System SFML::Window SFML::Graphics)
 
+target_link_libraries(nimonspoli_ui PUBLIC sfml-system sfml-window sfml-graphics)
 target_link_libraries(nimonspoli PRIVATE nimonspoli_ui)
+
+# unit testing stuff 
+enable_testing()
+
+find_package(GTest REQUIRED)
+add_executable(tiles_test src/core/TilesTest.cpp)
+
+target_link_libraries(tiles_test 
+    PRIVATE 
+    nimonspoli_core 
+    GTest::gtest 
+    GTest::gtest_main 
+    pthread
+)
+
+add_test(NAME CoreTilesTest COMMAND tiles_test)
