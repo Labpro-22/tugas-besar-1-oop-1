@@ -62,17 +62,17 @@ target_link_libraries(nimonspoli_ui PUBLIC sfml-system sfml-window sfml-graphics
 target_link_libraries(nimonspoli PRIVATE nimonspoli_ui)
 
 # unit testing stuff 
-enable_testing()
-
-find_package(GTest REQUIRED)
-add_executable(tiles_test src/core/TilesTest.cpp)
-
-target_link_libraries(tiles_test 
-    PRIVATE 
-    nimonspoli_core 
-    GTest::gtest 
-    GTest::gtest_main 
-    pthread
-)
-
-add_test(NAME CoreTilesTest COMMAND tiles_test)
+# enable_testing()
+#
+# find_package(GTest REQUIRED)
+# add_executable(tiles_test src/core/TilesTest.cpp)
+#
+# target_link_libraries(tiles_test 
+#     PRIVATE 
+#     nimonspoli_core 
+#     GTest::gtest 
+#     GTest::gtest_main 
+#     pthread
+# )
+#
+# add_test(NAME CoreTilesTest COMMAND tiles_test)

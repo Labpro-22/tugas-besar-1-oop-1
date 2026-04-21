@@ -71,7 +71,7 @@ public:
     }
 
 private:
-    std::string configKey_;
+    std::string configKey_; 
     std::string expected_;
 };
 
