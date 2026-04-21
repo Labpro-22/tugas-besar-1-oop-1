@@ -39,6 +39,7 @@ add_library(
   src/ui/BoardPanel.cpp
   src/ui/PlayerInfoPanel.cpp
   src/ui/GameWindow.cpp
+  src/ui/Constants.cpp
   # etc.
 )
 

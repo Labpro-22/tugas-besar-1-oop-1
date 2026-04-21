@@ -9,7 +9,7 @@
 
 namespace ui {
 GameWindow::GameWindow()
-    : sf::RenderWindow(sf::VideoMode(dim::width, dim::height), "Nimonspoli"),
+    : sf::RenderWindow(sf::VideoMode(size::width, size::height), "Nimonspoli"),
       game_(0),
       boardPanel_(),
       playerInfoPanel_(),

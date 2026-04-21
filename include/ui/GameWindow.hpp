@@ -25,9 +25,9 @@ class GameWindow : public sf::RenderWindow {
 
  private:
   // Size
-  const sf::Vector2f virtualSize_{dim::width, dim::height};
-  const sf::Vector2f mainBoardSize_{dim::height, dim::height};
-  const sf::Vector2f sideBarSize_{dim::sideWidth, dim::height};
+  const sf::Vector2f virtualSize_{size::width, size::height};
+  const sf::Vector2f mainBoardSize_{size::height, size::height};
+  const sf::Vector2f sideBarSize_{size::sideWidth, size::height};
 
   // SFML View
   sf::Event event_;

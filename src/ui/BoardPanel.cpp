@@ -10,8 +10,8 @@
 namespace ui {
 
 BoardPanel::BoardPanel()
-    : Panel({dim::sideWidth, 0}, {dim::height, dim::height},
-            color::light::surface::gameBoardBase) {
+    : Panel({size::sideWidth, 0}, {size::height, size::height},
+            component::board) {
   if (regTileNum_ < 3 || regTileNum_ > 14)
     throw std::runtime_error("Invalid board configuration.");
 }

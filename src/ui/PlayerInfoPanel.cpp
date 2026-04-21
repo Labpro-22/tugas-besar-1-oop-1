@@ -6,8 +6,8 @@
 namespace ui {
 
 PlayerInfoPanel::PlayerInfoPanel()
-    : Panel({dim::sideWidth + dim::height, 0}, {dim::sideWidth, dim::height},
-            color::light::surface::background) {}
+    : Panel({size::sideWidth + size::height, 0},
+            {size::sideWidth, size::height}, component::sideBar) {}
 
 PlayerInfoPanel::~PlayerInfoPanel() = default;
 

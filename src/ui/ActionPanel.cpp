@@ -7,8 +7,7 @@
 namespace ui {
 
 ActionPanel::ActionPanel()
-    : Panel({0, 0}, {dim::sideWidth, dim::height},
-            color::light::surface::background) {}
+    : Panel({0, 0}, {size::sideWidth, size::height}, component::sideBar) {}
 
 ActionPanel::~ActionPanel() = default;
 

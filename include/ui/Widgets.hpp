@@ -48,7 +48,7 @@ class Panel : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow& window) override;
 
- private:
+ protected:
   std::vector<std::unique_ptr<Widget>> children;
   sf::RectangleShape background;
 };
@@ -63,7 +63,7 @@ class Label : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow& window) override {}
 
- private:
+ protected:
   sf::Text text_;
 };
 
@@ -76,7 +76,7 @@ class ImagePanel : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow& window) override {}
 
- private:
+ protected:
   sf::Texture texture_;
   sf::Sprite sprite_;
 };
@@ -92,7 +92,7 @@ class Button : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow& window) override;
 
- private:
+ protected:
   sf::RectangleShape background_;
   std::unique_ptr<Widget> widget_;
 };
