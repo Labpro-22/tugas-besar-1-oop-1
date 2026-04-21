@@ -1,6 +1,4 @@
-#include "../../include/core/Property.hpp"
-#include "../../include/core/Player.hpp"
-#include "../../include/logic/Game.hpp"
+#include "core/Property.hpp"
 
 #include <cmath>
 
@@ -8,31 +6,23 @@ using namespace std;
 
 namespace core {
 
-Railroad::Railroad(string name, int mortgageValue, int baseFare) : Property(move(name), 0, mortgageValue), baseFare_(baseFare) {}
+Railroad::Railroad(const string& name, int mortgageValue, int baseFare) : Property(name, 0, mortgageValue), baseFare_(baseFare) {}
 
-int Railroad::calculateRent(logic::Game& g) {
-    if (isMortgagedStatus()) {
+int Railroad::calculateRent([[maybe_unused]] int diceRoll, int ownedSameType, [[maybe_unused]] bool haMonopoly) const {
+    if (isMortgagedStatus() || !isOwned()) {
         return 0;
     } 
 
-    Player* owner = getOwner();
-    if (!owner) {
+    if (ownedSameType <= 0) {
         return 0;
     }
 
-    auto properties = g.getPropertiesOwnedBy(owner);
-    int ownedRailroads = 0;
-    for (auto* prop : properties) {
-        if (prop->getType() == "RAILROAD" && !prop->isMortgagedStatus()) {
-            ownedRailroads++;
-        }
-    }
-
-    return static_cast<int>(baseFare_ * pow(2, ownedRailroads - 1));
+    int rent = static_cast<int>(baseFare_ * pow(2, ownedSameType - 1));
+    return rent * getFestMultiplier();
 }
 
-string Railroad::getType() const { 
-    return "RAILROAD"; 
+PropertyType Railroad::getType() const { 
+    return PropertyType::RAILROAD; 
 }
 
 int Railroad::getBaseFare() const { 

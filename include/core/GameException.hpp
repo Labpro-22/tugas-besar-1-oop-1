@@ -3,11 +3,10 @@
 #include <exception>
 namespace core { class Player; }
 
-using namespace std;
 
 class GameException : public std::exception {
 public:
-    virtual string getMessage() const = 0;
+    virtual std::string getMessage() const = 0;
 
     const char* what() const noexcept override {
         cachedMessage_ = getMessage();
@@ -17,15 +16,15 @@ public:
     virtual ~GameException() = default;
 
 private:
-    mutable string cachedMessage_;
+    mutable std::string cachedMessage_;
 };
 
 class InsufficientFundsException : public GameException {
 public:
     InsufficientFundsException(int amount, int required) : amount_(amount), required_(required) {};
 
-    string getMessage() const override {
-        return "InsufficientFundsException: Dimiliki M" + to_string(amount_) + ", Dibutuhkan M" + to_string(required_) + ", Kekurangan M" + to_string(required_ - amount_);
+    std::string getMessage() const override {
+        return "InsufficientFundsException: Dimiliki M" + std::to_string(amount_) + ", Dibutuhkan M" + std::to_string(required_) + ", Kekurangan M" + std::to_string(required_ - amount_);
     }
 
     int getAmount() const { 
@@ -42,73 +41,56 @@ private:
 
 class InvalidMoveException : public GameException {
 public:
-    InvalidMoveException(const string& reason) : reason_(reason) {};
+    InvalidMoveException(const std::string& reason) : reason_(reason) {};
 
-    string getMessage() const override {
+    std::string getMessage() const override {
         return "InvalidMoveException: " + reason_;
     }
 
-    string getReason() const { 
+    std::string getReason() const { 
         return reason_; 
     }
 
 private:
-    string reason_;
+    std::string reason_;
 };
 
 class InvalidConfigException : public GameException {
 public:
-    InvalidConfigException(const string& configKey, const string& expected) : configKey_(configKey), expected_(expected) {}
+    InvalidConfigException(const std::string& configKey, const std::string& expected) : configKey_(configKey), expected_(expected) {}
 
-    string getMessage() const override {
+    std::string getMessage() const override {
         return "InvalidConfigException: key='" + configKey_ + "' expected=" + expected_;
     }
 
-    string getConfigKey() const { 
+    std::string getConfigKey() const { 
         return configKey_; 
     }
-    string getExpected()  const { 
+    std::string getExpected()  const { 
         return expected_; 
     }
 
 private:
-    string configKey_;
-    string expected_;
+    std::string configKey_; 
+    std::string expected_;
 };
 
 class FileIOException : public GameException {
 public:
-    FileIOException(const string& filename, const string& operation) : filename_(filename), operation_(operation) {}
+    FileIOException(const std::string& filename, const std::string& operation) : filename_(filename), operation_(operation) {}
 
-    string getMessage() const override {
+    std::string getMessage() const override {
         return "FileIOException: cannot " + operation_ + " file '" + filename_ + "'";
     }
 
-    string getFilename() const { 
+    std::string getFilename() const { 
         return filename_; 
     }
-    string getOperation() const { 
+    std::string getOperation() const { 
         return operation_; 
     }
 
 private:
-    string filename_;
-    string operation_;
-};
-
-class BankruptcyException : public GameException {
-public:
-    explicit BankruptcyException(core::Player* bankrupt) : bankrupt_(bankrupt) {}
-
-    string getMessage() const override{
-        string name = bankrupt_ ? bankrupt_->getName() : "Unknown";
-        return "BankruptcyException: Player '" + name + "' has gone bankrupt";
-    };
-
-    core::Player* getBankrupt() const { 
-        return bankrupt_; 
-    }
-
-private:
-    core::Player* bankrupt_;
+    std::string filename_;
+    std::string operation_;
 };

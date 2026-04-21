@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "data/LogEntry.hpp"
+#include "LogEntry.hpp"
 
 namespace data {
 class HeldCardDTO {

@@ -9,7 +9,7 @@ class PropertyConfig {
   std::string code;   // kode huruf unik, misal: "GRT"
   std::string name;   // nama lengkap, misal: "GARUT"
   std::string type;   // "STREET" | "RAILROAD" | "UTILITY"
-  std::string color;  // warna, misal: "COKLAT"
+  std::string color; 
   int purchasePrice = 0;
   int mortgageValue = 0;
 
