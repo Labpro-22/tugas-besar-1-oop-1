@@ -28,8 +28,6 @@ const auto black = sf::Color(sf::Uint32(0x040E18FFU));
 }  // namespace ui::accent
 
 namespace ui::component {
-// Core surfaces
-
 const auto background = palette::white;
 const auto sideBar = palette::backgroundGrey;
 const auto card = palette::darkGrey;
@@ -41,6 +39,12 @@ const auto hover = palette::lightGrey;
 const auto yes = accent::lime;
 const auto no = accent::red;
 const auto disabled = palette::lightGrey;
+const auto green = accent::green;
+const auto redAction = accent::red;
+const auto purple = accent::lavender;
+const auto blue = accent::lightBlue;
+const auto orange = accent::orange;
+const auto lightBlue = accent::lightBlue;
 }  // namespace button
 
 const auto board = sf::Color(sf::Uint32(0xA1CCA5FFU));
@@ -48,8 +52,6 @@ const auto border = accent::black;
 }  // namespace ui::component
 
 namespace ui::property {
-// Property tile colors
-
 const auto brown = accent::brown;
 const auto lightBlue = accent::lightBlue;
 const auto pink = accent::pink;
