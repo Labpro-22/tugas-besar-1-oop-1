@@ -1,60 +1,31 @@
-#include "../../include/core/Property.hpp"
-#include "../../include/core/Player.hpp"
-#include "../../include/logic/Game.hpp"
+#include "include/core/Property.hpp"
 
 using namespace std;
 
 namespace core {
+map<int, int> Utility::multiplierTable_;
 
-Utility::Utility(string name, int mortgageValue, map<int, int> multiplierTable) : Property(move(name), 0, mortgageValue), multiplierTable_(move(multiplierTable)) {}
+Utility::Utility(const string& name, int mortgageValue) : Property(name, 0, mortgageValue) {}
 
-int Utility::calculateRent(logic::Game& g) {
-    if (isMortgagedStatus()) {
+void Utility::setMultiplierTabel(const map<int, int>& table) {
+    multiplierTable_ = table;
+}
+
+int Utility::calculateRent(int diceRoll, int ownedSameType, [[maybe_unused]] bool hasMonopoly) const {
+    if (isMortgagedStatus() || !isOwned()) {
         return 0;
     }
 
-    Player* owner = getOwner();
-    if (!owner) {
-        return 0;
-    }
-
-    auto properties = g.getPropertiesOwnedBy(owner);
-    int ownedUtilities = 0;
-    for (auto* prop : properties) {
-        if (prop->getType() == "UTILITY" && !prop->isMortgagedStatus()) {
-            ownedUtilities++;
-        }
-    }
-
-    int multiplier = 1;
-    auto it = multiplierTable_.find(ownedUtilities);
-    if (it != multiplierTable_.end()) {
-        multiplier = it->second;
-    } else if (!multiplierTable_.empty()) {
-        multiplier = multiplierTable_.rbegin()->second;
-    }
-
-    return g.getLastDiceRoll() * multiplier;
+    int multiplier = getCurrentMultiplier(ownedSameType);
+    int rent = diceRoll * multiplier;
+    return rent * getFestMultiplier();
 }
 
-string Utility::getType() const { 
-    return "UTILITY"; 
+PropertyType Utility::getType() const { 
+    return PropertyType::UTILITY; 
 }
 
-int Utility::getCurrentMultiplier(logic::Game& g) const {
-    Player* owner = getOwner();
-    if (!owner) {
-        return 1;
-    }
-
-    auto properties = g.getPropertiesOwnedBy(owner);
-    int ownedUtilities = 0;
-    for (auto* prop : properties) {
-        if (prop->getType() == "UTILITY" && !prop->isMortgagedStatus()) {
-            ownedUtilities++;
-        }
-    }
-
+int Utility::getCurrentMultiplier(int ownedUtilities) const {
     auto it = multiplierTable_.find(ownedUtilities);
     if (it != multiplierTable_.end()) {
         return it->second;
