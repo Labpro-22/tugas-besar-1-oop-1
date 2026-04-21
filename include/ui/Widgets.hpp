@@ -7,10 +7,36 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
+#include <functional>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace ui {
+
+enum class HorizontalAlign { Left, Center, Right };
+enum class VerticalAlign { Top, Middle, Bottom };
+
+struct LabelStyle {
+  unsigned int characterSize = 30;
+  sf::Color color = sf::Color::White;
+  sf::Uint32 textStyle = sf::Text::Regular;
+  HorizontalAlign horizontalAlign = HorizontalAlign::Left;
+  VerticalAlign verticalAlign = VerticalAlign::Top;
+  sf::Vector2f padding{0.0f, 0.0f};
+  bool autoScaleToFit = false;
+  unsigned int minCharacterSize = 10;
+};
+
+struct ButtonStyle {
+  sf::Color baseColor = sf::Color::Transparent;
+  sf::Color hoverColor = sf::Color::Transparent;
+  sf::Color pressedColor = sf::Color::Transparent;
+  sf::Color disabledColor = sf::Color::Transparent;
+  sf::Color borderColor = sf::Color::Transparent;
+  float borderThickness = 0.0f;
+  LabelStyle labelStyle;
+};
 
 class Widget {
  public:
@@ -56,14 +82,20 @@ class Panel : public Widget {
 class Label : public Widget {
  public:
   Label(const std::string& text, const sf::Font& font,
-        unsigned int characterSize = 30);
+        const LabelStyle& style = {});
   ~Label() override;
 
-  void handleEvent(sf::Event& event, sf::RenderWindow& window) override {}
+  void handleEvent(sf::Event&, sf::RenderWindow&) override {}
   void render(sf::RenderWindow& window) override;
-  void update(sf::RenderWindow& window) override {}
+  void update(sf::RenderWindow&) override {}
+
+  void setText(const std::string& text);
+  void setStyle(const LabelStyle& style);
 
  protected:
+  void applyStyle();
+
+  LabelStyle style_;
   sf::Text text_;
 };
 
@@ -72,9 +104,9 @@ class ImagePanel : public Widget {
   ImagePanel(const std::string& imagePath);
   ~ImagePanel() override;
 
-  void handleEvent(sf::Event& event, sf::RenderWindow& window) override {}
+  void handleEvent(sf::Event&, sf::RenderWindow&) override {}
   void render(sf::RenderWindow& window) override;
-  void update(sf::RenderWindow& window) override {}
+  void update(sf::RenderWindow&) override {}
 
  protected:
   sf::Texture texture_;
@@ -83,8 +115,10 @@ class ImagePanel : public Widget {
 
 class Button : public Widget {
  public:
-  Button(const std::string& text);
-  Button(const std::string& text, const std::string& imagePath);
+  Button(const std::string& text, const sf::Font& font,
+         const ButtonStyle& style);
+  Button(const std::string& text, const sf::Font& font,
+         const std::string& imagePath, const ButtonStyle& style);
   Button(std::unique_ptr<Widget> widget);
   ~Button() override;
 
@@ -92,7 +126,19 @@ class Button : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow& window) override;
 
+  void setStyle(const ButtonStyle& style);
+  void setOnClick(std::function<void()> onClick);
+  void setOnHoverChanged(std::function<void(bool)> onHoverChanged);
+
  protected:
+  bool contains(const sf::Vector2f& point) const;
+  void updateHoverState(const sf::Vector2f& mousePosition);
+
+  bool isHovered_ = false;
+  bool isPressed_ = false;
+  ButtonStyle style_;
+  std::function<void()> onClick_;
+  std::function<void(bool)> onHoverChanged_;
   sf::RectangleShape background_;
   std::unique_ptr<Widget> widget_;
 };
