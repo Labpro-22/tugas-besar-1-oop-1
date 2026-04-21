@@ -1,17 +1,13 @@
-#include "../../include/core/Property.hpp"
-#include "../../include/core/Player.hpp"
-#include "../../include/logic/Game.hpp"
-#include "../../include/core/GameException.hpp"
-#include <algorithm>
-#include <cmath>
+#include "include/core/Property.hpp"
+#include "include/core/GameException.hpp"
 
 using namespace std;
 
 namespace core{
 
-Property::Property() : name_(""), owner_(nullptr), isMortgaged_(false), price_(0), mortgageValue_(0) {};
+Property::Property() : name_(""), owner_(nullptr), isMortgaged_(false), price_(0), mortgageValue_(0), festMultiplier_(1), festDuration_(0) {}
 
-Property::Property(string name, int price, int mortgageValue) : name_(move(name)), owner_(nullptr), isMortgaged_(false), price_(price), mortgageValue_(mortgageValue) {};
+Property::Property(const string& name, int price, int mortgageValue) : name_(name), owner_(nullptr), isMortgaged_(false), price_(price), mortgageValue_(mortgageValue), festMultiplier_(1), festDuration_(0) {}
 
 void Property::mortgage() {
     if(!isOwned()) {
@@ -50,14 +46,50 @@ bool Property::isMortgagedStatus() const{
     return isMortgaged_;
 };
 
-string Property::getName() const{
+const string& Property::getName() const{
     return name_;
 };
+
 int Property::getPrice() const{
     return price_;
 };
 int Property::getMortgageValue() const{
     return mortgageValue_;
 }; 
+
+void Property::applyFestival() {
+    if (festMultiplier_ < 8) {
+        festMultiplier_ *= 2;
+    }
+    festDuration_ = 3;
+}
+
+void Property::tickFestival() {
+    if (festDuration_ <= 0) return;
+
+    --festDuration_;
+    if (festDuration_ == 0){
+        festMultiplier_ = 1;
+    }
+}
+
+int Property::getFestMultiplier() const {
+    return festMultiplier_;
+}
+
+int Property::getFestDuration() const {
+    return festDuration_;
+}
+
+void Property::setFestivalState(int mult, int dur) {
+    if (mult != 1 && mult != 2 && mult != 4 && mult != 8){
+        throw InvalidConfigException("festivalMultiplier", "1, 2, 4, atau  8");
+    }
+    if (dur < 0 || dur > 3){
+        throw InvalidConfigException("festivalDuration", "antara 0 dan 3");
+    }
+    festMultiplier_ = mult;
+    festDuration_   = dur;
+}
 
 }
