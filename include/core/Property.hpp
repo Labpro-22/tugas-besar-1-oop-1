@@ -2,14 +2,12 @@
 
 #include <string> 
 #include "Player.hpp" 
-#include "Game.hpp" 
 #include <vector> 
 #include <map>
 
-using namespace std; 
-namespace logic {class Game;}
 namespace core {class Player;}
-namespace core { 
+namespace core {
+
 enum class ColorGroup {
     BROWN,
     LIGHT_BLUE,
@@ -29,18 +27,21 @@ enum class PropertyType {
 };
 
 class Property { 
-	private: 
-		string name_; 
+	protected: 
+		std::string name_; 
 		Player* owner_; 
 		bool isMortgaged_; 
 		int price_; 
 		int mortgageValue_; 
+		int festMultiplier_;
+		int festDuration_;
+
 	public: 
 		Property();
-		Property(string name, int price, int mortgageValue);
+		Property(const std::string& name, int price, int mortgageValue);
 
-		virtual int calculateRent(logic::Game& g) = 0; 
-		virtual string getType() const = 0; 
+		virtual int calculateRent(int diceRoll, int ownedSameType, bool hasMonopoly) const = 0; 
+		virtual PropertyType getType() const = 0;
 		void mortgage(); 
 		void unmortgage(); 
 		void setOwner(Player* p); 
@@ -48,9 +49,15 @@ class Property {
 		bool isOwned() const; 
 		bool isAvailable() const; 
 		bool isMortgagedStatus() const;
-		string getName() const;
+		const std::string& getName() const;
 		int getPrice() const;
 		int getMortgageValue() const;
+		void applyFestival();
+		void tickFestival();
+		int getFestMultiplier() const;
+		int getFestDuration() const;
+		void setFestivalState(int mult, int dur);
+		
 		virtual ~Property() = default;
 }; 
 class Street : public Property { 
@@ -58,28 +65,24 @@ class Street : public Property {
 		ColorGroup colorGroup_; 
 		int houseCount_; 
 		int hotelCount_; 
-		vector<int> rentValues_; 
+		std::vector<int> rentValues_; 
 		int houseCost_; 
 		int hotelCost_; 
-		int festivalMultiplier_;
-		int festivalDuration_;
 	public: 
-		Street(string name, int price, int mortgageValue, ColorGroup colorGroup, vector<int> rentValues, int houseCost, int hotelCost);
-		int calculateRent(logic::Game& g) override; 
-		string getType() const override ; 
-		void buildHouse(); 
-		void buildHotel(); 
+		Street(const std::string& name, int price, int mortgageValue, ColorGroup colorGroup, std::vector<int> rentValues, int houseCost, int hotelCost);
+		int calculateRent(int diceRoll, int ownedSameType, bool hasMonopoly) const override; 
+		PropertyType getType() const override ; 
+		
+		void build();
 		void demolish(int n);
-		bool canBuild(logic::Game& g) const; 
-		bool hasMonopoly(logic::Game& g) const; 
-		void applyFestival();
-		void tickFestival();
+
+		bool canBuild(bool hasMonopoly) const; 
+		
 		ColorGroup getColorGroup() const;
     	int getHouseCount() const;
     	int getHotelCount() const;
-    	int getFestivalMultiplier() const;
-    	int getFestivalDuration() const;
-    	void setFestivalState(int mult, int dur);
+    	int getHouseCost() const;
+		int getHotelCost() const;
 
 };
 
@@ -87,24 +90,23 @@ class Railroad : public Property {
 	private: 
 		int baseFare_; 
 	public: 
-		Railroad(string name, int mortgageValue, int baseFare);
-		int calculateRent(logic::Game& g) override; 
-		string getType() const override ; 
+		Railroad(const std::string& name, int mortgageValue, int baseFare);
+		int calculateRent(int diceRoll, int ownedSameType, bool hasMonopoly) const override; 
+		PropertyType getType() const override ; 
 		int getBaseFare() const;
 		
 };
 
 class Utility : public Property { 
 	private: 
-		map<int, int> multiplierTable_; // jmlh utility -> faktor pengali
+		static std::map<int, int> multiplierTable_; // jmlh utility -> faktor pengali
 	public: 
-		Utility(string name, int mortgageValue, map<int, int> multiplierTable);
-		int calculateRent(logic::Game& g) override; 
-		string getType() const override ; 
-		int getCurrentMultiplier(logic::Game& g) const;
+		Utility(const std::string& name, int mortgageValue);
+		static void setMultiplierTabel(const std::map<int, int>& table);
+		int calculateRent(int diceRoll, int ownedSameType, bool hasMonopoly) const override; 
+		PropertyType getType() const override; 
+		int getCurrentMultiplier(int ownedUtilities) const;
 	
-
 }; 
-} 
 
-
+}
