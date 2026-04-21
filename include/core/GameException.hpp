@@ -43,11 +43,11 @@ class InvalidMoveException : public GameException {
 public:
     InvalidMoveException(const std::string& reason) : reason_(reason) {};
 
-    string getMessage() const override {
+    std::string getMessage() const override {
         return "InvalidMoveException: " + reason_;
     }
 
-    string getReason() const { 
+    std::string getReason() const { 
         return reason_; 
     }
 
