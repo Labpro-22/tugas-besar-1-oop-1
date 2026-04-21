@@ -1,5 +1,5 @@
-#include "include/core/Property.hpp"
-#include "include/core/GameException.hpp"
+#include "core/Property.hpp"
+#include "core/GameException.hpp"
 
 using namespace std;
 
