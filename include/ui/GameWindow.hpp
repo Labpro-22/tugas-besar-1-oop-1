@@ -34,7 +34,7 @@ struct ActionPanel : public Panel {
 struct DialogManager {};
 
 class GameWindow : public sf::RenderWindow {
- public:
+public:
   GameWindow();
   ~GameWindow();
 
@@ -43,7 +43,7 @@ class GameWindow : public sf::RenderWindow {
   void run();
   void close();
 
- private:
+private:
   sf::Event event_;
   logic::Game game_;
   BoardPanel boardPanel_;
@@ -53,4 +53,4 @@ class GameWindow : public sf::RenderWindow {
   std::unique_ptr<DialogManager> dialogManager_;
 };
 
-}  // namespace ui
+} // namespace ui

@@ -23,12 +23,15 @@ add_library(
 add_library(
   nimonspoli_logic STATIC
   src/logic/Game.cpp
+  src/logic/TransactionLogger.cpp
   # etc. lanjut sendiri
 )
 
 add_library(
   nimonspoli_data STATIC
-  src/data/ConfigReader.cpp 
+  src/data/ConfigReader.cpp
+  src/data/SaveLoadManager.cpp
+  src/data/LogSerializer.cpp
   # etc. lanjut sendiri
 )
 
@@ -36,7 +39,7 @@ add_library(
   nimonspoli_ui STATIC 
   src/ui/Widgets.cpp
   src/ui/GameWindow.cpp
-  # etc.
+  # etc. lanjut sendiri
 )
 
 add_executable(nimonspoli src/main.cpp)
