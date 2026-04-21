@@ -1,13 +1,20 @@
 #pragma once
+#include <vector>
+namespace core {
+  class Player;
+  class Property;
+}
 
+using namespace std;
 namespace logic {
+  class Game {
+  public:
+    Game();
+    int getLastDiceRoll() const;
+    vector<core::Property *> getPropertiesOwnedBy(core::Player *p) const;
 
-class Game {
- public:
-  Game(int i);
+  private:
+    int lastDiceRoll_; // state lainnya nanti ditambahin sesuai kebutuhan
+  };
 
- private:
-  int ini_cuma_stub_aja_nanti_ganti_sendiri_;
-};
-
-}  // namespace logic
+} // namespace logic
