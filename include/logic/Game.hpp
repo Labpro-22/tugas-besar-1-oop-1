@@ -5,6 +5,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <random>
 
 namespace core {
 class Player;
@@ -37,7 +38,9 @@ private:
   GameState state_;
   std::pair<int, int> lastDiceRoll_;
   int turnCount_;
-
+	std::mt19937 rng_;
+	int doubles_; 
+	bool hasExtraTurn_; 
 public:
   Game(std::vector<core::Player *> players, TransactionLogger *logger);
   ~Game() = default;
