@@ -40,6 +40,7 @@ add_library(
   src/ui/PlayerInfoPanel.cpp
   src/ui/GameWindow.cpp
   src/ui/Constants.cpp
+  src/ui/Style.cpp
   # etc.
 )
 
