@@ -112,7 +112,7 @@ const float topActionHeight = 0.34f * size::multiplier;
 const float tileInfoHeight = 0.72f * size::multiplier;
 const float tileActionHeight = 0.30f * size::multiplier;
 const float logHeaderHeight = 0.33f * size::multiplier;
-const float logBodyHeight = 2.85f * size::multiplier;
+const float logBodyHeight = 4 * size::multiplier;
 const float gameOptionHeight = 0.36f * size::multiplier;
 
 const float headerButtonWidth = 0.95f * size::multiplier;
