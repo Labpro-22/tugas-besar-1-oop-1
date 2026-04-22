@@ -4,7 +4,7 @@
 #include "core/Property.hpp"
 #include "core/Tiles.hpp"
 #include "logic/Auction.hpp"
-
+#include "logic/TransactionLogger.hpp"
 namespace logic {
 
 Game::Game(std::vector<core::Player *> players, TransactionLogger *logger)
@@ -151,7 +151,6 @@ void Game::buildHouse(core::Player *buyer, core::Tile *at) {
     throw InsufficientFundsException(buyer->getBalance(), cost);
   }
 
-  bank_.sellHouse(1);
 
   *buyer -= cost;
   bank_.receive(cost);
@@ -181,7 +180,6 @@ void Game::sellHouse(core::Player *seller, core::Tile *at) {
   int refund = street->getHouseCost() / 2;
 
   street->demolish(1);
-  bank_.receiveHouse(1);
   bank_.pay(*seller, refund);
 }
 void Game::mortgageProperty(core::Property *prop) {
@@ -208,7 +206,7 @@ void Game::unmortgageProperty(core::Property *prop) {
     throw InvalidMoveException("unmortgage exception");
   }
 
-  int cost = prop->getMortgageValue() + (prop->getMortgageValue() * 0.10);
+  int cost = prop->getPrice();  
 
   if (!p->canAfford(cost)) {
     throw InsufficientFundsException(p->getBalance(), cost);
@@ -234,15 +232,16 @@ void Game::startAuction(core::Property *prop) {
   }
 }
 
-void Game::logEvent(const std::string & /*action*/, core::Player & /*p*/,
-                    int /*value*/) {
+void Game::logEvent(const std::string & action, core::Player &p, int value ) {
   if (logger_) {
+  	logger_->log(turnCount_, action, p, value);	
   }
 }
 
 void Game::logEvent(const std::string &action, core::Player &p,
                     core::Property &prop, int value) {
   if (logger_) {
+	logger_->log(turnCount_, action, p, prop, value); 
   }
 }
 
@@ -253,5 +252,5 @@ core::Player *Game::getCurrentPlayer() const {
 }
 
 GameState Game::getState() const { return state_; }
-
+	
 } // namespace logic
