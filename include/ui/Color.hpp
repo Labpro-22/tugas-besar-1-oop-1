@@ -5,53 +5,57 @@
 
 namespace ui::palette {
 const auto white = sf::Color(sf::Uint32(0xF2F2F2FFU));
+const auto white40 = sf::Color(sf::Uint32(0xF2F2F266U));
 const auto lightGrey = sf::Color(sf::Uint32(0xCCCCCCFFU));
 const auto darkGrey = sf::Color(sf::Uint32(0x7F7F7FFFU));
 const auto backgroundGrey = sf::Color(sf::Uint32(0x595959FFU));
+const auto black = sf::Color(sf::Uint32(0x050505FFU));
+const auto black20 = sf::Color(sf::Uint32(0x05050533U));
 }  // namespace ui::palette
 
 namespace ui::accent {
-const auto pink = sf::Color(sf::Uint32(0xE55D8DFFU));
-const auto red = sf::Color(sf::Uint32(0xD81159FFU));
-const auto orange = sf::Color(sf::Uint32(0xEC674EFFU));
-const auto yellow = sf::Color(sf::Uint32(0xFFBC42FFU));
-const auto lime = sf::Color(sf::Uint32(0x6CC551FFU));
-const auto green = sf::Color(sf::Uint32(0x447604FFU));
-const auto cyan = sf::Color(sf::Uint32(0x9FFCDFFFU));
-const auto lightBlue = sf::Color(sf::Uint32(0x0496FFFFU));
-const auto darkBlue = sf::Color(sf::Uint32(0x006BA6FFU));
-const auto lavender = sf::Color(sf::Uint32(0x70587CFFU));
-const auto magenta = sf::Color(sf::Uint32(0xE800E8FFU));
-const auto purple = sf::Color(sf::Uint32(0x2E1760FFU));
-const auto brown = sf::Color(sf::Uint32(0x8B5A2BFFU));
-const auto black = sf::Color(sf::Uint32(0x040E18FFU));
+const auto pink = sf::Color(sf::Uint32(0xD93A96FFU));
+const auto red = sf::Color(sf::Uint32(0xF11C26FFU));
+const auto darkRed = sf::Color(sf::Uint32(0xB30008FFU));
+const auto orange = sf::Color(sf::Uint32(0xFF8B00FFU));
+const auto orange50 = sf::Color(sf::Uint32(0xFF8B0080U));
+const auto darkOrange = sf::Color(sf::Uint32(0XDF7A00FFU));
+const auto yellow = sf::Color(sf::Uint32(0xFEF200FFU));
+const auto mint = sf::Color(sf::Uint32(0xD9E8D6FFU));
+const auto lightGreen = sf::Color(sf::Uint32(0x91CB3EFFU));
+const auto green = sf::Color(sf::Uint32(0x1FB25AFFU));
+const auto darkGreen = sf::Color(sf::Uint32(0x00762FFFU));
+const auto lightBlue = sf::Color(sf::Uint32(0xAAE0FAFFU));
+const auto blue50 = sf::Color(sf::Uint32(0x0072BB80U));
+const auto darkBlue = sf::Color(sf::Uint32(0x0072BBFFU));
+const auto purple = sf::Color(sf::Uint32(0x4B36D3FFU));
+const auto lavender = sf::Color(sf::Uint32(0XD295BFFFU));
+const auto brown = sf::Color(sf::Uint32(0x955235FFU));
+const auto darkBrown = sf::Color(sf::Uint32(0x391F14FFU));
 }  // namespace ui::accent
 
 namespace ui::component {
 const auto background = palette::white;
-const auto sideBar = palette::backgroundGrey;
+const auto sideBar = accent::lightBlue;
 const auto card = palette::darkGrey;
 const auto cardHover = palette::lightGrey;
+const auto panel = accent::darkBrown;
 
 namespace button {
-const auto base = palette::darkGrey;
-const auto hover = palette::lightGrey;
-const auto yes = accent::lime;
-const auto no = accent::red;
+const auto base = palette::black;
+const auto hover = palette::black20;
+const auto confirm = accent::green;
+const auto cancel = accent::red;
 const auto disabled = palette::lightGrey;
-const auto green = accent::green;
-const auto redAction = accent::red;
-const auto purple = accent::lavender;
-const auto blue = accent::lightBlue;
-const auto orange = accent::orange;
-const auto lightBlue = accent::lightBlue;
-}  // namespace button
 
-const auto board = sf::Color(sf::Uint32(0xA1CCA5FFU));
-const auto border = accent::black;
+}  // namespace button
 }  // namespace ui::component
 
-namespace ui::property {
+namespace ui::board {
+const auto base = accent::mint;
+const auto border = palette::black;
+
+namespace property {
 const auto brown = accent::brown;
 const auto lightBlue = accent::lightBlue;
 const auto pink = accent::pink;
@@ -60,9 +64,11 @@ const auto red = accent::red;
 const auto yellow = accent::yellow;
 const auto green = accent::green;
 const auto darkBlue = accent::darkBlue;
-const auto lime = accent::lime;
+const auto grey = palette::darkGrey;
 const auto purple = accent::purple;
-const auto silver = palette::lightGrey;
-const auto cyan = accent::cyan;
-const auto magenta = accent::magenta;
-}  // namespace ui::property
+const auto lightGreen = accent::lightGreen;
+const auto lavender = accent::lavender;
+const auto white = palette::white;
+const auto black = palette::black;
+}  // namespace property
+}  // namespace ui::board

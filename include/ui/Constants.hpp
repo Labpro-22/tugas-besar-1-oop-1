@@ -64,12 +64,10 @@ float tileAccentHeight(int numTiles = 9);
 
 namespace ui::font {
 
-inline constexpr const char* primaryFamily = "assets/fonts/Cinzel-Regular.ttf";
+inline constexpr const char* primaryFamily =
+    "assets/fonts/ITCKabelStdMedium.ttf";
 inline constexpr const char* secondaryFamily =
-    "assets/fonts/OpenSans-Regular.ttf";
-inline constexpr const char* fallbackFamily =
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-
+    "assets/fonts/Helvetica-Condensed.ttf";
 }  // namespace ui::font
 
 namespace ui::typography {

@@ -33,7 +33,7 @@ void ActionPanel::setup() {
 
   auto titlePanel = std::make_unique<Panel>(
       sf::Vector2f(layout::actionPanel::outerPadding, currentY),
-      sf::Vector2f(width, layout::actionPanel::titleHeight), component::card);
+      sf::Vector2f(width, layout::actionPanel::titleHeight), accent::darkRed);
   auto titleLabel = std::make_unique<Label>(
       "Menu", font_, sf::Vector2f(layout::actionPanel::outerPadding, currentY),
       sf::Vector2f(width, layout::actionPanel::titleHeight), titleStyle);
@@ -57,17 +57,18 @@ void ActionPanel::setupGameActionPanel(float width, float& currentY) {
       true, typography::logBody);
 
   const ButtonStyle nextTurnStyle(
-      component::button::green, accent::lime, accent::green,
-      component::button::disabled, component::border,
+      accent::darkGreen, accent::lightGreen, accent::darkGreen,
+      component::button::disabled, sf::Color::Transparent,
       layout::actionPanel::borderThickness, buttonLabelStyle);
+
   const ButtonStyle setDiceStyle(
-      accent::darkBlue, component::button::blue, component::button::blue,
-      component::button::disabled, component::border,
+      accent::darkBlue, accent::blue50, accent::darkBlue,
+      component::button::disabled, sf::Color::Transparent,
       layout::actionPanel::borderThickness, buttonLabelStyle);
-  const ButtonStyle useCardStyle(accent::orange, accent::yellow, accent::orange,
-                                 component::button::disabled, component::border,
-                                 layout::actionPanel::borderThickness,
-                                 buttonLabelStyle);
+  const ButtonStyle useCardStyle(
+      accent::purple, accent::lavender, accent::purple,
+      component::button::disabled, sf::Color::Transparent,
+      layout::actionPanel::borderThickness, buttonLabelStyle);
 
   auto addTopButton = [&](const std::string& text, const ButtonStyle& style,
                           std::function<void()> clickHandler) {
@@ -96,7 +97,7 @@ void ActionPanel::setupTileOptionPanel(float width, float& currentY) {
   auto selectedTilePanel = std::make_unique<Panel>(
       sf::Vector2f(layout::actionPanel::outerPadding, currentY),
       sf::Vector2f(width, layout::actionPanel::tileInfoHeight),
-      component::card);
+      accent::darkOrange);
 
   const LabelStyle tileInfoTitleStyle(
       typography::infoTitle, palette::white, typography::infoTitleStyle,
@@ -104,7 +105,7 @@ void ActionPanel::setupTileOptionPanel(float width, float& currentY) {
       {layout::actionPanel::innerPadding, layout::actionPanel::innerPadding},
       true, typography::logBody);
   const LabelStyle tileInfoBodyStyle(
-      typography::infoBody, palette::lightGrey, typography::infoBodyStyle,
+      typography::infoBody, palette::white, typography::infoBodyStyle,
       HorizontalAlign::Left, VerticalAlign::Middle,
       {layout::actionPanel::innerPadding, layout::actionPanel::textPaddingY},
       true, typography::logBody);
@@ -136,20 +137,20 @@ void ActionPanel::setupTileOptionPanel(float width, float& currentY) {
       true, typography::logBody);
 
   const ButtonStyle buildStyle(
-      component::button::green, accent::lime, accent::green,
-      component::button::disabled, component::border,
+      accent::darkGreen, accent::lightGreen, accent::darkGreen,
+      component::button::disabled, sf::Color::Transparent,
       layout::actionPanel::borderThickness, tileActionLabelStyle);
   const ButtonStyle sellStyle(
-      component::button::redAction, accent::pink, accent::magenta,
-      component::button::disabled, component::border,
-      layout::actionPanel::borderThickness, tileActionLabelStyle);
+      accent::red, accent::pink, accent::red, component::button::disabled,
+      sf::Color::Transparent, layout::actionPanel::borderThickness,
+      tileActionLabelStyle);
   const ButtonStyle mortgageStyle(
-      component::button::purple, accent::magenta, accent::lavender,
-      component::button::disabled, component::border,
+      accent::purple, accent::lavender, accent::purple,
+      component::button::disabled, sf::Color::Transparent,
       layout::actionPanel::borderThickness, tileActionLabelStyle);
   const ButtonStyle unmortgageStyle(
-      accent::darkBlue, component::button::blue, component::button::blue,
-      component::button::disabled, component::border,
+      accent::darkBlue, accent::blue50, accent::darkBlue,
+      component::button::disabled, sf::Color::Transparent,
       layout::actionPanel::borderThickness, tileActionLabelStyle);
 
   const float x0 = layout::actionPanel::outerPadding;
@@ -194,7 +195,7 @@ void ActionPanel::setupLogPanel(float width, float& currentY) {
   auto logHeaderPanel = std::make_unique<Panel>(
       sf::Vector2f(layout::actionPanel::outerPadding, currentY),
       sf::Vector2f(width, layout::actionPanel::logHeaderHeight),
-      component::card);
+      accent::darkBrown);
 
   const float logHeaderLabelWidth = width -
                                     layout::actionPanel::headerButtonWidth -
@@ -218,8 +219,8 @@ void ActionPanel::setupLogPanel(float width, float& currentY) {
       {layout::actionPanel::textPaddingX, layout::actionPanel::textPaddingY},
       true, typography::logBody);
   const ButtonStyle showMoreStyle(
-      component::button::orange, accent::yellow, accent::orange,
-      component::button::disabled, component::border,
+      accent::brown, accent::orange50, accent::brown,
+      component::button::disabled, palette::black,
       layout::actionPanel::borderThickness, showMoreLabelStyle);
 
   auto showMoreButton = std::make_unique<Button>(
@@ -240,11 +241,10 @@ void ActionPanel::setupLogPanel(float width, float& currentY) {
 
   auto logBodyPanel = std::make_unique<Panel>(
       sf::Vector2f(layout::actionPanel::outerPadding, currentY),
-      sf::Vector2f(width, layout::actionPanel::logBodyHeight),
-      palette::lightGrey);
+      sf::Vector2f(width, layout::actionPanel::logBodyHeight), palette::white);
 
   const LabelStyle logEntryStyle(
-      typography::logBody, component::border, typography::logStyle,
+      typography::logBody, palette::black, typography::logStyle,
       HorizontalAlign::Left, VerticalAlign::Top,
       {layout::actionPanel::innerPadding, layout::actionPanel::innerPadding},
       true, typography::logBody);
@@ -278,17 +278,16 @@ void ActionPanel::setupGameOptionPanel(float width, float& currentY) {
       {layout::actionPanel::textPaddingX, layout::actionPanel::textPaddingY},
       true, typography::logBody);
   const ButtonStyle saveStyle(
-      component::button::green, accent::lime, accent::green,
-      component::button::disabled, component::border,
+      accent::darkGreen, accent::lightGreen, accent::darkGreen,
+      component::button::disabled, palette::white,
       layout::actionPanel::borderThickness, optionLabelStyle);
   const ButtonStyle loadStyle(
-      accent::darkBlue, component::button::blue, component::button::blue,
-      component::button::disabled, component::border,
+      accent::darkBlue, accent::blue50, accent::darkBlue,
+      component::button::disabled, palette::white,
       layout::actionPanel::borderThickness, optionLabelStyle);
   const ButtonStyle quitStyle(
-      component::button::redAction, accent::pink, accent::magenta,
-      component::button::disabled, component::border,
-      layout::actionPanel::borderThickness, optionLabelStyle);
+      accent::red, accent::pink, accent::red, component::button::disabled,
+      palette::white, layout::actionPanel::borderThickness, optionLabelStyle);
 
   addChild(std::make_unique<Button>(
       "SIMPAN", font_,
