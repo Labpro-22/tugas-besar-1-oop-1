@@ -58,7 +58,15 @@ void Panel::update(sf::RenderWindow& window) {
 
 Label::Label(const std::string& text, const sf::Font& font,
              const LabelStyle& style)
-    : Widget(), style_(style), text_(text, font, style.characterSize) {
+    : Widget(), style_(style), text_(text, font, style.characterSize()) {
+  applyStyle();
+}
+
+Label::Label(const std::string& text, const sf::Font& font,
+             sf::Vector2f position, sf::Vector2f size, const LabelStyle& style)
+    : Widget(position, size),
+      style_(style),
+      text_(text, font, style.characterSize()) {
   applyStyle();
 }
 
@@ -72,9 +80,9 @@ void Label::setStyle(const LabelStyle& style) {
 }
 
 void Label::applyStyle() {
-  text_.setFillColor(style_.color);
-  text_.setStyle(style_.textStyle);
-  text_.setCharacterSize(style_.characterSize);
+  text_.setFillColor(style_.color());
+  text_.setStyle(style_.textStyle());
+  text_.setCharacterSize(style_.characterSize());
 }
 
 void Label::render(sf::RenderWindow& window) {
@@ -83,14 +91,15 @@ void Label::render(sf::RenderWindow& window) {
   applyStyle();
   auto textBounds = text_.getLocalBounds();
 
-  if (style_.autoScaleToFit && size().x > 0.0f) {
-    const float maxWidth = std::max(0.0f, size().x - (2.0f * style_.padding.x));
+  if (style_.autoScaleToFit() && size().x > 0.0f) {
+    const float maxWidth =
+        std::max(0.0f, size().x - (2.0f * style_.padding().x));
     if (textBounds.width > maxWidth && textBounds.width > 0.0f) {
       const float scale = maxWidth / textBounds.width;
       const float candidate =
-          std::floor(static_cast<float>(style_.characterSize) * scale);
+          std::floor(static_cast<float>(style_.characterSize()) * scale);
       const auto fittedSize = static_cast<unsigned int>(
-          std::max(static_cast<float>(style_.minCharacterSize), candidate));
+          std::max(static_cast<float>(style_.minCharacterSize()), candidate));
       text_.setCharacterSize(fittedSize);
       textBounds = text_.getLocalBounds();
     }
@@ -100,33 +109,33 @@ void Label::render(sf::RenderWindow& window) {
   float posY = position().y - textBounds.top;
 
   if (size().x > 0.0f) {
-    switch (style_.horizontalAlign) {
+    switch (style_.horizontalAlign()) {
       case HorizontalAlign::Left:
-        posX = position().x + style_.padding.x - textBounds.left;
+        posX = position().x + style_.padding().x - textBounds.left;
         break;
       case HorizontalAlign::Center:
         posX = position().x + ((size().x - textBounds.width) * 0.5f) -
                textBounds.left;
         break;
       case HorizontalAlign::Right:
-        posX = position().x + size().x - style_.padding.x - textBounds.width -
+        posX = position().x + size().x - style_.padding().x - textBounds.width -
                textBounds.left;
         break;
     }
   }
 
   if (size().y > 0.0f) {
-    switch (style_.verticalAlign) {
+    switch (style_.verticalAlign()) {
       case VerticalAlign::Top:
-        posY = position().y + style_.padding.y - textBounds.top;
+        posY = position().y + style_.padding().y - textBounds.top;
         break;
       case VerticalAlign::Middle:
         posY = position().y + ((size().y - textBounds.height) * 0.5f) -
                textBounds.top;
         break;
       case VerticalAlign::Bottom:
-        posY = position().y + size().y - style_.padding.y - textBounds.height -
-               textBounds.top;
+        posY = position().y + size().y - style_.padding().y -
+               textBounds.height - textBounds.top;
         break;
     }
   }
@@ -159,9 +168,23 @@ Button::Button(const std::string& text, const sf::Font& font,
       isHovered_(false),
       isPressed_(false),
       style_(style),
-      widget_(std::make_unique<Label>(text, font, style.labelStyle)) {
+      widget_(std::make_unique<Label>(text, font, style.labelStyle())) {
   background_.setSize(size());
-  background_.setFillColor(style_.baseColor);
+  background_.setFillColor(style_.baseColor());
+}
+
+Button::Button(const std::string& text, const sf::Font& font,
+               sf::Vector2f position, sf::Vector2f size,
+               const ButtonStyle& style, std::function<void()> onClick)
+    : Widget(position, size),
+      isHovered_(false),
+      isPressed_(false),
+      style_(style),
+      onClick_(std::move(onClick)),
+      widget_(std::make_unique<Label>(text, font, position, size,
+                                      style.labelStyle())) {
+  background_.setSize(size);
+  background_.setFillColor(style_.baseColor());
 }
 
 Button::Button(const std::string& text, const sf::Font& font,
@@ -174,7 +197,23 @@ Button::Button(const std::string& text, const sf::Font& font,
   (void)text;
   (void)font;
   background_.setSize(size());
-  background_.setFillColor(style_.baseColor);
+  background_.setFillColor(style_.baseColor());
+}
+
+Button::Button(const std::string& text, const sf::Font& font,
+               const std::string& imagePath, sf::Vector2f position,
+               sf::Vector2f size, const ButtonStyle& style,
+               std::function<void()> onClick)
+    : Widget(position, size),
+      isHovered_(false),
+      isPressed_(false),
+      style_(style),
+      onClick_(std::move(onClick)),
+      widget_(std::make_unique<ImagePanel>(imagePath)) {
+  (void)text;
+  (void)font;
+  background_.setSize(size);
+  background_.setFillColor(style_.baseColor());
 }
 
 Button::Button(std::unique_ptr<Widget> widget)
@@ -212,17 +251,17 @@ void Button::render(sf::RenderWindow& window) {
 
   background_.setPosition(position());
   background_.setSize(size());
-  background_.setOutlineColor(style_.borderColor);
-  background_.setOutlineThickness(style_.borderThickness);
+  background_.setOutlineColor(style_.borderColor());
+  background_.setOutlineThickness(style_.borderThickness());
 
   if (!isActive()) {
-    background_.setFillColor(style_.disabledColor);
+    background_.setFillColor(style_.disabledColor());
   } else if (isPressed_) {
-    background_.setFillColor(style_.pressedColor);
+    background_.setFillColor(style_.pressedColor());
   } else if (isHovered_) {
-    background_.setFillColor(style_.hoverColor);
+    background_.setFillColor(style_.hoverColor());
   } else {
-    background_.setFillColor(style_.baseColor);
+    background_.setFillColor(style_.baseColor());
   }
 
   window.draw(background_);
@@ -245,7 +284,7 @@ void Button::update(sf::RenderWindow& window) {
 void Button::setStyle(const ButtonStyle& style) {
   style_ = style;
   if (auto* label = dynamic_cast<Label*>(widget_.get())) {
-    label->setStyle(style_.labelStyle);
+    label->setStyle(style_.labelStyle());
   }
 }
 

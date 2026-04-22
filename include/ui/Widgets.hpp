@@ -12,31 +12,9 @@
 #include <string>
 #include <vector>
 
+#include "ui/Style.hpp"
+
 namespace ui {
-
-enum class HorizontalAlign { Left, Center, Right };
-enum class VerticalAlign { Top, Middle, Bottom };
-
-struct LabelStyle {
-  unsigned int characterSize = 30;
-  sf::Color color = sf::Color::White;
-  sf::Uint32 textStyle = sf::Text::Regular;
-  HorizontalAlign horizontalAlign = HorizontalAlign::Left;
-  VerticalAlign verticalAlign = VerticalAlign::Top;
-  sf::Vector2f padding{0.0f, 0.0f};
-  bool autoScaleToFit = false;
-  unsigned int minCharacterSize = 10;
-};
-
-struct ButtonStyle {
-  sf::Color baseColor = sf::Color::Transparent;
-  sf::Color hoverColor = sf::Color::Transparent;
-  sf::Color pressedColor = sf::Color::Transparent;
-  sf::Color disabledColor = sf::Color::Transparent;
-  sf::Color borderColor = sf::Color::Transparent;
-  float borderThickness = 0.0f;
-  LabelStyle labelStyle;
-};
 
 class Widget {
  public:
@@ -83,6 +61,8 @@ class Label : public Widget {
  public:
   Label(const std::string& text, const sf::Font& font,
         const LabelStyle& style = {});
+  Label(const std::string& text, const sf::Font& font, sf::Vector2f position,
+        sf::Vector2f size, const LabelStyle& style = {});
   ~Label() override;
 
   void handleEvent(sf::Event&, sf::RenderWindow&) override {}
@@ -117,8 +97,14 @@ class Button : public Widget {
  public:
   Button(const std::string& text, const sf::Font& font,
          const ButtonStyle& style);
+  Button(const std::string& text, const sf::Font& font, sf::Vector2f position,
+         sf::Vector2f size, const ButtonStyle& style,
+         std::function<void()> onClick = {});
   Button(const std::string& text, const sf::Font& font,
          const std::string& imagePath, const ButtonStyle& style);
+  Button(const std::string& text, const sf::Font& font,
+         const std::string& imagePath, sf::Vector2f position, sf::Vector2f size,
+         const ButtonStyle& style, std::function<void()> onClick = {});
   Button(std::unique_ptr<Widget> widget);
   ~Button() override;
 
