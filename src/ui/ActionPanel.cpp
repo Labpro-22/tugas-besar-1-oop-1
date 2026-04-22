@@ -1,7 +1,7 @@
 #include "ui/ActionPanel.hpp"
 
+#include <SFML/Graphics/Font.hpp>
 #include <memory>
-#include <stdexcept>
 #include <string>
 
 #include "ui/Color.hpp"
@@ -10,15 +10,10 @@
 namespace ui {
 
 ActionPanel::ActionPanel()
-    : Panel({0, 0}, {size::sideWidth, size::height}, component::sideBar) {
-  if (!font_.loadFromFile(font::primaryFamily)) {
-    throw std::runtime_error(
-        std::string("Unable to load font from ").append(font::primaryFamily));
-  }
+    : Panel({0, 0}, {size::sideWidth, size::height}, component::sideBar),
+      font_(AssetsManager::get().getFont(font::primaryFamily)) {
   setup();
 }
-
-ActionPanel::~ActionPanel() = default;
 
 void ActionPanel::setup() {
   const float width =

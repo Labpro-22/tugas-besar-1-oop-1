@@ -7,7 +7,7 @@ namespace ui {
 class ActionPanel : public Panel {
  public:
   ActionPanel();
-  ~ActionPanel() override;
+  ~ActionPanel() override = default;
 
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;
