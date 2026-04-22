@@ -15,9 +15,10 @@ Widget::Widget(sf::Vector2f position, sf::Vector2f size)
 
 Panel::Panel(sf::Vector2f position, sf::Vector2f size,
              sf::Color backgroundColor)
-    : Widget(position, size), background(size) {
-  background.setFillColor(backgroundColor);
-}
+    : Widget(position, size), style_(backgroundColor), background(size) {}
+
+Panel::Panel(sf::Vector2f position, sf::Vector2f size, const PanelStyle& style)
+    : Widget(position, size), style_(style), background(size) {}
 
 Panel::~Panel() = default;
 
@@ -38,7 +39,9 @@ void Panel::render(sf::RenderWindow& window) {
 
   background.setPosition(position());
   background.setSize(size());
-  background.setFillColor(background.getFillColor());
+  background.setFillColor(style_.backgroundColor());
+  background.setOutlineColor(style_.borderColor());
+  background.setOutlineThickness(style_.borderThickness());
   window.draw(background);
 
   for (auto& child : children) {

@@ -9,6 +9,39 @@ namespace ui {
 enum class HorizontalAlign { Left, Center, Right };
 enum class VerticalAlign { Top, Middle, Bottom };
 
+class PanelStyle {
+ public:
+  PanelStyle() = default;
+  PanelStyle(sf::Color backgroundColor);
+  PanelStyle(sf::Color backgroundColor, sf::Color borderColor,
+             float borderThickness);
+  PanelStyle(sf::Color backgroundColor, sf::Color hoverColor,
+             sf::Color pressedColor, sf::Color disabledColor,
+             sf::Color borderColor, float borderThickness);
+
+  PanelStyle& setBackgroundColor(sf::Color backgroundColor);
+  PanelStyle& setHoverColor(sf::Color hoverColor);
+  PanelStyle& setPressedColor(sf::Color pressedColor);
+  PanelStyle& setDisabledColor(sf::Color disabledColor);
+  PanelStyle& setBorderColor(sf::Color borderColor);
+  PanelStyle& setBorderThickness(float borderThickness);
+
+  const sf::Color& backgroundColor() const { return backgroundColor_; }
+  const sf::Color& hoverColor() const { return hoverColor_; }
+  const sf::Color& pressedColor() const { return pressedColor_; }
+  const sf::Color& disabledColor() const { return disabledColor_; }
+  const sf::Color& borderColor() const { return borderColor_; }
+  float borderThickness() const { return borderThickness_; }
+
+ private:
+  sf::Color backgroundColor_ = sf::Color::Transparent;
+  sf::Color hoverColor_ = backgroundColor_;
+  sf::Color pressedColor_ = backgroundColor_;
+  sf::Color disabledColor_ = backgroundColor_;
+  sf::Color borderColor_ = sf::Color::Transparent;
+  float borderThickness_ = 0.0f;
+};
+
 class LabelStyle {
  public:
   LabelStyle();
@@ -25,14 +58,14 @@ class LabelStyle {
   LabelStyle& setAutoScale(bool autoScaleToFit,
                            unsigned int minCharacterSize = 10);
 
-  unsigned int characterSize() const;
-  const sf::Color& color() const;
-  sf::Uint32 textStyle() const;
-  HorizontalAlign horizontalAlign() const;
-  VerticalAlign verticalAlign() const;
-  const sf::Vector2f& padding() const;
-  bool autoScaleToFit() const;
-  unsigned int minCharacterSize() const;
+  unsigned int characterSize() const { return characterSize_; }
+  const sf::Color& color() const { return color_; }
+  sf::Uint32 textStyle() const { return textStyle_; }
+  HorizontalAlign horizontalAlign() const { return horizontalAlign_; }
+  VerticalAlign verticalAlign() const { return verticalAlign_; }
+  const sf::Vector2f& padding() const { return padding_; }
+  bool autoScaleToFit() const { return autoScaleToFit_; }
+  unsigned int minCharacterSize() const { return minCharacterSize_; }
 
  private:
   unsigned int characterSize_;
@@ -56,13 +89,13 @@ class ButtonStyle {
 
   ButtonStyle& setLabelStyle(const LabelStyle& labelStyle);
 
-  const sf::Color& baseColor() const;
-  const sf::Color& hoverColor() const;
-  const sf::Color& pressedColor() const;
-  const sf::Color& disabledColor() const;
-  const sf::Color& borderColor() const;
-  float borderThickness() const;
-  const LabelStyle& labelStyle() const;
+  const sf::Color& baseColor() const { return baseColor_; }
+  const sf::Color& hoverColor() const { return hoverColor_; }
+  const sf::Color& pressedColor() const { return pressedColor_; }
+  const sf::Color& disabledColor() const { return disabledColor_; }
+  const sf::Color& borderColor() const { return borderColor_; }
+  float borderThickness() const { return borderThickness_; }
+  const LabelStyle& labelStyle() const { return labelStyle_; }
 
  private:
   sf::Color baseColor_;

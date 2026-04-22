@@ -2,6 +2,55 @@
 
 namespace ui {
 
+PanelStyle::PanelStyle(sf::Color backgroundColor)
+    : PanelStyle(backgroundColor, backgroundColor, backgroundColor,
+                 backgroundColor, sf::Color::Transparent, 0.0f) {}
+
+PanelStyle::PanelStyle(sf::Color backgroundColor, sf::Color borderColor,
+                       float borderThickness)
+    : PanelStyle(backgroundColor, backgroundColor, backgroundColor,
+                 backgroundColor, borderColor, borderThickness) {}
+
+PanelStyle::PanelStyle(sf::Color backgroundColor, sf::Color hoverColor,
+                       sf::Color pressedColor, sf::Color disabledColor,
+                       sf::Color borderColor, float borderThickness)
+    : backgroundColor_(backgroundColor),
+      hoverColor_(hoverColor),
+      pressedColor_(pressedColor),
+      disabledColor_(disabledColor),
+      borderColor_(borderColor),
+      borderThickness_(borderThickness) {}
+
+PanelStyle& PanelStyle::setBackgroundColor(sf::Color backgroundColor) {
+  backgroundColor_ = backgroundColor;
+  return *this;
+}
+
+PanelStyle& PanelStyle::setHoverColor(sf::Color hoverColor) {
+  hoverColor_ = hoverColor;
+  return *this;
+}
+
+PanelStyle& PanelStyle::setPressedColor(sf::Color pressedColor) {
+  pressedColor_ = pressedColor;
+  return *this;
+}
+
+PanelStyle& PanelStyle::setDisabledColor(sf::Color disabledColor) {
+  disabledColor_ = disabledColor;
+  return *this;
+}
+
+PanelStyle& PanelStyle::setBorderColor(sf::Color borderColor) {
+  borderColor_ = borderColor;
+  return *this;
+}
+
+PanelStyle& PanelStyle::setBorderThickness(float borderThickness) {
+  borderThickness_ = borderThickness;
+  return *this;
+}
+
 LabelStyle::LabelStyle()
     : LabelStyle(30, sf::Color::White, sf::Text::Regular, HorizontalAlign::Left,
                  VerticalAlign::Top, sf::Vector2f(0.0f, 0.0f), false, 10) {}
@@ -38,22 +87,6 @@ LabelStyle& LabelStyle::setAutoScale(bool autoScaleToFit,
   return *this;
 }
 
-unsigned int LabelStyle::characterSize() const { return characterSize_; }
-
-const sf::Color& LabelStyle::color() const { return color_; }
-
-sf::Uint32 LabelStyle::textStyle() const { return textStyle_; }
-
-HorizontalAlign LabelStyle::horizontalAlign() const { return horizontalAlign_; }
-
-VerticalAlign LabelStyle::verticalAlign() const { return verticalAlign_; }
-
-const sf::Vector2f& LabelStyle::padding() const { return padding_; }
-
-bool LabelStyle::autoScaleToFit() const { return autoScaleToFit_; }
-
-unsigned int LabelStyle::minCharacterSize() const { return minCharacterSize_; }
-
 ButtonStyle::ButtonStyle()
     : ButtonStyle(sf::Color::Transparent, sf::Color::Transparent,
                   sf::Color::Transparent, sf::Color::Transparent,
@@ -75,19 +108,5 @@ ButtonStyle& ButtonStyle::setLabelStyle(const LabelStyle& labelStyle) {
   labelStyle_ = labelStyle;
   return *this;
 }
-
-const sf::Color& ButtonStyle::baseColor() const { return baseColor_; }
-
-const sf::Color& ButtonStyle::hoverColor() const { return hoverColor_; }
-
-const sf::Color& ButtonStyle::pressedColor() const { return pressedColor_; }
-
-const sf::Color& ButtonStyle::disabledColor() const { return disabledColor_; }
-
-const sf::Color& ButtonStyle::borderColor() const { return borderColor_; }
-
-float ButtonStyle::borderThickness() const { return borderThickness_; }
-
-const LabelStyle& ButtonStyle::labelStyle() const { return labelStyle_; }
 
 }  // namespace ui

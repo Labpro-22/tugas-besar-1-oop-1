@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include "ui/AssetsManager.hpp"
 #include "ui/Style.hpp"
 
 namespace ui {
@@ -45,6 +46,7 @@ class Widget {
 class Panel : public Widget {
  public:
   Panel(sf::Vector2f position, sf::Vector2f size, sf::Color backgroundColor);
+  Panel(sf::Vector2f position, sf::Vector2f size, const PanelStyle& style);
   ~Panel() override;
 
   void addChild(std::unique_ptr<Widget> child);
@@ -53,6 +55,7 @@ class Panel : public Widget {
   void update(sf::RenderWindow& window) override;
 
  protected:
+  PanelStyle style_;
   std::vector<std::unique_ptr<Widget>> children;
   sf::RectangleShape background;
 };
