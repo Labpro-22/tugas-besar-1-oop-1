@@ -10,9 +10,10 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <tuple>
+#include <unordered_map>
 #include <vector>
 
-#include "ui/AssetsManager.hpp"
 #include "ui/Style.hpp"
 
 namespace ui {
@@ -45,18 +46,33 @@ class Widget {
 
 class Panel : public Widget {
  public:
+  enum class Layer { Background = 0, Content = 1, Overlay = 2 };
+
   Panel(sf::Vector2f position, sf::Vector2f size, sf::Color backgroundColor);
   Panel(sf::Vector2f position, sf::Vector2f size, const PanelStyle& style);
   ~Panel() override;
 
   void addChild(std::unique_ptr<Widget> child);
+  void addChild(const std::string& key, std::unique_ptr<Widget> child,
+                Layer layer = Layer::Content);
+  Widget* getChild(const std::string& key);
+  const Widget* getChild(const std::string& key) const;
+  bool hasChild(const std::string& key) const;
+  bool removeChild(const std::string& key);
+  void clearChildren();
+  void clearChildren(Layer layer);
+
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow& window) override;
 
  protected:
+  void rebuildKeyIndex();
+
   PanelStyle style_;
-  std::vector<std::unique_ptr<Widget>> children;
+  std::vector<std::tuple<std::string, Layer, std::unique_ptr<Widget>>>
+      children_;
+  std::unordered_map<std::string, Widget*> keyedChildren_;
   sf::RectangleShape background;
 };
 
@@ -72,14 +88,19 @@ class Label : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow&) override {}
 
+  sf::Text& text() { return text_; }
+
   void setText(const std::string& text);
   void setStyle(const LabelStyle& style);
+  void setRotation(float degrees);
+  float rotation() const { return rotationDegrees_; }
 
  protected:
   void applyStyle();
 
   LabelStyle style_;
   sf::Text text_;
+  float rotationDegrees_ = 0.0f;
 };
 
 class ImagePanel : public Widget {
@@ -90,6 +111,15 @@ class ImagePanel : public Widget {
   void handleEvent(sf::Event&, sf::RenderWindow&) override {}
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow&) override {}
+
+  sf::Texture& texture() { return texture_; }
+  sf::Sprite& sprite() { return sprite_; }
+
+  void setTexture(const sf::Texture& texture) {
+    texture_ = texture;
+    sprite_.setTexture(texture_);
+  }
+  void setSprite(const sf::Sprite& sprite) { sprite_ = sprite; }
 
  protected:
   sf::Texture texture_;

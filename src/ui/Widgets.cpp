@@ -13,6 +13,9 @@ namespace ui {
 Widget::Widget(sf::Vector2f position, sf::Vector2f size)
     : position_(position), size_(size) {}
 
+using ChildEntry =
+    std::tuple<std::string, Panel::Layer, std::unique_ptr<Widget>>;
+
 Panel::Panel(sf::Vector2f position, sf::Vector2f size,
              sf::Color backgroundColor)
     : Widget(position, size), style_(backgroundColor), background(size) {}
@@ -23,13 +26,93 @@ Panel::Panel(sf::Vector2f position, sf::Vector2f size, const PanelStyle& style)
 Panel::~Panel() = default;
 
 void Panel::addChild(std::unique_ptr<Widget> child) {
-  children.push_back(std::move(child));
+  addChild("", std::move(child), Layer::Content);
+}
+
+void Panel::addChild(const std::string& key, std::unique_ptr<Widget> child,
+                     Layer layer) {
+  if (!child) {
+    return;
+  }
+
+  if (!key.empty()) {
+    removeChild(key);
+  }
+
+  Widget* childPtr = child.get();
+  children_.push_back(std::make_tuple(key, layer, std::move(child)));
+  if (!key.empty()) {
+    keyedChildren_[key] = childPtr;
+  }
+}
+
+Widget* Panel::getChild(const std::string& key) {
+  const auto it = keyedChildren_.find(key);
+  return it == keyedChildren_.end() ? nullptr : it->second;
+}
+
+const Widget* Panel::getChild(const std::string& key) const {
+  const auto it = keyedChildren_.find(key);
+  return it == keyedChildren_.end() ? nullptr : it->second;
+}
+
+bool Panel::hasChild(const std::string& key) const {
+  return keyedChildren_.find(key) != keyedChildren_.end();
+}
+
+bool Panel::removeChild(const std::string& key) {
+  if (key.empty()) {
+    return false;
+  }
+
+  const auto initialSize = children_.size();
+  children_.erase(std::remove_if(children_.begin(), children_.end(),
+                                 [&](const ChildEntry& entry) {
+                                   return std::get<0>(entry) == key;
+                                 }),
+                  children_.end());
+
+  if (children_.size() == initialSize) {
+    return false;
+  }
+
+  rebuildKeyIndex();
+  return true;
+}
+
+void Panel::clearChildren() {
+  children_.clear();
+  keyedChildren_.clear();
+}
+
+void Panel::clearChildren(Layer layer) {
+  children_.erase(std::remove_if(children_.begin(), children_.end(),
+                                 [&](const ChildEntry& entry) {
+                                   return std::get<1>(entry) == layer;
+                                 }),
+                  children_.end());
+  rebuildKeyIndex();
+}
+
+void Panel::rebuildKeyIndex() {
+  keyedChildren_.clear();
+  for (const auto& entry : children_) {
+    if (!std::get<0>(entry).empty() && std::get<2>(entry)) {
+      keyedChildren_[std::get<0>(entry)] = std::get<2>(entry).get();
+    }
+  }
 }
 
 void Panel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
-  for (auto& child : children) {
-    if (child->isActive()) {
-      child->handleEvent(event, window);
+  const Panel::Layer eventOrder[] = {Layer::Overlay, Layer::Content,
+                                     Layer::Background};
+  for (Panel::Layer layer : eventOrder) {
+    for (auto it = children_.rbegin(); it != children_.rend(); ++it) {
+      if (std::get<1>(*it) != layer || !std::get<2>(*it) ||
+          !std::get<2>(*it)->isActive()) {
+        continue;
+      }
+      std::get<2>(*it)->handleEvent(event, window);
     }
   }
 }
@@ -44,17 +127,29 @@ void Panel::render(sf::RenderWindow& window) {
   background.setOutlineThickness(style_.borderThickness());
   window.draw(background);
 
-  for (auto& child : children) {
-    if (child->isVisible()) {
-      child->render(window);
+  const Panel::Layer renderOrder[] = {Layer::Background, Layer::Content,
+                                      Layer::Overlay};
+  for (Panel::Layer layer : renderOrder) {
+    for (auto& child : children_) {
+      if (std::get<1>(child) != layer || !std::get<2>(child) ||
+          !std::get<2>(child)->isVisible()) {
+        continue;
+      }
+      std::get<2>(child)->render(window);
     }
   }
 }
 
 void Panel::update(sf::RenderWindow& window) {
-  for (auto& child : children) {
-    if (child->isActive()) {
-      child->update(window);
+  const Panel::Layer updateOrder[] = {Layer::Background, Layer::Content,
+                                      Layer::Overlay};
+  for (Panel::Layer layer : updateOrder) {
+    for (auto& child : children_) {
+      if (std::get<1>(child) != layer || !std::get<2>(child) ||
+          !std::get<2>(child)->isActive()) {
+        continue;
+      }
+      std::get<2>(child)->update(window);
     }
   }
 }
@@ -77,6 +172,8 @@ Label::~Label() = default;
 
 void Label::setText(const std::string& text) { text_.setString(text); }
 
+void Label::setRotation(float degrees) { rotationDegrees_ = degrees; }
+
 void Label::setStyle(const LabelStyle& style) {
   style_ = style;
   applyStyle();
@@ -92,11 +189,18 @@ void Label::render(sf::RenderWindow& window) {
   if (!isVisible()) return;
 
   applyStyle();
+  const float normalizedRotation =
+      std::fmod(std::fmod(rotationDegrees_, 360.0f) + 360.0f, 360.0f);
+  const bool quarterTurn = std::fabs(normalizedRotation - 90.0f) < 0.1f ||
+                           std::fabs(normalizedRotation - 270.0f) < 0.1f;
+
   auto textBounds = text_.getLocalBounds();
 
   if (style_.autoScaleToFit() && size().x > 0.0f) {
-    const float maxWidth =
-        std::max(0.0f, size().x - (2.0f * style_.padding().x));
+    const float availablePrimary = quarterTurn
+                                       ? size().y - (2.0f * style_.padding().y)
+                                       : size().x - (2.0f * style_.padding().x);
+    const float maxWidth = std::max(0.0f, availablePrimary);
     if (textBounds.width > maxWidth && textBounds.width > 0.0f) {
       const float scale = maxWidth / textBounds.width;
       const float candidate =
@@ -108,42 +212,53 @@ void Label::render(sf::RenderWindow& window) {
     }
   }
 
-  float posX = position().x - textBounds.left;
-  float posY = position().y - textBounds.top;
+  const float renderedWidth =
+      quarterTurn ? textBounds.height : textBounds.width;
+  const float renderedHeight =
+      quarterTurn ? textBounds.width : textBounds.height;
+
+  float drawX = position().x;
+  float drawY = position().y;
 
   if (size().x > 0.0f) {
+    const float contentX = position().x + style_.padding().x;
+    const float contentWidth =
+        std::max(0.0f, size().x - (2.0f * style_.padding().x));
     switch (style_.horizontalAlign()) {
       case HorizontalAlign::Left:
-        posX = position().x + style_.padding().x - textBounds.left;
+        drawX = contentX;
         break;
       case HorizontalAlign::Center:
-        posX = position().x + ((size().x - textBounds.width) * 0.5f) -
-               textBounds.left;
+        drawX = contentX + ((contentWidth - renderedWidth) * 0.5f);
         break;
       case HorizontalAlign::Right:
-        posX = position().x + size().x - style_.padding().x - textBounds.width -
-               textBounds.left;
+        drawX = contentX + contentWidth - renderedWidth;
         break;
     }
   }
 
   if (size().y > 0.0f) {
+    const float contentY = position().y + style_.padding().y;
+    const float contentHeight =
+        std::max(0.0f, size().y - (2.0f * style_.padding().y));
     switch (style_.verticalAlign()) {
       case VerticalAlign::Top:
-        posY = position().y + style_.padding().y - textBounds.top;
+        drawY = contentY;
         break;
       case VerticalAlign::Middle:
-        posY = position().y + ((size().y - textBounds.height) * 0.5f) -
-               textBounds.top;
+        drawY = contentY + ((contentHeight - renderedHeight) * 0.5f);
         break;
       case VerticalAlign::Bottom:
-        posY = position().y + size().y - style_.padding().y -
-               textBounds.height - textBounds.top;
+        drawY = contentY + contentHeight - renderedHeight;
         break;
     }
   }
 
-  text_.setPosition(posX, posY);
+  text_.setOrigin(textBounds.left + (textBounds.width * 0.5f),
+                  textBounds.top + (textBounds.height * 0.5f));
+  text_.setRotation(rotationDegrees_);
+  text_.setPosition(drawX + (renderedWidth * 0.5f),
+                    drawY + (renderedHeight * 0.5f));
   window.draw(text_);
 }
 
