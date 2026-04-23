@@ -12,8 +12,8 @@ std::string Tile::getName() const {
 	return this->name_; 
 } 
 
-std::string Tile::getType() const { 
-	return "Tile";
+TileType Tile::getType() const { 
+	return TileType::BASE;
 } 
 
 int Tile::getPosition() const { 
@@ -23,9 +23,9 @@ int Tile::getPosition() const {
 ActionTile::ActionTile (int position, const std::string& name) : Tile(position, name) {} 
 
 
-PropertyTile::PropertyTile(int position, const std::string& name, Property* property) : Tile(position, name), property_(property) {} 
+PropertyTile::PropertyTile(int position, const std::string& name, std::unique_ptr<Property> property) : Tile(position, name), property_(std::move(property)) {} 
 
-Property* PropertyTile::getProperty() const {return property_;} 
+Property* PropertyTile::getProperty() const {return property_.get();} 
 
 void PropertyTile::onLanded(Player& p, GameContext& g){ 
 
@@ -33,40 +33,41 @@ void PropertyTile::onLanded(Player& p, GameContext& g){
 
 	if (property_->isAvailable()){ 
 		// purchase 
-		g.offerProperty(&p, property_); 
+		g.offerProperty(&p, property_.get()); 
 	}else if (property_->getOwner() != &p && !property_->isMortgagedStatus()){
 		// rent 
-		g.chargeRent(&p, property_);
+		g.chargeRent(&p, property_.get());
 	} 
 } 
 
-UtilityTile::UtilityTile(int position, const std::string& name, Property* property) : PropertyTile(position, name, property) {}
+UtilityTile::UtilityTile(int position, const std::string& name, std::unique_ptr<Property> property) : PropertyTile(position, name, std::move(property)) {}
 
 void UtilityTile::onLanded(Player& p, GameContext& g){ 
 	if (property_->isAvailable()){ 
 		property_->setOwner(&p); 
-		p.addProperty(property_);
+		p.addProperty(property_.get());
 	} else if (property_->getOwner() != &p && !property_->isMortgagedStatus()){
 		// rent 
-		g.chargeRent(&p, property_);
+		g.chargeRent(&p, property_.get());
 	} 
 } 
 
-std::string UtilityTile::getType() const { return "Utility Tile";} 
-RailroadTile::RailroadTile(int position, const std::string& name, Property* property) : PropertyTile(position, name, property) {}
+TileType UtilityTile::getType() const { return TileType::UTILITY;} 
+
+RailroadTile::RailroadTile(int position, const std::string& name, std::unique_ptr<Property> property) : PropertyTile(position, name, std::move(property)) {}
 
 void RailroadTile::onLanded(Player& p, GameContext& g) {
     if (property_->isAvailable()) {
         property_->setOwner(&p);
-        p.addProperty(property_);
+        p.addProperty(property_.get());
 		g.logEvent("RAILROAD", p, *property_, 0);
     } else if (property_->getOwner() != &p && !property_->isMortgagedStatus()) {
    	// rent  
-		g.chargeRent(&p, property_);
+		g.chargeRent(&p, property_.get());
     }
 }
 
-std::string RailroadTile::getType() const { return "RailroadTile"; }
+TileType RailroadTile::getType() const { return TileType::RAILROAD; }
 
 
 GoTile::GoTile(int position, const std::string& name) : ActionTile(position, name) {}
@@ -84,7 +85,7 @@ void GoTile::onPassed(Player& p, GameContext &g){
 }
 
 
-std::string GoTile::getType() const { return "Go Tile"; }
+TileType GoTile::getType() const { return TileType::GO; }
 
 FreeParkingTile::FreeParkingTile(int position, const std::string& name) : ActionTile(position, name) {}
 
@@ -92,13 +93,13 @@ void FreeParkingTile::onLanded(Player& p, GameContext& g) {
 	// nothing happens here 
 }
 
-std::string FreeParkingTile::getType() const { return "FreeParkingTile"; }
+TileType FreeParkingTile::getType() const { return TileType::FREE_PARKING; }
 
 JailTile::JailTile(int position, const std::string& name) : ActionTile(position, name) {}
 void JailTile::onLanded([[maybe_unused]] Player& p, [[maybe_unused]] GameContext& g) {
     // just visiting
 }
-std::string JailTile::getType() const { return "Jail Tile"; } 
+TileType JailTile::getType() const { return TileType::JAIL; } 
 
 GoToJailTile::GoToJailTile(int position, const std::string& name) : ActionTile(position, name) {}
 
@@ -108,7 +109,7 @@ void GoToJailTile::onLanded(Player& p, GameContext& g) {
 	g.logEvent("GO_TO_JAIL", p, 0);
 } 
 
-std::string GoToJailTile::getType() const { return "GoToJail Tile";} 
+TileType GoToJailTile::getType() const { return TileType::GO_TO_JAIL;} 
 
 TaxTile::TaxTile(int position, const std::string& name, int rate, bool isPercentage) : ActionTile(position, name), rate_(rate), isPercentage_(isPercentage) {}
 
@@ -117,7 +118,7 @@ void TaxTile::onLanded(Player& p, GameContext& g) {
 	g.chargeTax(&p, taxAmount, false);
 }
 
-std::string TaxTile::getType() const {return "Tax Tile";} 
+TileType TaxTile::getType() const {return TileType::TAX;} 
 
 FestivalTile::FestivalTile(int position, const std::string& name) : ActionTile(position, name) {} ; 
 
@@ -127,7 +128,7 @@ void FestivalTile::onLanded([[maybe_unused]] Player& p,[[maybe_unused]] GameCont
 }
 
 
-std::string FestivalTile::getType() const { return "FestivalTile"; }
+TileType FestivalTile::getType() const { return TileType::FESTIVAL; }
 
 
 CardTile::CardTile(int position, const std::string& name, bool isChance) : ActionTile(position, name), isChance_(isChance) {}
@@ -139,5 +140,5 @@ void CardTile::onLanded([[maybe_unused]]Player& p,[[maybe_unused]] GameContext& 
     }
 }
 
-std::string CardTile::getType() const { return "CardTile"; }
+TileType CardTile::getType() const { return TileType::CARD; }
 } // namespace core
