@@ -116,17 +116,17 @@ void GoToJailTile::onLanded(Player& p, GameContext& g) {
 
 TileType GoToJailTile::getType() const { return TileType::GO_TO_JAIL;} 
 
-TaxTile::TaxTile(int position, const std::string& name, int rate, bool isPercentage) : ActionTile(position, name), rate_(rate), isPercentage_(isPercentage) {}
+TaxTile::TaxTile(int position, const std::string& name, int flatRate, int percentageRate, TaxType type) : ActionTile(position, name), flatRate_(flatRate), percentageRate_(percentageRate), type_(type) {}
 
 void TaxTile::onLanded(Player& p, GameContext& g) {
-	int taxAmount = isPercentage_ ? (p.getBalance() * rate_ / 100) : rate_;
-	g.chargeTax(p, taxAmount, false);
+	g.chargeTax(p, flatRate_, percentageRate_, type_);
 }
 
 TileType TaxTile::getType() const {return TileType::TAX;} 
 
-bool TaxTile::isPercentage() const { return isPercentage_; }
-int TaxTile::getRate() const { return rate_; }
+int TaxTile::getFlatRate() const { return flatRate_; }
+int TaxTile::getPercentageRate() const { return percentageRate_; }
+TaxType TaxTile::getTaxType() const { return type_; }
 
 FestivalTile::FestivalTile(int position, const std::string& name) : ActionTile(position, name) {} ; 
 

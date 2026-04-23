@@ -108,18 +108,19 @@ class GoToJailTile: public ActionTile {
 
 class TaxTile: public ActionTile { 
 	private: 
-		// TaxType type_; 
-		int rate_; 
-		bool isPercentage_; 
+		int flatRate_; 
+		int percentageRate_;
+		TaxType type_;
 
 	public: 
-		TaxTile(int position, const std::string& name, int rate, bool isPercentage);
-		int getRate() const;
-		bool isPercentage() const;
+		TaxTile(int position, const std::string& name, int flatRate, int percentageRate, TaxType type);
+		int getFlatRate() const;
+		int getPercentageRate() const;
+		TaxType getTaxType() const;
 		void onLanded(Player&, GameContext&) override; 
 		virtual TileType getType() const override; 
 
-}; 
+	};
 class FestivalTile: public ActionTile { 
 	public: 
 

@@ -15,7 +15,8 @@ class Property;
 } // namespace core
 namespace logic {
 class TransactionLogger;
-}
+class UIInputMediator;
+} // namespace logic
 
 namespace logic {
 
@@ -23,6 +24,8 @@ enum class GameState {
   PRE_ROLL,
   WAITING_FOR_DICE,
   TILE_ACTION,
+  WAITING_FESTIVAL,
+  WAITING_TAX,
   AUCTION,
   GAME_OVER
 };
@@ -33,17 +36,23 @@ private:
   std::vector<core::Player *> players_;
   Bank bank_;
   TransactionLogger *logger_;
+  UIInputMediator *mediator_;
 
   int currentPlayerId_;
   GameState state_;
   std::pair<int, int> lastDiceRoll_;
   int turnCount_;
-	std::mt19937 rng_;
+ 	std::mt19937 rng_;
 	int doubles_; 
 	bool hasExtraTurn_; 
+
+  void resolveFestival(core::Property* selectedProp);
+
 public:
   Game(std::vector<core::Player *> players, TransactionLogger *logger);
   ~Game() = default;
+
+  void setMediator(UIInputMediator *mediator);
 
   void startGame();
   void nextTurn();
@@ -78,7 +87,7 @@ public:
 
   void sendToJail(core::Player& p) override;
 
-  void chargeTax(core::Player& p, int rate, bool isPercentage) override;
+  void chargeTax(core::Player& p, int flatRate, int percentageRate, core::TaxType type) override;
 
   void activateFestival(core::Player& p) override;
 

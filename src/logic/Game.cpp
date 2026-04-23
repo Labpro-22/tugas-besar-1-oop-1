@@ -1,4 +1,5 @@
 #include "logic/Game.hpp"
+#include "logic/UIInputMediator.hpp"
 #include "core/GameException.hpp"
 #include "core/Player.hpp"
 #include "core/Property.hpp"
@@ -9,13 +10,15 @@
 namespace logic {
 
 Game::Game(std::vector<core::Player *> players, TransactionLogger *logger)
-    : players_(players), logger_(logger), currentPlayerId_(0),
+    : players_(players), logger_(logger), mediator_(nullptr), currentPlayerId_(0),
       state_(GameState::PRE_ROLL), lastDiceRoll_({0, 0}), turnCount_(1),
       rng_(std::random_device{}()), doubles_(0), hasExtraTurn_(false) {}
 
 void Game::startGame() { state_ = GameState::PRE_ROLL; }
 
 Board &Game::getBoard() { return board_; }
+
+void Game::setMediator(UIInputMediator *mediator) { mediator_ = mediator; }
 
 void Game::nextTurn() {
   if (checkWinCondition()) {
@@ -220,13 +223,19 @@ void Game::startAuction(core::Property *prop) {
     throw InvalidMoveException("auction exception");
   }
 
-  state_ = GameState::AUCTION;
-
   std::vector<core::Player *> eligiblePlayers;
   for (auto *p : players_) {
     if (!p->isBankrupted()) {
       eligiblePlayers.push_back(p);
     }
+  }
+
+  AuctionResult result = mediator_->runAuction(prop, eligiblePlayers);
+  if (result.winner != nullptr) {
+    *result.winner -= result.finalBid;
+    bank_.receive(result.finalBid);
+    prop->setOwner(result.winner);
+    result.winner->addProperty(prop);
   }
 }
 
@@ -271,13 +280,37 @@ void Game::sendToJail(core::Player& p) {
     p.goToJail(); 
 }
 
-void Game::chargeTax(core::Player& p, int rate, bool isPercentage) {
-  int amount = isPercentage ? (p.getBalance() * rate / 100) : rate;
-  p -= amount;
-  bank_.receive(amount);
+void Game::chargeTax(core::Player& p, int flatRate, int percentageRate, core::TaxType type) {
+    if (type == core::TaxType::PPH) {
+        int percentageAmount = p.getBalance() * percentageRate / 100;
+        bool usePercentage = mediator_->chooseTaxMethod(p, flatRate, percentageAmount);
+        int amount = usePercentage ? percentageAmount : flatRate;
+        p -= amount;
+        bank_.receive(amount);
+    } else {
+        if (p.canAfford(flatRate)) {
+            p -= flatRate;
+            bank_.receive(flatRate);
+        } else {
+            p.goToJail();
+        }
+    }
 }
 
-void Game::activateFestival(core::Player& p) { }
+void Game::activateFestival(core::Player& p) {
+  if (p.getOwnedProperties().empty()) {
+    throw InvalidMoveException("festival exception");
+  }
+  core::Property* selectedProp = mediator_->selectFestivalProperty(p);
+  resolveFestival(selectedProp);
+}
+
+void Game::resolveFestival(core::Property* selectedProp) { 
+  if (selectedProp){ 
+    selectedProp->applyFestival();
+    logEvent("FESTIVAL_ACTIVATED", *getCurrentPlayer(), *selectedProp, selectedProp->getFestMultiplier());
+  }
+}
 
 void Game::drawChanceCard(core::Player& p) { 
 }
