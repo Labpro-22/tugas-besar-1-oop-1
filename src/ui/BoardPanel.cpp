@@ -7,6 +7,9 @@
 
 #include "ui/Color.hpp"
 #include "ui/Constants.hpp"
+#include "ui/StreetTilePanel.hpp"
+#include "ui/TileGeometry.hpp"
+#include "ui/TilePanel.hpp"
 #include "ui/Widgets.hpp"
 
 namespace ui {
@@ -24,47 +27,40 @@ BoardPanel::BoardPanel(int tileNum)
 }
 
 void BoardPanel::setup() {
-  const auto cornerSize = size::cornerTileSize(tileNum_);
+  const TileGeometry geo(tileNum_);
+  const float cornerSize = geo.cornerSide();
+  const float tileWidth = geo.sideWidth();
 
-  // Always top-left corner of the tile
-
-  auto leftPos = sf::Vector2f(position_.x, position_.y + cornerSize);
-  auto topPos = sf::Vector2f(position_.x + cornerSize, position_.y);
-  auto rightPos = sf::Vector2f(position_.x + size_.x - cornerSize,
-                               position_.y + cornerSize);
-  auto bottomPos = sf::Vector2f(position_.x + cornerSize,
-                                position_.y + size_.y - cornerSize);
+  // Top-left corner of each side's first tile.
+  const auto leftPos = sf::Vector2f(position_.x, position_.y + cornerSize);
+  const auto topPos = sf::Vector2f(position_.x + cornerSize, position_.y);
+  const auto rightPos = sf::Vector2f(position_.x + size_.x - cornerSize,
+                                     position_.y + cornerSize);
+  const auto bottomPos = sf::Vector2f(position_.x + cornerSize,
+                                      position_.y + size_.y - cornerSize);
 
   // DEBUG
   for (int i = 0; i < tileNum_; i++) {
     // Left
-    auto leftTile = std::make_unique<StreetTilePanel>(
-        leftPos + sf::Vector2f(0, i * size::regularTileWidth(tileNum_)),
-        sf::Vector2f(cornerSize, size::regularTileWidth(tileNum_)), tileNum_,
-        Orientation::Left, board::property::red, "YOGYAKARTA", "$ 100");
-    addChild(std::move(leftTile));
+    addChild(std::make_unique<StreetTilePanel>(
+        leftPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Left,
+        board::property::red, "YOGYAKARTA", "$ 100"));
 
     // Top
-    auto topTile = std::make_unique<StreetTilePanel>(
-        topPos + sf::Vector2f(i * size::regularTileWidth(tileNum_), 0),
-        sf::Vector2f(size::regularTileWidth(tileNum_), cornerSize), tileNum_,
-        Orientation::Top, board::property::yellow, "YOGYAKARTA", "$ 100");
-    addChild(std::move(topTile));
+    addChild(std::make_unique<StreetTilePanel>(
+        topPos + sf::Vector2f(i * tileWidth, 0), tileNum_, Orientation::Top,
+        board::property::yellow, "YOGYAKARTA", "$ 100"));
 
     // Right
-    auto rightTile = std::make_unique<StreetTilePanel>(
-        rightPos + sf::Vector2f(0, i * size::regularTileWidth(tileNum_)),
-        sf::Vector2f(cornerSize, size::regularTileWidth(tileNum_)), tileNum_,
-        Orientation::Right, board::property::green, "YOGYAKARTA", "$ 100");
-    addChild(std::move(rightTile));
+    addChild(std::make_unique<StreetTilePanel>(
+        rightPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Right,
+        board::property::green, "YOGYAKARTA", "$ 100"));
 
     // Bottom
-    auto bottomTile = std::make_unique<StreetTilePanel>(
-        bottomPos + sf::Vector2f(i * size::regularTileWidth(tileNum_), 0),
-        sf::Vector2f(size::regularTileWidth(tileNum_), cornerSize), tileNum_,
+    addChild(std::make_unique<StreetTilePanel>(
+        bottomPos + sf::Vector2f(i * tileWidth, 0), tileNum_,
         Orientation::Bottom, board::property::darkBlue,
-        "SANGATPANJANGTEKSNYAINI", "$ 100");
-    addChild(std::move(bottomTile));
+        "SANGATPANJANGTEKSNYAINI", "$ 100"));
   }
 }
 

@@ -1,34 +1,36 @@
+#include "ui/StreetTilePanel.hpp"
+
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <memory>
 
-#include "ui/AssetsManager.hpp"
-#include "ui/BoardPanel.hpp"
 #include "ui/Color.hpp"
 #include "ui/Constants.hpp"
 #include "ui/Style.hpp"
+#include "ui/TileGeometry.hpp"
+#include "ui/TilePanel.hpp"
 #include "ui/Widgets.hpp"
 
 namespace ui {
 
-namespace {
-PanelStyle defaultTileStyle(board::base, board::baseHover, board::base,
-                            board::base, palette::black,
-                            layout::streetTilePanel::borderThickness);
+sf::Vector2f StreetTilePanel::computePanelSize(int numTiles,
+                                               Orientation orientation) {
+  const TileGeometry geo(numTiles);
+  const bool sideways =
+      (orientation == Orientation::Left || orientation == Orientation::Right);
+  return sideways ? sf::Vector2f(geo.sideHeight(), geo.sideWidth())
+                  : sf::Vector2f(geo.sideWidth(), geo.sideHeight());
 }
 
-StreetTilePanel::StreetTilePanel(sf::Vector2f position, sf::Vector2f size,
-                                 int numTiles, Orientation orientation,
-                                 sf::Color accentColor,
+StreetTilePanel::StreetTilePanel(sf::Vector2f position, int numTiles,
+                                 Orientation orientation, sf::Color accentColor,
                                  const std::string& topText,
                                  const std::string& bottomText)
-    : Panel(position, size, defaultTileStyle),
-      numTiles_(numTiles),
-      orientation_(orientation),
+    : TilePanel(position, computePanelSize(numTiles, orientation), numTiles,
+                orientation),
       accentColor_(accentColor),
       topText_(topText),
-      bottomText_(bottomText),
-      font_(AssetsManager::get().getFont(font::primaryFamily)) {
+      bottomText_(bottomText) {
   switch (orientation_) {
     case Orientation::Bottom:
       setupBottom();
@@ -43,6 +45,10 @@ StreetTilePanel::StreetTilePanel(sf::Vector2f position, sf::Vector2f size,
       setupRight();
       break;
   }
+}
+
+float StreetTilePanel::tileAccentHeight() const {
+  return tileGeo_.sideHeight() * 0.2f;
 }
 
 LabelStyle topTextStyle() {
@@ -64,7 +70,7 @@ LabelStyle bottomTextStyle() {
 }
 
 void StreetTilePanel::setupBottom() {
-  const float accentHeight = size::tileAccentHeight(numTiles_);
+  const float accentHeight = tileAccentHeight();
   const float topTextY =
       position_.y + (size_.y * layout::streetTilePanel::topTextOffsetRatio);
   const float bottomTextY =
@@ -91,7 +97,7 @@ void StreetTilePanel::setupBottom() {
 }
 
 void StreetTilePanel::setupLeft() {
-  const float accentWidth = size::tileAccentHeight(numTiles_);
+  const float accentWidth = tileAccentHeight();
   const float topTextX =
       position_.x +
       (size_.x * (1.0f - layout::streetTilePanel::bottomTextOffsetRatio));
@@ -120,7 +126,7 @@ void StreetTilePanel::setupLeft() {
 }
 
 void StreetTilePanel::setupTop() {
-  const float accentHeight = size::tileAccentHeight(numTiles_);
+  const float accentHeight = tileAccentHeight();
   const float topTextY =
       position_.y +
       (size_.y * (1.0f - layout::streetTilePanel::bottomTextOffsetRatio));
@@ -149,7 +155,7 @@ void StreetTilePanel::setupTop() {
 }
 
 void StreetTilePanel::setupRight() {
-  const float accentWidth = size::tileAccentHeight(numTiles_);
+  const float accentWidth = tileAccentHeight();
   const float topTextX =
       position_.x + (size_.x * layout::streetTilePanel::topTextOffsetRatio);
   const float bottomTextX =
