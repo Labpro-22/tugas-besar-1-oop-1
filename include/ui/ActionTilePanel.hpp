@@ -23,7 +23,7 @@ class ActionTilePanel : public TilePanel {
    */
   ActionTilePanel(sf::Vector2f position, int numTiles,
                   Orientation orientation = Orientation::Bottom,
-                  const std::string& iconPath = "assets/logos/train.png",
+                  const std::string& iconPath = "assets/icons/train.png",
                   const std::string& topText = "PETAK AKSI",
                   const std::string& bottomText = "$ 100");
 

@@ -8,6 +8,7 @@
 #include "ui/ActionTilePanel.hpp"
 #include "ui/Color.hpp"
 #include "ui/Constants.hpp"
+#include "ui/CornerTilePanel.hpp"
 #include "ui/TileGeometry.hpp"
 #include "ui/TilePanel.hpp"
 #include "ui/Widgets.hpp"
@@ -44,24 +45,40 @@ void BoardPanel::setup() {
     // Left
     addChild(std::make_unique<ActionTilePanel>(
         leftPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Left,
-        "assets/logos/train.png", "ABC", "$ 100"));
+        "assets/icons/train.png", "ABC", "$ 100"));
 
     // Top
     addChild(std::make_unique<ActionTilePanel>(
         topPos + sf::Vector2f(i * tileWidth, 0), tileNum_, Orientation::Top,
-        "assets/logos/chance-pink.png", "PENDEK", "$ 100"));
+        "assets/icons/chance-pink.png", "PENDEK", "$ 100"));
 
     // Right
     addChild(std::make_unique<ActionTilePanel>(
         rightPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Right,
-        "assets/logos/luxury-tax.png", "YOGYAKARTA", "$ 100"));
+        "assets/icons/go.png", "YOGYAKARTA", "$ 100"));
 
     // Bottom
     addChild(std::make_unique<ActionTilePanel>(
         bottomPos + sf::Vector2f(i * tileWidth, 0), tileNum_,
-        Orientation::Bottom, "assets/logos/train-kai.png",
+        Orientation::Bottom, "assets/icons/train-kai.png",
         "SANGATPANJANGTEKSNYAINI", "$ 100"));
   }
+
+  addChild(std::make_unique<CornerTilePanel>(
+      position_ + size_ - sf::Vector2f(cornerSize, cornerSize), tileNum_,
+      CornerType::GO, Orientation::Bottom, "assets/icons/go.png", "MULAI",
+      "DAPAT UANG"));
+  addChild(std::make_unique<CornerTilePanel>(
+      position_ + sf::Vector2f(0, size_.y - cornerSize), tileNum_,
+      CornerType::JAIL, Orientation::Left, "assets/icons/jail.png", "HANYA",
+      "BERKUNJUNG"));
+  addChild(std::make_unique<CornerTilePanel>(
+      position_, tileNum_, CornerType::FREE, Orientation::Top,
+      "assets/icons/free-park.png", "PARKIR", "GRATIS"));
+  addChild(std::make_unique<CornerTilePanel>(
+      position_ + sf::Vector2f(size_.x - cornerSize, 0), tileNum_,
+      CornerType::GO_TO_JAIL, Orientation::Right, "assets/icons/go-to-jail.png",
+      "PERGI", "KE PENJARA"));
 }
 
 void BoardPanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
