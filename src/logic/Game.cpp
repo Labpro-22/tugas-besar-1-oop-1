@@ -31,7 +31,7 @@ void Game::nextTurn() {
       if (currentPlayerId_ == 0) {
         turnCount_++;
       }
-    } while (players_[currentPlayerId_]->getIsBankrupt());
+    } while (players_[currentPlayerId_]->isBankrupted());
   }
 
   hasExtraTurn_ = false;
@@ -41,7 +41,7 @@ void Game::nextTurn() {
 bool Game::checkWinCondition() const {
   int activePlayers = 0;
   for (const auto *p : players_) {
-    if (!p->getIsBankrupt()) {
+    if (!p->isBankrupted()) {
       activePlayers++;
     }
   }
@@ -53,8 +53,8 @@ void Game::rollDice() {
     throw InvalidMoveException("state exception");
   }
 
-  lastDiceRoll_.first = (std::rand() % 6) + 1;
-  lastDiceRoll_.second = (std::rand() % 6) + 1;
+  lastDiceRoll_.first = rng_.operator()() % 6 + 1;
+  lastDiceRoll_.second = rng_.operator()() % 6 + 1; 
 
   if (lastDiceRoll_.first == lastDiceRoll_.second) {
     doubles_++;
@@ -75,7 +75,7 @@ void Game::rollDice() {
 void Game::moveCurrentPlayer() {
   core::Player *p = getCurrentPlayer();
 
-  if (p->getInJail()) {
+  if (p->isInJail()) {
     return;
   }
   
@@ -83,7 +83,7 @@ void Game::moveCurrentPlayer() {
   int boardSize = board_.getTileCount();
 
   if (boardSize == 0) {
-    throw InvalidMoveException("board logging exception!");
+    throw InvalidConfigException("Board", "at least 1 tile");
   }
 
   int currentPos = p->getPosition();
@@ -160,9 +160,6 @@ void Game::buildHouse(core::Player *buyer, core::Tile *at) {
 
 void Game::sellHouse(core::Player *seller, core::Tile *at) {
   core::Property *prop = at->getProperty();
-  if (!prop) {
-    throw InvalidMoveException("property exception.");
-  }
 
   if (prop->getType() != core::PropertyType::STREET) {
     throw InvalidMoveException("no house exception.");
@@ -227,7 +224,7 @@ void Game::startAuction(core::Property *prop) {
 
   std::vector<core::Player *> eligiblePlayers;
   for (auto *p : players_) {
-    if (!p->getIsBankrupt()) {
+    if (!p->isBankrupted()) {
       eligiblePlayers.push_back(p);
     }
   }
@@ -258,35 +255,34 @@ GameState Game::getState() const { return state_; }
 std::pair<int, int> Game::getLastDiceRoll() const { return lastDiceRoll_; }
 int Game::getTurnCount() const { return turnCount_; }
 
-void Game::offerProperty(core::Player* p, core::Property* prop) {
-  if (p->canAfford(prop->getPrice())) {
-    buyProperty(prop);
+void Game::offerProperty(core::Player& p, core::Property& prop) {
+  if (p.canAfford(prop.getPrice())) {
+    buyProperty(&prop);
   } 
 }
 
-void Game::chargeRent(core::Player* p, core::Property* prop) {
-  int rent = prop->calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
-  *p -= rent;
-  *(prop->getOwner()) + rent;
+void Game::chargeRent(core::Player& p, core::Property& prop) {
+  int rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
+  p -= rent;
+  *(prop.getOwner()) += rent;
 }
 
 void Game::sendToJail(core::Player& p) { 
     p.goToJail(); 
 }
 
-void Game::chargeTax(core::Player* p, int rate, bool isPercentage) {
-  int amount = isPercentage ? (p->getBalance() * rate / 100) : rate;
-  *p -= amount;
+void Game::chargeTax(core::Player& p, int rate, bool isPercentage) {
+  int amount = isPercentage ? (p.getBalance() * rate / 100) : rate;
+  p -= amount;
   bank_.receive(amount);
 }
 
-void Game::activateFestival(core::Player* p) { 
+void Game::activateFestival(core::Player& p) { }
+
+void Game::drawChanceCard(core::Player& p) { 
 }
 
-void Game::drawChanceCard(core::Player* p) { 
-}
-
-void Game::drawCommunityChestCard(core::Player* p) { 
+void Game::drawCommunityChestCard(core::Player& p) { 
 }
 
 void Game::payPlayerFromBank(core::Player& p, int amount) { 

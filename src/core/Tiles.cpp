@@ -25,7 +25,11 @@ ActionTile::ActionTile (int position, const std::string& name) : Tile(position, 
 
 PropertyTile::PropertyTile(int position, const std::string& name, std::unique_ptr<Property> property) : Tile(position, name), property_(std::move(property)) {} 
 
-Property* PropertyTile::getProperty() const {return property_.get();} 
+Property* PropertyTile::getProperty() const {
+	// segfault guard 
+	if (!property_) return nullptr;	
+	return property_.get();
+} 
 
 void PropertyTile::onLanded(Player& p, GameContext& g){ 
 

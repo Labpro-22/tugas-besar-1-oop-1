@@ -61,24 +61,38 @@ public:
   void handleTileAction(core::Tile *tile);
 
   void buyProperty(core::Property *prop);
+
   void buildHouse(core::Player *buyer, core::Tile *at);
+
   void sellHouse(core::Player *seller, core::Tile *at);
+
   void mortgageProperty(core::Property *prop);
+
   void unmortgageProperty(core::Property *prop);
+
   void startAuction(core::Property *prop);
-  void offerProperty(core::Player* p, core::Property* prop) override;
-  void chargeRent(core::Player* p, core::Property* prop) override;
+
+  void offerProperty(core::Player& p, core::Property& prop) override;
+
+  void chargeRent(core::Player& p, core::Property& prop) override;
+
   void sendToJail(core::Player& p) override;
-  void chargeTax(core::Player* p, int rate, bool isPercentage) override;
-  void activateFestival(core::Player* p) override;
-  void drawChanceCard(core::Player* p) override;
-  void drawCommunityChestCard(core::Player* p) override;
+
+  void chargeTax(core::Player& p, int rate, bool isPercentage) override;
+
+  void activateFestival(core::Player& p) override;
+
+  void drawChanceCard(core::Player& p) override;
+
+  void drawCommunityChestCard(core::Player& p) override;
+
   void payPlayerFromBank(core::Player& p, int amount) override;
+
   int getGoSalary() const override;
 
   void logEvent(const std::string &action, core::Player &p, int value);
-  void logEvent(const std::string &action, core::Player &p,
-                core::Property &prop, int value);
+
+  void logEvent(const std::string &action, core::Player &p, core::Property &prop, int value);
 
   core::Player *getCurrentPlayer() const;
   GameState getState() const;
