@@ -5,26 +5,31 @@ namespace core {
 class Player;
 class Property;
 
+enum class TaxType {
+    PPH,
+    PBM
+};
+
 class GameContext {
 public:
     virtual ~GameContext() = default;
 
     // Property 
-    virtual void offerProperty(Player* p, Property* prop) = 0;
-    virtual void chargeRent(Player* p, Property* prop) = 0;
+    virtual void offerProperty(Player& p, Property& prop) = 0;
+    virtual void chargeRent(Player& p, Property& prop) = 0;
 
     // Jail
     virtual void sendToJail(Player& p) = 0;
 
     // Tax
-    virtual void chargeTax(Player* p, int rate, bool isPercentage) = 0;
+    virtual void chargeTax(Player& p, int flatRate, int percentageRate, TaxType type) = 0;
 
     // Festival
-    virtual void activateFestival(Player* p) = 0;
+    virtual void activateFestival(Player& p) = 0;
 
     // Cards
-    virtual void drawChanceCard(Player* p) = 0;
-    virtual void drawCommunityChestCard(Player* p) = 0;
+    virtual void drawChanceCard(Player& p) = 0;
+    virtual void drawCommunityChestCard(Player& p) = 0;
 
     // Bank payments
     virtual void payPlayerFromBank(Player& p, int amount) = 0;
