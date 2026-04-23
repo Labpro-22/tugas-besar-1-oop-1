@@ -117,14 +117,14 @@ const float textPaddingX = 0.08f * size::multiplier;
 const float textPaddingY = 0.05f * size::multiplier;
 const float borderThickness = 0.025f * size::multiplier;
 const float logoSizeRatio = 0.62f;
-const float diagonalInsetRatio = 0.10f;
-const float nonJailTextWidthRatio = 0.48f;
-const float nonJailTextHeightRatio = 0.24f;
+const float diagonalInsetRatio = 0.06f;
+const float nonJailTextWidthRatio = 0.56f;
+const float nonJailTextHeightRatio = 0.28f;
 const float jailTextBandRatio = 0.24f;
 
 // Jail-specific ratios.
-const float jailLogoSizeRatio = 0.45f;
-const float jailLogoInsetRatio = 0.08f;
+const float jailLogoSizeRatio = 1;
+const float jailLogoInsetRatio = 0.04f;
 const float jailVisitingOffsetXRatio = 0.52f;
 const float jailVisitingOffsetYRatio = 0.68f;
 
