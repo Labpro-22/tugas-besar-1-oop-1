@@ -8,10 +8,10 @@
 #include "ui/PlayerInfoPanel.hpp"
 
 namespace ui {
-GameWindow::GameWindow()
+GameWindow::GameWindow(int boardTileCount)
     : sf::RenderWindow(sf::VideoMode(size::width, size::height), "Nimonspoli"),
       game_(0),
-      boardPanel_(),
+      boardPanel_(boardTileCount),
       playerInfoPanel_(),
       actionPanel_() {
   dialogManager_ = std::make_unique<DialogManager>();

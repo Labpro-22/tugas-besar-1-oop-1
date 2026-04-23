@@ -53,6 +53,7 @@ const auto disabled = palette::lightGrey;
 
 namespace ui::board {
 const auto base = accent::mint;
+const auto baseHover = sf::Color(sf::Uint32(0xD9E8D680U));
 const auto border = palette::black;
 
 namespace property {

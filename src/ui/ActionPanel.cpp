@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include "ui/AssetsManager.hpp"
 #include "ui/Color.hpp"
 #include "ui/Constants.hpp"
 
