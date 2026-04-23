@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "ui/TilePanel.hpp"
-#include "ui/Widgets.hpp"
+#include "ui/board/TilePanel.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 

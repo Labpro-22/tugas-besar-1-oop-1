@@ -34,21 +34,24 @@ add_library(
 
 add_library(
   nimonspoli_ui STATIC 
-  src/ui/Panel.cpp
-  src/ui/Label.cpp
-  src/ui/ImagePanel.cpp
-  src/ui/Button.cpp
+
+  src/ui/component/Panel.cpp
+  src/ui/component/Label.cpp
+  src/ui/component/ImagePanel.cpp
+  src/ui/component/Button.cpp
+  src/ui/component/Style.cpp
+
+  src/ui/board/TileGeometry.cpp
+  src/ui/board/TilePanel.cpp
+  src/ui/board/StreetTilePanel.cpp
+  src/ui/board/ActionTilePanel.cpp
+  src/ui/board/CornerTilePanel.cpp
+  src/ui/board/BoardPanel.cpp
+ 
   src/ui/ActionPanel.cpp
-  src/ui/BoardPanel.cpp
   src/ui/PlayerInfoPanel.cpp
+  
   src/ui/GameWindow.cpp
-  src/ui/Style.cpp
-  src/ui/StreetTilePanel.cpp
-  src/ui/TilePanel.cpp
-  src/ui/TileGeometry.cpp
-  src/ui/ActionTilePanel.cpp
-  src/ui/CornerTilePanel.cpp
-  # etc.
 )
 
 add_executable(nimonspoli src/main.cpp)

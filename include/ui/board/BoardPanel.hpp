@@ -4,11 +4,8 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Sensor.hpp>
-#include <memory>
-#include <string>
 
-#include "ui/Color.hpp"
-#include "ui/Widgets.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 

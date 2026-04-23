@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ui/Style.hpp"
+#include "ui/component/Style.hpp"
 
 namespace ui {
 

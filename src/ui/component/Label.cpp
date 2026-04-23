@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cmath>
 
-#include "ui/Widgets.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 

@@ -1,4 +1,4 @@
-#include "ui/Style.hpp"
+#include "ui/component/Style.hpp"
 
 namespace ui {
 

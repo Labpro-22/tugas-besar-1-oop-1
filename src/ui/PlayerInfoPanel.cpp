@@ -1,7 +1,7 @@
 #include "ui/PlayerInfoPanel.hpp"
 
-#include "ui/Color.hpp"
-#include "ui/Constants.hpp"
+#include "ui/component/Color.hpp"
+#include "ui/component/Constants.hpp"
 
 namespace ui {
 

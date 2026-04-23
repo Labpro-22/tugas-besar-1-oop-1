@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ui/Color.hpp"
-#include "ui/TilePanel.hpp"
+#include "ui/board/TilePanel.hpp"
+#include "ui/component/Color.hpp"
 
 namespace ui {
 

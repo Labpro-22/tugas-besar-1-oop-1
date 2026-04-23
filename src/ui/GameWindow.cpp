@@ -3,9 +3,9 @@
 #include <SFML/Graphics/View.hpp>
 
 #include "ui/ActionPanel.hpp"
-#include "ui/BoardPanel.hpp"
-#include "ui/Constants.hpp"
 #include "ui/PlayerInfoPanel.hpp"
+#include "ui/board/BoardPanel.hpp"
+#include "ui/component/Constants.hpp"
 
 namespace ui {
 GameWindow::GameWindow(int boardTileCount)

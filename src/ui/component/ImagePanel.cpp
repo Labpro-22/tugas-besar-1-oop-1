@@ -2,7 +2,7 @@
 #include <string>
 
 #include "ui/AssetsManager.hpp"
-#include "ui/Widgets.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 

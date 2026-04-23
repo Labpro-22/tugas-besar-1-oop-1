@@ -8,10 +8,10 @@
 
 #include "logic/Game.hpp"
 #include "ui/ActionPanel.hpp"
-#include "ui/BoardPanel.hpp"
-#include "ui/Constants.hpp"
 #include "ui/DialogManager.hpp"
 #include "ui/PlayerInfoPanel.hpp"
+#include "ui/board/BoardPanel.hpp"
+#include "ui/component/Constants.hpp"
 
 namespace ui {
 class GameWindow : public sf::RenderWindow {

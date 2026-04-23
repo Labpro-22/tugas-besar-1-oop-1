@@ -1,10 +1,10 @@
-#include "ui/CornerTilePanel.hpp"
+#include "ui/board/CornerTilePanel.hpp"
 
 #include <SFML/System/Vector2.hpp>
 
-#include "ui/Constants.hpp"
-#include "ui/Style.hpp"
-#include "ui/TileGeometry.hpp"
+#include "ui/board/TileGeometry.hpp"
+#include "ui/component/Constants.hpp"
+#include "ui/component/Style.hpp"
 
 namespace ui {
 

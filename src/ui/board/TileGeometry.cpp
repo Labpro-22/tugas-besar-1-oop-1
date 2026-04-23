@@ -1,6 +1,6 @@
-#include "ui/TileGeometry.hpp"
+#include "ui/board/TileGeometry.hpp"
 
-#include "ui/Constants.hpp"
+#include "ui/component/Constants.hpp"
 
 namespace ui {
 

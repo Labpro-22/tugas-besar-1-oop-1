@@ -1,17 +1,17 @@
-#include "ui/BoardPanel.hpp"
+#include "ui/board/BoardPanel.hpp"
 
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <stdexcept>
 #include <utility>
 
-#include "ui/ActionTilePanel.hpp"
-#include "ui/Color.hpp"
-#include "ui/Constants.hpp"
-#include "ui/CornerTilePanel.hpp"
-#include "ui/TileGeometry.hpp"
-#include "ui/TilePanel.hpp"
-#include "ui/Widgets.hpp"
+#include "ui/board/ActionTilePanel.hpp"
+#include "ui/board/CornerTilePanel.hpp"
+#include "ui/board/TileGeometry.hpp"
+#include "ui/board/TilePanel.hpp"
+#include "ui/component/Color.hpp"
+#include "ui/component/Constants.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 

@@ -2,7 +2,7 @@
 #include <functional>
 #include <memory>
 
-#include "ui/Widgets.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 

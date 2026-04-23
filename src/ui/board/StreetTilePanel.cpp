@@ -1,15 +1,15 @@
-#include "ui/StreetTilePanel.hpp"
+#include "ui/board/StreetTilePanel.hpp"
 
 #include <SFML/System/Vector2.hpp>
 #include <algorithm>
 #include <memory>
 
-#include "ui/Color.hpp"
-#include "ui/Constants.hpp"
-#include "ui/Style.hpp"
-#include "ui/TileGeometry.hpp"
-#include "ui/TilePanel.hpp"
-#include "ui/Widgets.hpp"
+#include "ui/board/TileGeometry.hpp"
+#include "ui/board/TilePanel.hpp"
+#include "ui/component/Color.hpp"
+#include "ui/component/Constants.hpp"
+#include "ui/component/Style.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 

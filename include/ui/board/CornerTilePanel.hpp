@@ -4,7 +4,8 @@
 #include <memory>
 #include <string>
 
-#include "ui/TilePanel.hpp"
+#include "ui/board/TilePanel.hpp"
+
 namespace ui {
 
 enum class CornerType { GO, JAIL, FREE, GO_TO_JAIL };

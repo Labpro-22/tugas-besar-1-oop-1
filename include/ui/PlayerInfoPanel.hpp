@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ui/Widgets.hpp"
+#include "ui/component/Widgets.hpp"
 
 namespace ui {
 
