@@ -46,3 +46,10 @@ bin/
 # Mics
 .cache/
 .DS_Store
+
+build/
+CMakeFiles/
+*.cmake 
+CMakeCache.txt
+compile_commands.json
+Makefile
