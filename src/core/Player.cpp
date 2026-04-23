@@ -27,7 +27,7 @@ int Player::getNetWorth() const noexcept {
     int total = balance_;
     for (Property* p : ownedProperties_) {
         if (p != nullptr) {
-            total += p->getValue();
+            total += p->getPrice();
         }
     }
     return total;
