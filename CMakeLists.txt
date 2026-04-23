@@ -46,6 +46,7 @@ add_library(
   src/ui/StreetTilePanel.cpp
   src/ui/TilePanel.cpp
   src/ui/TileGeometry.cpp
+  src/ui/ActionTilePanel.cpp
   # etc.
 )
 

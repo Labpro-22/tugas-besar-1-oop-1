@@ -37,7 +37,8 @@ Button::Button(const std::string& text, const sf::Font& font,
       isHovered_(false),
       isPressed_(false),
       style_(style),
-      widget_(std::make_unique<ImagePanel>(imagePath)) {
+      widget_(std::make_unique<ImagePanel>(sf::Vector2f(0, 0),
+                                           sf::Vector2f(0, 0), imagePath)) {
   (void)text;
   (void)font;
   background_.setSize(size());
@@ -53,7 +54,8 @@ Button::Button(const std::string& text, const sf::Font& font,
       isPressed_(false),
       style_(style),
       onClick_(std::move(onClick)),
-      widget_(std::make_unique<ImagePanel>(imagePath)) {
+      widget_(std::make_unique<ImagePanel>(sf::Vector2f(0, 0),
+                                           sf::Vector2f(0, 0), imagePath)) {
   (void)text;
   (void)font;
   background_.setSize(size);

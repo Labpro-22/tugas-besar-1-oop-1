@@ -104,10 +104,11 @@ namespace ui::layout::actionTilePanel {
 const float textPaddingX = 0.08f * size::multiplier;
 const float textPaddingY = 0.05f * size::multiplier;
 const float borderThickness = 0.025f * size::multiplier;
-const float topTextOffsetRatio = 0.10f;
-const float logoSizeRatio = 0.50f;
-const float logoOffsetRatio = 0.25f;
-const float bottomTextOffsetRatio = 0.70f;
+const float textHeightRatio = 0.25f;
+const float logoHeightRatio = 0.50f;
+const float logoWidthRatio = 0.80f;
+const float logoWidthOffset = 0.10f;
+const float bottomTextOffsetRatio = 0.75f;
 
 }  // namespace ui::layout::actionTilePanel
 

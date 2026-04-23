@@ -106,7 +106,8 @@ class Label : public Widget {
 
 class ImagePanel : public Widget {
  public:
-  ImagePanel(const std::string& imagePath);
+  ImagePanel(sf::Vector2f position, sf::Vector2f size,
+             const std::string& imagePath);
   ~ImagePanel() override;
 
   void handleEvent(sf::Event&, sf::RenderWindow&) override {}
@@ -122,9 +123,13 @@ class ImagePanel : public Widget {
   }
   void setSprite(const sf::Sprite& sprite) { sprite_ = sprite; }
 
+  void setRotation(float degrees) { rotationDegrees_ = degrees; }
+  float rotation() const { return rotationDegrees_; }
+
  protected:
-  sf::Texture texture_;
+  sf::Texture& texture_;
   sf::Sprite sprite_;
+  float rotationDegrees_ = 0.0f;
 };
 
 class Button : public Widget {

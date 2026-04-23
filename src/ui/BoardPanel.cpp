@@ -5,9 +5,9 @@
 #include <stdexcept>
 #include <utility>
 
+#include "ui/ActionTilePanel.hpp"
 #include "ui/Color.hpp"
 #include "ui/Constants.hpp"
-#include "ui/StreetTilePanel.hpp"
 #include "ui/TileGeometry.hpp"
 #include "ui/TilePanel.hpp"
 #include "ui/Widgets.hpp"
@@ -42,24 +42,24 @@ void BoardPanel::setup() {
   // DEBUG
   for (int i = 0; i < tileNum_; i++) {
     // Left
-    addChild(std::make_unique<StreetTilePanel>(
+    addChild(std::make_unique<ActionTilePanel>(
         leftPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Left,
-        board::property::red, "YOGYAKARTA", "$ 100"));
+        "assets/logos/train.png", "ABC", "$ 100"));
 
     // Top
-    addChild(std::make_unique<StreetTilePanel>(
+    addChild(std::make_unique<ActionTilePanel>(
         topPos + sf::Vector2f(i * tileWidth, 0), tileNum_, Orientation::Top,
-        board::property::yellow, "YOGYAKARTA", "$ 100"));
+        "assets/logos/chance-pink.png", "PENDEK", "$ 100"));
 
     // Right
-    addChild(std::make_unique<StreetTilePanel>(
+    addChild(std::make_unique<ActionTilePanel>(
         rightPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Right,
-        board::property::green, "YOGYAKARTA", "$ 100"));
+        "assets/logos/luxury-tax.png", "YOGYAKARTA", "$ 100"));
 
     // Bottom
-    addChild(std::make_unique<StreetTilePanel>(
+    addChild(std::make_unique<ActionTilePanel>(
         bottomPos + sf::Vector2f(i * tileWidth, 0), tileNum_,
-        Orientation::Bottom, board::property::darkBlue,
+        Orientation::Bottom, "assets/logos/train-kai.png",
         "SANGATPANJANGTEKSNYAINI", "$ 100"));
   }
 }
