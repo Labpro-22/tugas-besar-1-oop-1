@@ -25,53 +25,6 @@ const float buttonPanelWidth = 3 * multiplier;
 const float buttonPanelHeight = 1.5 * multiplier;
 const float textBoxHeight = 0.5 * multiplier;
 
-/**
- * @brief Calculates the base size of a tile based on the number of tiles
- * excluding corners. The size of the board starts from 4 (4 x 4 + 4 = 20 tiles)
- * to 14 (14 x 4 + 4 = 60 tiles). The default is 9 (9 x 4 + 4 = 40 tiles).
- *
- * @param numTiles Number of tiles for each side excluding corners [4..14]
- * @return sf::Vector2f (width, height)
- */
-sf::Vector2f baseTileSize(int numTiles = 9);
-
-/**
- * @brief Get the size of the tile parallel to the board edge. This is used to
- * calculate the position of tiles and the size of corner tiles.
- *
- * @param numTiles Number of tiles for each side excluding corners [4..14]
- * @return float
- */
-float regularTileWidth(int numTiles = 9);
-
-/**
- * @brief Get the size of corner tile (also the size of the tile perpendicular
- * to the board edge) based on the number of tiles excluding corners. This is
- * used to calculate the position of tiles and the size of corner tiles.
- *
- * @param numTiles Number of tiles for each side excluding corners [4..14]
- * @return float
- */
-float cornerTileSize(int numTiles = 9);
-
-/**
- * @brief Return the tile logo size relative to the current tile size.
- *
- * @param numTiles Number of tiles for each side excluding corners [4..14]
- * @param isCorner Whether the tile is a corner tile
- * @return float
- */
-float tileLogoSize(int numTiles = 9, bool isCorner = false);
-
-/**
- * @brief Return the tile accent height for street tile relative to the current
- * tile size
- *
- * @param numTiles
- * @return float
- */
-float tileAccentHeight(int numTiles = 9);
-
 }  // namespace ui::size
 
 namespace ui::font {

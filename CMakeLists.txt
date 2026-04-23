@@ -42,9 +42,10 @@ add_library(
   src/ui/BoardPanel.cpp
   src/ui/PlayerInfoPanel.cpp
   src/ui/GameWindow.cpp
-  src/ui/Constants.cpp
   src/ui/Style.cpp
   src/ui/StreetTilePanel.cpp
+  src/ui/TilePanel.cpp
+  src/ui/TileGeometry.cpp
   # etc.
 )
 
