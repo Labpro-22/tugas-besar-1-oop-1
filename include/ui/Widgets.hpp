@@ -20,7 +20,8 @@ namespace ui {
 
 class Widget {
  public:
-  Widget(sf::Vector2f position = {0, 0}, sf::Vector2f size = {100, 100});
+  Widget(sf::Vector2f position = {0, 0}, sf::Vector2f size = {100, 100})
+      : position_(position), size_(size) {}
   virtual ~Widget() = default;
 
   virtual void handleEvent(sf::Event& event, sf::RenderWindow& window) = 0;
