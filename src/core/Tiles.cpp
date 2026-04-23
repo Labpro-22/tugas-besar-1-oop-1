@@ -33,10 +33,10 @@ void PropertyTile::onLanded(Player& p, GameContext& g){
 
 	if (property_->isAvailable()){ 
 		// purchase 
-		g.offerProperty(&p, property_.get()); 
+		g.offerProperty(p, *property_.get()); 
 	}else if (property_->getOwner() != &p && !property_->isMortgagedStatus()){
 		// rent 
-		g.chargeRent(&p, property_.get());
+		g.chargeRent(p, *property_.get());
 	} 
 } 
 
@@ -48,7 +48,7 @@ void UtilityTile::onLanded(Player& p, GameContext& g){
 		p.addProperty(property_.get());
 	} else if (property_->getOwner() != &p && !property_->isMortgagedStatus()){
 		// rent 
-		g.chargeRent(&p, property_.get());
+		g.chargeRent(p, *property_.get());
 	} 
 } 
 
@@ -63,7 +63,7 @@ void RailroadTile::onLanded(Player& p, GameContext& g) {
 		g.logEvent("RAILROAD", p, *property_, 0);
     } else if (property_->getOwner() != &p && !property_->isMortgagedStatus()) {
    	// rent  
-		g.chargeRent(&p, property_.get());
+		g.chargeRent(p, *property_.get());
     }
 }
 
@@ -116,7 +116,7 @@ TaxTile::TaxTile(int position, const std::string& name, int rate, bool isPercent
 
 void TaxTile::onLanded(Player& p, GameContext& g) {
 	int taxAmount = isPercentage_ ? (p.getBalance() * rate_ / 100) : rate_;
-	g.chargeTax(&p, taxAmount, false);
+	g.chargeTax(p, taxAmount, false);
 }
 
 TileType TaxTile::getType() const {return TileType::TAX;} 
@@ -128,7 +128,7 @@ FestivalTile::FestivalTile(int position, const std::string& name) : ActionTile(p
 
 void FestivalTile::onLanded([[maybe_unused]] Player& p,[[maybe_unused]] GameContext& g) {
 	// pick property 
-	g.activateFestival(&p);
+	g.activateFestival(p);
 }
 
 
