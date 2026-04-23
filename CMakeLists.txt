@@ -41,6 +41,7 @@ add_library(
   src/ui/GameWindow.cpp
   src/ui/Constants.cpp
   src/ui/Style.cpp
+  src/ui/StreetTilePanel.cpp
   # etc.
 )
 
