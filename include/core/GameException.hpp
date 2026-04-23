@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <exception>
+namespace core { class Player; }
+
 
 class GameException : public std::exception {
 public:
@@ -17,31 +19,75 @@ private:
     mutable std::string cachedMessage_;
 };
 
-class InvalidConfigException : public GameException {
+class InsufficientFundsException : public GameException {
 public:
-    InvalidConfigException(const std::string& configKey,
-                           const std::string& expected)
-        : configKey_(configKey), expected_(expected) {}
+    InsufficientFundsException(int amount, int required) : amount_(amount), required_(required) {};
 
     std::string getMessage() const override {
-        return "InvalidConfigException: key='" + configKey_ +
-               "' expected=" + expected_;
+        return "InsufficientFundsException: Dimiliki M" + std::to_string(amount_) + ", Dibutuhkan M" + std::to_string(required_) + ", Kekurangan M" + std::to_string(required_ - amount_);
+    }
+
+    int getAmount() const { 
+        return amount_; 
+    }
+    int getRequired() const { 
+        return required_; 
     }
 
 private:
-    std::string configKey_;
+    int amount_;
+    int required_;
+};
+
+class InvalidMoveException : public GameException {
+public:
+    InvalidMoveException(const std::string& reason) : reason_(reason) {};
+
+    std::string getMessage() const override {
+        return "InvalidMoveException: " + reason_;
+    }
+
+    std::string getReason() const { 
+        return reason_; 
+    }
+
+private:
+    std::string reason_;
+};
+
+class InvalidConfigException : public GameException {
+public:
+    InvalidConfigException(const std::string& configKey, const std::string& expected) : configKey_(configKey), expected_(expected) {}
+
+    std::string getMessage() const override {
+        return "InvalidConfigException: key='" + configKey_ + "' expected=" + expected_;
+    }
+
+    std::string getConfigKey() const { 
+        return configKey_; 
+    }
+    std::string getExpected()  const { 
+        return expected_; 
+    }
+
+private:
+    std::string configKey_; 
     std::string expected_;
 };
 
 class FileIOException : public GameException {
 public:
-    FileIOException(const std::string& filename,
-                    const std::string& operation)
-        : filename_(filename), operation_(operation) {}
+    FileIOException(const std::string& filename, const std::string& operation) : filename_(filename), operation_(operation) {}
 
     std::string getMessage() const override {
-        return "FileIOException: cannot " + operation_ +
-               " file '" + filename_ + "'";
+        return "FileIOException: cannot " + operation_ + " file '" + filename_ + "'";
+    }
+
+    std::string getFilename() const { 
+        return filename_; 
+    }
+    std::string getOperation() const { 
+        return operation_; 
     }
 
 private:
