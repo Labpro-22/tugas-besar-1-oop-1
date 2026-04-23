@@ -7,11 +7,11 @@
 #include <core/ActionCard.hpp>
 #include <core/Player.hpp>
 
-#include <logic/Game.hpp>
-
 //TODO: this class uses out-of-spec methods.
 
 namespace core {
+
+class GameContext;
 
 /**
  * @brief Chance deck entry implemented as description + functor payload.
@@ -21,18 +21,18 @@ public:
     /**
      * @brief Build a card with a custom functor effect.
      * @param description Text printed when the card is revealed.
-     * @param effect Functor that mutates `player` and `game`.
+     * @param effect Functor that mutates `player` and `context`.
      * @note Extension (not in spec); the spec only lists `execute` / `getCardType`.
      */
-    ChanceCard(std::string description, std::function<void(Player&, logic::Game&)> effect);
+    ChanceCard(std::string description, std::function<void(Player&, GameContext&)> effect);
 
-    void execute(Player& player, logic::Game& game) override;
+    void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;
 
     /**
      * @brief Factory for "move back N spaces" style instructions.
-     * @param spaces Negative movement is applied through `moveCurrentPlayer`.
+     * @param spaces Number of spaces to move backward (wrapped on the board).
      * @param description Card flavour text.
      * @note Extension (not in spec).
      */
@@ -62,7 +62,7 @@ public:
     static std::unique_ptr<ActionCard> makeAdvanceTo(int index, std::string description);
 
 private:
-    std::function<void(Player&, logic::Game&)> effect_;  // Extension (not in spec).
+    std::function<void(Player&, GameContext&)> effect_;  // Extension (not in spec).
 };
 
 }

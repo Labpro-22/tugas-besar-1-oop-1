@@ -6,15 +6,11 @@
 #include <core/Player.hpp>
 #include <core/SkillCard.hpp>
 
-namespace logic {
-
-class Game;
-
-}
-
 // TODO: this class has out-of-spec method(s).
 
 namespace core {
+
+class GameContext;
 
 /**
  * @brief Skill that rolls a random discount percentage when acquired.
@@ -28,7 +24,7 @@ public:
      */
     DiscountCard(float discountRate, std::string description);
 
-    void execute(Player& player, logic::Game& game) override;
+    void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;
 

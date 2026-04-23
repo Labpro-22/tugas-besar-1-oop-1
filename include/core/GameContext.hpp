@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <utility>
+#include <vector>
 
 namespace core {
 class Player;
@@ -37,6 +39,13 @@ public:
     // Config getters tiles need
     virtual int getGoSalary() const = 0;
     virtual std::pair<int,int> getLastDiceRoll() const = 0;
+
+    // TODO: extension beyond M1 spec - needed by LassoCard/DemolitionCard.
+    virtual const std::vector<Player*>& getPlayers() const = 0;
+
+    // TODO: extension beyond M1 spec - needed by MoveCard/TeleportCard/
+    // ChanceCard::makeMoveBack to wrap-around the board without touching Board directly.
+    virtual int getBoardSize() const = 0;
 };
 
 } // namespace core

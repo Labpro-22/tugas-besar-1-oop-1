@@ -29,7 +29,6 @@ add_library(
   src/core/MoveCard.cpp
   src/core/Player.cpp
   src/core/Property.cpp
-  src/core/PropertyTile.cpp
   src/core/Railroad.cpp
   src/core/ShieldCard.cpp
   src/core/SimpleCOMStrategy.cpp

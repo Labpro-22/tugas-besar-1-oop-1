@@ -1,6 +1,6 @@
 #include "core/ShieldCard.hpp"
 
-#include "logic/Game.hpp"
+#include "core/GameContext.hpp"
 
 #include <utility>
 
@@ -9,8 +9,8 @@ namespace core {
 ShieldCard::ShieldCard(std::string description)
     : SkillCard(std::move(description)) {}
 
-void ShieldCard::execute(Player& player, logic::Game& game) {
-    (void)game;
+void ShieldCard::execute(Player& player, GameContext& ctx) {
+    (void)ctx;
     player.consumeSkillUse();
     player.useShield();
 }

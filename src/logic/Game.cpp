@@ -267,7 +267,7 @@ void Game::offerProperty(core::Player* p, core::Property* prop) {
 void Game::chargeRent(core::Player* p, core::Property* prop) {
   int rent = prop->calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
   *p -= rent;
-  *(prop->getOwner()) + rent;
+  *(prop->getOwner()) += rent;
 }
 
 void Game::sendToJail(core::Player& p) { 
@@ -296,5 +296,9 @@ void Game::payPlayerFromBank(core::Player& p, int amount) {
 int Game::getGoSalary() const { 
     return 200; 
 }
+
+const std::vector<core::Player*>& Game::getPlayers() const { return players_; }
+
+int Game::getBoardSize() const { return board_.getTileCount(); }
 
 } // namespace logic

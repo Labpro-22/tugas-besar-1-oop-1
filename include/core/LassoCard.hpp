@@ -6,13 +6,9 @@
 #include <core/Player.hpp>
 #include <core/SkillCard.hpp>
 
-namespace logic {
-
-class Game;
-
-}
-
 namespace core {
+
+class GameContext;
 
 // TODO: this class has out-of-spec method(s).
 
@@ -27,7 +23,7 @@ class LassoCard : public SkillCard {
      */
     explicit LassoCard(std::string description);
 
-    void execute(Player& player, logic::Game& game) override;
+    void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;
 

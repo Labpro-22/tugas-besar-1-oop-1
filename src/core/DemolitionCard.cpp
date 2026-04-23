@@ -1,21 +1,22 @@
 #include "core/DemolitionCard.hpp"
 
-#include "logic/Game.hpp"
+#include "core/GameContext.hpp"
+#include "core/Property.hpp"
 
 #include <cstddef>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace core {
 
 DemolitionCard::DemolitionCard(std::string description)
     : SkillCard(std::move(description)) {}
 
-void DemolitionCard::execute(Player& player, logic::Game& game) {
+void DemolitionCard::execute(Player& player, GameContext& ctx) {
     player.consumeSkillUse();
-    const std::vector<core::Player*>& participants = game.players();
+    const std::vector<Player*>& participants = ctx.getPlayers();
     const int optionCount = static_cast<int>(participants.size());
-    // TODO: the expression below uses out-of-spec method. IDK how to handle this using only the defined methods in the spec.
+    // TODO: out-of-spec - `promptChoice` is not in the course spec; needed until UI exposes targets.
     const int choice = player.promptChoice("DemolitionVictim", 0, optionCount);
     if (choice < 0 || choice >= optionCount) {
         return;
@@ -24,11 +25,31 @@ void DemolitionCard::execute(Player& player, logic::Game& game) {
     if (victim == nullptr || victim == &player) {
         return;
     }
-    if (victim->getOwnedProperties().empty()) {
-        game.logEvent("DEMOLITION_MISS", player, 0);
+    const std::vector<Property*>& props = victim->getOwnedProperties();
+    if (props.empty()) {
+        ctx.logEvent("DEMOLITION_MISS", player, 0);
         return;
     }
-    game.logEvent("DEMOLITION", player, 0);
+    const int propChoice = player.promptChoice("DemolitionProperty", 0, static_cast<int>(props.size()));
+    if (propChoice < 0 || propChoice >= static_cast<int>(props.size())) {
+        return;
+    }
+    Property* prop = props[static_cast<std::size_t>(propChoice)];
+    if (prop == nullptr) {
+        ctx.logEvent("DEMOLITION_MISS", player, 0);
+        return;
+    }
+    if (prop->getType() != PropertyType::STREET) {
+        ctx.logEvent("DEMOLITION_MISS", player, 0);
+        return;
+    }
+    auto* street = static_cast<Street*>(prop);
+    if (street->getHouseCount() == 0 && street->getHotelCount() == 0) {
+        ctx.logEvent("DEMOLITION_MISS", player, 0);
+        return;
+    }
+    street->demolish(1);
+    ctx.logEvent("DEMOLITION", player, *prop, 0);
 }
 
 std::string DemolitionCard::getCardType() const { return "Demolition"; }

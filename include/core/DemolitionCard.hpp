@@ -6,15 +6,11 @@
 #include <core/Player.hpp>
 #include <core/SkillCard.hpp>
 
-namespace logic {
-
-class Game;
-
-}
-
 // TODO: this class has out-of-spec method(s).
 
 namespace core {
+
+class GameContext;
 
 /**
  * @brief Skill that attempts to destroy an opponent building (stub hook).
@@ -27,9 +23,8 @@ public:
      */
     explicit DemolitionCard(std::string description);
 
-    // TODO: this method doesn't actually do anything for now.
-    // FIXME: make this method actually demolish a property.
-    void execute(Player& player, logic::Game& game) override;
+    // TODO: extend to hotels and multi-house removal when UI is ready.
+    void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;
 

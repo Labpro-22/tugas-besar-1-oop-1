@@ -6,13 +6,9 @@
 #include <core/Player.hpp>
 #include <core/SkillCard.hpp>
 
-namespace logic {
-
-class Game;
-
-}
-
 namespace core {
+
+class GameContext;
 
 /**
  * @brief Skill that advances the current player a relative number of spaces.
@@ -26,13 +22,13 @@ public:
      */
     MoveCard(int steps, std::string description);
 
-    void execute(Player& player, logic::Game& game) override;
+    void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;
 
     /**
      * @brief Factory helper for deck loaders.
-     * @param steps Relative movement forwarded to `Game::moveCurrentPlayer`.
+     * @param steps Relative movement (wrapped using `GameContext::getBoardSize`).
      * @param description Human-readable description for UI logs.
      * @note Extension (not in spec).
      */

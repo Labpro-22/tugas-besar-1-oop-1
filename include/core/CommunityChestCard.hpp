@@ -7,11 +7,11 @@
 #include <core/ActionCard.hpp>
 #include <core/Player.hpp>
 
-#include <logic/Game.hpp>
-
 //TODO: this class uses out-of-spec methods.
 
 namespace core {
+
+class GameContext;
 
 /**
  * @brief Community Chest deck entry mirroring `ChanceCard` mechanics.
@@ -21,12 +21,12 @@ public:
     /**
      * @brief Build a card with a custom functor effect.
      * @param description Text printed when the card is revealed.
-     * @param effect Functor that mutates `player` and `game`.
+     * @param effect Functor that mutates `player` and `context`.
      * @note Extension (not in spec); the spec only lists `execute` / `getCardType`.
      */
-    CommunityChestCard(std::string description, std::function<void(Player&, logic::Game&)> effect);
+    CommunityChestCard(std::string description, std::function<void(Player&, GameContext&)> effect);
 
-    void execute(Player& player, logic::Game& game) override;
+    void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;
 
@@ -47,7 +47,7 @@ public:
     static std::unique_ptr<ActionCard> makeCollect(int amount, std::string description);
 
 private:
-    std::function<void(Player&, logic::Game&)> effect_;  // Extension (not in spec).
+    std::function<void(Player&, GameContext&)> effect_;  // Extension (not in spec).
 };
 
 }

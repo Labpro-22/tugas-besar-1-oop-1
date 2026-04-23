@@ -1,6 +1,6 @@
 #include "core/DiscountCard.hpp"
 
-#include "logic/Game.hpp"
+#include "core/GameContext.hpp"
 
 #include <random>
 #include <utility>
@@ -10,8 +10,8 @@ namespace core {
 DiscountCard::DiscountCard(float discountRate, std::string description)
     : SkillCard(std::move(description)), discountRate_(discountRate) {}
 
-void DiscountCard::execute(Player& player, logic::Game& game) {
-    (void)game;
+void DiscountCard::execute(Player& player, GameContext& ctx) {
+    (void)ctx;
     player.consumeSkillUse();
     player.applyDiscount(discountRate_);
 }

@@ -1,6 +1,6 @@
 #include "core/TeleportCard.hpp"
 
-#include "logic/Game.hpp"
+#include "core/GameContext.hpp"
 
 #include <utility>
 
@@ -9,10 +9,18 @@ namespace core {
 TeleportCard::TeleportCard(int targetPosition, std::string description)
     : SkillCard(std::move(description)), targetPosition_(targetPosition) {}
 
-void TeleportCard::execute(Player& player, logic::Game& game) {
-    (void)game;
+void TeleportCard::execute(Player& player, GameContext& ctx) {
     player.consumeSkillUse();
-    player.setPosition(targetPosition_);
+    const int n = ctx.getBoardSize();
+    if (n <= 0) {
+        return;
+    }
+    // TODO: out-of-spec - bypasses Game::moveCurrentPlayer / onPassed / pass-Go handling.
+    int idx = targetPosition_ % n;
+    if (idx < 0) {
+        idx += n;
+    }
+    player.setPosition(idx);
 }
 
 std::string TeleportCard::getCardType() const { return "Teleport"; }

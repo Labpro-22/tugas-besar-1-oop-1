@@ -76,6 +76,9 @@ public:
   void payPlayerFromBank(core::Player& p, int amount) override;
   int getGoSalary() const override;
 
+  const std::vector<core::Player*>& getPlayers() const override;
+  int getBoardSize() const override;
+
   void logEvent(const std::string &action, core::Player &p, int value);
   void logEvent(const std::string &action, core::Player &p,
                 core::Property &prop, int value);

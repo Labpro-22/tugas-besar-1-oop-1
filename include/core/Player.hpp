@@ -11,9 +11,6 @@ class Game;
 
 }
 
-// TODO: use game errors instead of built-in errors.
-// TODO: methods marked as `Extension (not in spec)` might get removed later, since some of them expose internal state to external modifications.
-
 namespace core {
 
 class ActionCard;
@@ -56,7 +53,7 @@ public:
 
     /**
      * @brief Aggregate wealth used for rankings and tax calculations.
-     * @return Cash on hand plus `Property::getValue()` for every owned lot.
+     * @return Cash on hand plus mortgaged mortgage value or list price for each owned lot.
      */
     int getNetWorth() const noexcept;
 
@@ -164,14 +161,14 @@ public:
      * @return `true` while the player must follow jail rules.
      * @note Extension (not in spec).
      */
-    bool isInJail() const noexcept;
+    bool getInJail() const noexcept;
 
     /**
      * @brief Bankruptcy predicate.
      * @return `true` when the player has been eliminated.
      * @note Extension (not in spec).
      */
-    bool isBankrupted() const noexcept;
+    bool getIsBankrupt() const noexcept;
 
     /**
      * @brief Mark bankruptcy (called by `BankruptcyHandler` later).
@@ -183,7 +180,7 @@ public:
     /**
      * @brief Attempt to add a skill/community card reference to the hand.
      * @param card Non-owning pointer managed by a deck.
-     * @throws std::runtime_error When the hand already holds three cards.
+     * @throws InvalidMoveException When the hand already holds three cards.
      * @note Extension (not in spec).
      */
     void addCard(ActionCard* card);
@@ -210,7 +207,7 @@ public:
 
     /**
      * @brief Record that a skill card was activated this turn.
-     * @throws std::runtime_error When a second skill tries to fire in the same turn.
+     * @throws InvalidMoveException When a second skill tries to fire in the same turn.
      * @note Extension (not in spec).
      */
     void consumeSkillUse();

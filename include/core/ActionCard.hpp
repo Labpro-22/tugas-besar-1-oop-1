@@ -2,15 +2,10 @@
 
 #include <string>
 
-namespace logic {
-
-class Game;
-
-}
-
 namespace core {
 
 class Player;
+class GameContext;
 
 /**
  * @brief Abstract root for every drawable card (Chance, Community Chest, Skill).
@@ -34,11 +29,11 @@ public:
     virtual ~ActionCard() = default;
 
     /**
-     * @brief Apply this card's effect to @p player within @p game.
+     * @brief Apply this card's effect to @p player within @p context.
      * @param player The subject of the effect (drawer or activator).
-     * @param game Live game state used to mutate board/bank data.
+     * @param context Live game facade (`logic::Game`) used to mutate board/bank data.
      */
-    virtual void execute(Player& player, logic::Game& game) = 0;
+    virtual void execute(Player& player, GameContext& context) = 0;
 
     /**
      * @brief Stable category tag for logging and UI filtering.

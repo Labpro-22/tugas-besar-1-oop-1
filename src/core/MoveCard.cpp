@@ -1,6 +1,6 @@
 #include "core/MoveCard.hpp"
 
-#include "logic/Game.hpp"
+#include "core/GameContext.hpp"
 
 #include <utility>
 
@@ -9,9 +9,19 @@ namespace core {
 MoveCard::MoveCard(int steps, std::string description)
     : SkillCard(std::move(description)), steps_(steps) {}
 
-void MoveCard::execute(Player& player, logic::Game& game) {
+void MoveCard::execute(Player& player, GameContext& ctx) {
     player.consumeSkillUse(); // TODO: this method is not in the spec. Might fix this later.
-    game.moveCurrentPlayer(steps_);
+    const int n = ctx.getBoardSize();
+    if (n <= 0) {
+        return;
+    }
+    // TODO: out-of-spec - bypasses Game::moveCurrentPlayer / onPassed / pass-Go handling.
+    int pos = player.getPosition() + steps_;
+    pos %= n;
+    if (pos < 0) {
+        pos += n;
+    }
+    player.setPosition(pos);
 }
 
 std::string MoveCard::getCardType() const { return "Move"; }

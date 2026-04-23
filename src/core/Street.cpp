@@ -2,11 +2,14 @@
 #include "core/GameException.hpp"
 
 #include <algorithm>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace core {
 
-Street::Street(const string& name, int price, int mortgageValue, ColorGroup colorGroup, vector<int> rentValues, int houseCost, int hotelCost)
-    : Property(name, price, mortgageValue), colorGroup_(colorGroup), houseCount_(0), hotelCount_(0), rentValues_(move(rentValues)), houseCost_(houseCost), hotelCost_(hotelCost){
+Street::Street(const std::string& name, int price, int mortgageValue, ColorGroup colorGroup, std::vector<int> rentValues, int houseCost, int hotelCost)
+    : Property(name, price, mortgageValue), colorGroup_(colorGroup), houseCount_(0), hotelCount_(0), rentValues_(std::move(rentValues)), houseCost_(houseCost), hotelCost_(hotelCost){
     
     if (rentValues_.size() != 6) {
         throw InvalidConfigException("rentValues untuk '" + getName() + "'", "tepat 6 elemen (level 0-5)");
@@ -55,7 +58,7 @@ void Street::demolish(int n) {
         hotelCount_ = 0;
         --n;
     }
-    int toRemove = min(n, houseCount_);
+    int toRemove = std::min(n, houseCount_);
     houseCount_ -= toRemove;
 }
 

@@ -6,15 +6,11 @@
 #include <core/Player.hpp>
 #include <core/SkillCard.hpp>
 
-namespace logic {
-
-class Game;
-
-}
-
 // TODO: this class has out-of-spec method(s).
 
 namespace core {
+
+class GameContext;
 
 /**
  * @brief Skill that flags the player as immune to harmful payments briefly.
@@ -27,7 +23,7 @@ class ShieldCard : public SkillCard {
      */
     explicit ShieldCard(std::string description);
 
-    void execute(Player& player, logic::Game& game) override;
+    void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;
 
