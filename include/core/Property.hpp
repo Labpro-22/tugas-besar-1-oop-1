@@ -17,7 +17,13 @@ enum class ColorGroup {
     YELLOW,
     GREEN,
     DARK_BLUE,
-    DEFAULT  // utk Railroad, Utility, petak aksi
+	GREY,
+	PURPLE,
+	LIGHT_GREEN,
+	LAVENDER,
+	WHITE,
+	BLACK,
+    DEFAULT
 };
 
 enum class PropertyType { 

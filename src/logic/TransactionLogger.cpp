@@ -1,26 +1,10 @@
 #include "logic/TransactionLogger.hpp"
-// komenin dulu biar bisa jalan
-// #include "core/Player.hpp"
-// #include "core/Property.hpp"
-
-namespace logic {  // stub class
-
-// TODO: HAPUS KETIKA KELAS UTAMA SUDAH JADI
-class Player {
- public:
-  std::string getName() const { return ""; }
-};
-
-// TODO: HAPUS KETIKA KELAS UTAMA SUDAH JADI
-class Property {
- public:
-  std::string getName() const { return ""; }
-  std::string getCode() const { return ""; }
-};
 
 // Overload 1: player action with amount
+
+namespace logic{
 void TransactionLogger::log(int turnNumber, const std::string& actionType,
-                            const Player& player, int amount) {
+                            const core::Player& player, int amount) {
   data::LogEntry entry;
   entry.turnNumber = turnNumber;
   entry.playerName = player.getName();
@@ -31,7 +15,7 @@ void TransactionLogger::log(int turnNumber, const std::string& actionType,
 
 // Overload 2: player action involving a property
 void TransactionLogger::log(int turnNumber, const std::string& actionType,
-                            const Player& player, const Property& property,
+                            const core::Player& player, const core::Property& property,
                             int amount) {
   data::LogEntry entry;
   entry.turnNumber = turnNumber;
@@ -39,14 +23,14 @@ void TransactionLogger::log(int turnNumber, const std::string& actionType,
   entry.actionType = actionType;
 
   // e.g. "Jakarta (JKT) M600"
-  entry.description = property.getName() + " (" + property.getCode() + ")";
+  entry.description = property.getName(); /*+ " (" + property.getCode() + ")";*/
   if (amount != 0) entry.description += " M" + std::to_string(amount);
 
   entries_.push_back(entry);
 }
 
 void TransactionLogger::log(int turnNumber, const std::string& actionType,
-                            const Player& player,
+                            const core::Player& player,
                             const std::string& description) {
   data::LogEntry entry;
   entry.turnNumber = turnNumber;

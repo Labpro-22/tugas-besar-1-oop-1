@@ -3,7 +3,10 @@
 #include <string> 
 #include "core/Player.hpp"
 #include "core/Property.hpp"
-#include "logic/Game.hpp" 
+#include "core/GameContext.hpp" 
+
+
+namespace logic { class Game; } 
 
 namespace core {
 
@@ -12,8 +15,8 @@ class Tile {
 	public: 
 		Tile(int position, const std::string& name); 
 		virtual ~Tile() = default; 
-		virtual void onLanded(Player&p, logic::Game& g) = 0; 
-		virtual void onPassed(Player& p, logic::Game& g); 
+		virtual void onLanded(Player&p, GameContext& g) = 0; 
+		virtual void onPassed(Player& p, GameContext& g); 
 		virtual string getName() const; 
 		virtual string getType() const ; 
 		virtual int getPosition() const; 
@@ -27,14 +30,14 @@ class Tile {
 class ActionTile : public Tile { 
 	protected:
 		ActionTile(int position, const std::string& name ); 
-		virtual void onLanded(Player& p, logic::Game& g) override = 0; 
+		virtual void onLanded(Player& p, GameContext& g) override = 0; 
 }; 
 
 class PropertyTile : public Tile { 
 	public: 
 		PropertyTile(int position, const std::string& name, Property* property); 
 		virtual Property* getProperty() const; 
-		virtual void onLanded(Player& p, logic::Game& g); 
+		virtual void onLanded(Player& p, GameContext& g); 
 
 	protected:  						
 		Property* property_; 	
@@ -43,14 +46,14 @@ class PropertyTile : public Tile {
 class UtilityTile : public PropertyTile { 
 	public: 
 		UtilityTile(int position, const std::string& name, Property* property); 
-		void onLanded(Player& p, logic::Game& g) override ; 
+		void onLanded(Player& p, GameContext& g) override ; 
 		virtual string getType() const override; 
 }; 
 
 class RailroadTile : public PropertyTile { 
 	public: 
 		RailroadTile(int position, const std::string& name, Property* property); 
-		void onLanded(Player&, logic::Game&) override;
+		void onLanded(Player&, GameContext&) override;
 		virtual string getType() const override; 
 
 };
@@ -58,15 +61,15 @@ class RailroadTile : public PropertyTile {
 class GoTile : public ActionTile { 
 	public: 
 		GoTile(int position, const std::string& name);
-		void onPassed(Player&, logic::Game&) override; 
-		void onLanded(Player&, logic::Game&) override; 
+		void onPassed(Player&, GameContext&) override; 
+		void onLanded(Player&, GameContext&) override; 
 		virtual string getType() const override; 
 };
 
 class JailTile : public ActionTile { 
 	public: 
 		JailTile(int position, const std::string& name);
-		void onLanded(Player&, logic::Game&) override; 
+		void onLanded(Player&, GameContext&) override; 
 		virtual string getType() const  override; 
 };
 
@@ -74,7 +77,7 @@ class JailTile : public ActionTile {
 class FreeParkingTile : public ActionTile { 
 	public: 
 		FreeParkingTile(int position, const std::string& name);
-		void onLanded(Player&, logic::Game&) override; 
+		void onLanded(Player&, GameContext&) override; 
 		virtual string getType() const override; 
 };
 
@@ -82,7 +85,7 @@ class FreeParkingTile : public ActionTile {
 class GoToJailTile: public ActionTile { 
 	public: 
 		GoToJailTile(int position, const std::string& name);
-		void onLanded(Player&, logic::Game&) override; 
+		void onLanded(Player&, GameContext&) override; 
 		virtual string getType() const override; 
 };
 
@@ -95,14 +98,14 @@ class TaxTile: public ActionTile {
 
 	public: 
 		TaxTile(int position, const std::string& name, int rate, bool isPercentage);
-		void onLanded(Player&, logic::Game&) override; 
+		void onLanded(Player&, GameContext&) override; 
 		virtual string getType() const override; 
 }; 
 class FestivalTile: public ActionTile { 
 	public: 
 
 		FestivalTile(int position, const std::string& name);
-		void onLanded(Player&, logic::Game&) override; 
+		void onLanded(Player&, GameContext&) override; 
 		virtual string getType() const override; 
 };
 
@@ -113,7 +116,7 @@ class CardTile: public ActionTile {
 		bool isChance_; 
 	public: 
 		CardTile(int position, const std::string& name, bool isChance);
-		void onLanded(Player&, logic::Game&) override; 
+		void onLanded(Player&, GameContext&) override; 
 		virtual string getType() const override; 
 };
 

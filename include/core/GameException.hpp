@@ -80,7 +80,7 @@ public:
     FileIOException(const std::string& filename, const std::string& operation) : filename_(filename), operation_(operation) {}
 
     std::string getMessage() const override {
-        return "FileIOException: cannot " + operation_ + " file '" + filename_ + "'";
+        return "FileIOException: tidak bisa " + operation_ + " file '" + filename_ + "'";
     }
 
     std::string getFilename() const { 
@@ -94,3 +94,90 @@ private:
     std::string filename_;
     std::string operation_;
 };
+
+class InvalidStateException : public GameException {
+public:
+    InvalidStateException(const std::string& action, const std::string& currState) : action_(action), currState_(currState) {}
+    std::string getMessage() const override {
+        return "InvalidStateException: tidak bisa melakukan '" + action_ +  "' saat game sedang dalam state '" + currState_ + "'";
+    }
+    std::string getAction() const {
+        return action_;
+    }
+    std::string getCurrState() const {
+        return currState_;
+    }
+private:
+    std::string action_;
+    std::string currState_;
+};
+
+class UnauthorizedActionException : public GameException {
+public:
+    UnauthorizedActionException(const std::string& actorName, const std::string& ownerName, const std::string& propertyName) : actorName_(actorName), ownerName_(ownerName), propertyName_(propertyName) {}
+ 
+    std::string getMessage() const override {
+        return "UnauthorizedActionException: '" + actorName_ + "' tidak bisa build di '" + propertyName_ + "' karena property milik '" + ownerName_ + "'";
+    }
+ 
+    std::string getActorName()    const { return actorName_; }
+    std::string getOwnerName()    const { return ownerName_; }
+    std::string getPropertyName() const { return propertyName_; }
+ 
+private:
+    std::string actorName_;
+    std::string ownerName_;
+    std::string propertyName_;
+};
+
+class InvalidPropertyTypeException : public GameException {
+public:
+    InvalidPropertyTypeException(const std::string& propertyName, const std::string& propertyType) : propertyName_(propertyName), propertyType_(propertyType) {}
+ 
+    std::string getMessage() const override {
+        return "InvalidPropertyTypeException: '" + propertyName_ + "' adalah tipe '" + propertyType_ + "' yang tidak mendukung pembangunan rumah/hotel";
+    }
+ 
+    std::string getPropertyName() const { 
+        return propertyName_; 
+    }
+    std::string getPropertyType() const { 
+        return propertyType_; 
+    }
+
+private:
+    std::string propertyName_;
+    std::string propertyType_;
+};
+ 
+
+class GameSetupException : public GameException {
+public:
+    explicit GameSetupException(const std::string& reason) : reason_(reason), configKey_(""), configValue_("") {}
+ 
+    GameSetupException(const std::string& reason, const std::string& configKey, const std::string& configValue): reason_(reason), configKey_(configKey), configValue_(configValue) {}
+ 
+    std::string getMessage() const override {
+        std::string msg = "GameSetupException: " + reason_;
+        if (!configKey_.empty()) {
+            msg += " (key='" + configKey_ + "', value='" + configValue_ + "')";
+        }
+        return msg;
+    }
+ 
+    std::string getReason() const { 
+        return reason_; 
+    }
+    std::string getConfigKey() const { 
+        return configKey_; 
+    }
+    std::string getConfigValue() const { 
+        return configValue_; 
+    }
+ 
+private:
+    std::string reason_;
+    std::string configKey_;
+    std::string configValue_;
+};
+
