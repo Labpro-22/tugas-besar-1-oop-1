@@ -114,8 +114,11 @@ class TaxTile: public ActionTile {
 
 	public: 
 		TaxTile(int position, const std::string& name, int rate, bool isPercentage);
+		int getRate() const;
+		bool isPercentage() const;
 		void onLanded(Player&, GameContext&) override; 
 		virtual TileType getType() const override; 
+
 }; 
 class FestivalTile: public ActionTile { 
 	public: 
@@ -132,6 +135,7 @@ class CardTile: public ActionTile {
 		bool isChance_; 
 	public: 
 		CardTile(int position, const std::string& name, bool isChance);
+		bool isChance() const;
 		void onLanded(Player&, GameContext&) override; 
 		virtual TileType getType() const override; 
 };

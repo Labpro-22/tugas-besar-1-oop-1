@@ -106,6 +106,7 @@ GoToJailTile::GoToJailTile(int position, const std::string& name) : ActionTile(p
 void GoToJailTile::onLanded(Player& p, GameContext& g) { 
 	// go to jail 
 	// p.sendToJail(p); 
+	p.goToJail();
 	g.logEvent("GO_TO_JAIL", p, 0);
 } 
 
@@ -119,6 +120,9 @@ void TaxTile::onLanded(Player& p, GameContext& g) {
 }
 
 TileType TaxTile::getType() const {return TileType::TAX;} 
+
+bool TaxTile::isPercentage() const { return isPercentage_; }
+int TaxTile::getRate() const { return rate_; }
 
 FestivalTile::FestivalTile(int position, const std::string& name) : ActionTile(position, name) {} ; 
 
@@ -140,5 +144,9 @@ void CardTile::onLanded([[maybe_unused]]Player& p,[[maybe_unused]] GameContext& 
     }
 }
 
+bool CardTile::isChance() const { return isChance_; }
+
 TileType CardTile::getType() const { return TileType::CARD; }
+
+
 } // namespace core
