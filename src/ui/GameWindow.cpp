@@ -14,6 +14,8 @@ GameWindow::GameWindow(int boardTileCount)
       boardPanel_(boardTileCount),
       playerInfoPanel_(),
       actionPanel_() {
+  boardPanel_.setOnTileSelected(
+      [this](const TileInfo& info) { actionPanel_.setSelectedTile(info); });
   dialogManager_ = std::make_unique<DialogManager>();
 }
 

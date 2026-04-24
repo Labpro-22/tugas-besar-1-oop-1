@@ -7,6 +7,7 @@
 
 #include "ui/board/ActionTilePanel.hpp"
 #include "ui/board/CornerTilePanel.hpp"
+#include "ui/board/StreetTilePanel.hpp"
 #include "ui/board/TileGeometry.hpp"
 #include "ui/board/TilePanel.hpp"
 #include "ui/component/Color.hpp"
@@ -27,6 +28,18 @@ BoardPanel::BoardPanel(int tileNum)
   setup();
 }
 
+void BoardPanel::setOnTileSelected(
+    std::function<void(const TileInfo&)> onTileSelected) {
+  onTileSelected_ = std::move(onTileSelected);
+
+  for (auto& entry : children_) {
+    auto* tile = dynamic_cast<TilePanel*>(std::get<2>(entry).get());
+    if (tile) {
+      tile->setOnSelected(onTileSelected_);
+    }
+  }
+}
+
 void BoardPanel::setup() {
   const TileGeometry geo(tileNum_);
   const float cornerSize = geo.cornerSide();
@@ -43,42 +56,60 @@ void BoardPanel::setup() {
   // DEBUG
   for (int i = 0; i < tileNum_; i++) {
     // Left
-    addChild(std::make_unique<ActionTilePanel>(
+    auto leftTile = std::make_unique<ActionTilePanel>(
         leftPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Left,
-        "assets/icons/train.png", "ABC", "$ 100"));
+        "assets/icons/train.png", "BANDUNG", "$ 100");
+    leftTile->setOnSelected(onTileSelected_);
+    addChild(std::move(leftTile));
 
     // Top
-    addChild(std::make_unique<ActionTilePanel>(
+    auto topTile = std::make_unique<ActionTilePanel>(
         topPos + sf::Vector2f(i * tileWidth, 0), tileNum_, Orientation::Top,
-        "assets/icons/chance-pink.png", "PENDEK", "$ 100"));
+        "assets/icons/chance-pink.png", "KESEMPATAN", "$ 100");
+    topTile->setOnSelected(onTileSelected_);
+    addChild(std::move(topTile));
 
     // Right
-    addChild(std::make_unique<ActionTilePanel>(
+    auto rightTile = std::make_unique<StreetTilePanel>(
         rightPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Right,
-        "assets/icons/go.png", "YOGYAKARTA", "$ 100"));
+        board::property::red, "JAKARTA", "$ 100");
+    rightTile->setOnSelected(onTileSelected_);
+    addChild(std::move(rightTile));
 
     // Bottom
-    addChild(std::make_unique<ActionTilePanel>(
+    auto bottomTile = std::make_unique<StreetTilePanel>(
         bottomPos + sf::Vector2f(i * tileWidth, 0), tileNum_,
-        Orientation::Bottom, "assets/icons/train-kai.png",
-        "SANGATPANJANGTEKSNYAINI", "$ 100"));
+        Orientation::Bottom, board::property::lavender, "SOLO", "$ 100");
+    bottomTile->setOnSelected(onTileSelected_);
+    addChild(std::move(bottomTile));
   }
 
-  addChild(std::make_unique<CornerTilePanel>(
+  auto goTile = std::make_unique<CornerTilePanel>(
       position_ + size_ - sf::Vector2f(cornerSize, cornerSize), tileNum_,
       CornerType::GO, Orientation::Bottom, "assets/icons/go.png", "MULAI",
-      "DAPAT UANG"));
-  addChild(std::make_unique<CornerTilePanel>(
+      "DAPAT UANG");
+  goTile->setOnSelected(onTileSelected_);
+  addChild(std::move(goTile));
+
+  auto jailTile = std::make_unique<CornerTilePanel>(
       position_ + sf::Vector2f(0, size_.y - cornerSize), tileNum_,
       CornerType::JAIL, Orientation::Left, "assets/icons/jail.png", "HANYA",
-      "BERKUNJUNG"));
-  addChild(std::make_unique<CornerTilePanel>(
+      "BERKUNJUNG");
+  jailTile->setOnSelected(onTileSelected_);
+  addChild(std::move(jailTile));
+
+  auto freeTile = std::make_unique<CornerTilePanel>(
       position_, tileNum_, CornerType::FREE, Orientation::Top,
-      "assets/icons/free-park.png", "PARKIR", "GRATIS"));
-  addChild(std::make_unique<CornerTilePanel>(
+      "assets/icons/free-park.png", "PARKIR", "GRATIS");
+  freeTile->setOnSelected(onTileSelected_);
+  addChild(std::move(freeTile));
+
+  auto goToJailTile = std::make_unique<CornerTilePanel>(
       position_ + sf::Vector2f(size_.x - cornerSize, 0), tileNum_,
       CornerType::GO_TO_JAIL, Orientation::Right, "assets/icons/go-to-jail.png",
-      "PERGI", "KE PENJARA"));
+      "PERGI", "KE PENJARA");
+  goToJailTile->setOnSelected(onTileSelected_);
+  addChild(std::move(goToJailTile));
 }
 
 void BoardPanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
