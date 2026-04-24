@@ -13,20 +13,11 @@
 
 namespace ui {
 
-sf::Vector2f StreetTilePanel::computePanelSize(int numTiles,
-                                               Orientation orientation) {
-  const TileGeometry geo(numTiles);
-  const bool sideways =
-      (orientation == Orientation::Left || orientation == Orientation::Right);
-  return sideways ? sf::Vector2f(geo.sideHeight(), geo.sideWidth())
-                  : sf::Vector2f(geo.sideWidth(), geo.sideHeight());
-}
-
 StreetTilePanel::StreetTilePanel(sf::Vector2f position, int numTiles,
                                  Orientation orientation, sf::Color accentColor,
                                  const std::string& topText,
                                  const std::string& bottomText)
-    : TilePanel(position, computePanelSize(numTiles, orientation), numTiles,
+    : TilePanel(position, computeSidePanelSize(numTiles, orientation), numTiles,
                 orientation),
       accentColor_(accentColor),
       topText_(topText),
@@ -45,12 +36,15 @@ StreetTilePanel::StreetTilePanel(sf::Vector2f position, int numTiles,
       setupRight();
       break;
   }
+
+  selectionInfo_ = TileInfo{topText_, bottomText_, true, accentColor_, true};
 }
 
 float StreetTilePanel::tileAccentHeight() const {
   return tileGeo_.sideHeight() * 0.2f;
 }
 
+namespace {
 LabelStyle topTextStyle() {
   return LabelStyle(typography::tileTopText, palette::black,
                     typography::regular, HorizontalAlign::Center,
@@ -68,6 +62,7 @@ LabelStyle bottomTextStyle() {
                      layout::streetTilePanel::textPaddingY},
                     true, typography::tileMinFont);
 }
+}  // namespace
 
 void StreetTilePanel::setupBottom() {
   const float accentHeight = tileAccentHeight();
@@ -183,6 +178,8 @@ void StreetTilePanel::setupRight() {
 }
 
 void StreetTilePanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
+  TilePanel::handleEvent(event, window);
+
   if (accentPanel_ && accentPanel_->isActive()) {
     accentPanel_->handleEvent(event, window);
   }
@@ -202,6 +199,7 @@ void StreetTilePanel::render(sf::RenderWindow& window) {
   accentPanel_->render(window);
   topLabel_->render(window);
   bottomLabel_->render(window);
+  TilePanel::render(window);
 }
 
 void StreetTilePanel::update(sf::RenderWindow& window) {
@@ -209,6 +207,7 @@ void StreetTilePanel::update(sf::RenderWindow& window) {
   accentPanel_->update(window);
   topLabel_->update(window);
   bottomLabel_->update(window);
+  TilePanel::update(window);
 }
 
 }  // namespace ui

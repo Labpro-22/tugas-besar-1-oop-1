@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <memory>
 
-#include "ui/board/TileGeometry.hpp"
 #include "ui/board/TilePanel.hpp"
 #include "ui/component/Constants.hpp"
 #include "ui/component/Style.hpp"
@@ -12,21 +11,12 @@
 
 namespace ui {
 
-sf::Vector2f ActionTilePanel::computePanelSize(int numTiles,
-                                               Orientation orientation) {
-  const TileGeometry geo(numTiles);
-  const bool sideways =
-      (orientation == Orientation::Left || orientation == Orientation::Right);
-  return sideways ? sf::Vector2f(geo.sideHeight(), geo.sideWidth())
-                  : sf::Vector2f(geo.sideWidth(), geo.sideHeight());
-}
-
 ActionTilePanel::ActionTilePanel(sf::Vector2f position, int numTiles,
                                  Orientation orientation,
                                  const std::string& iconPath,
                                  const std::string& topText,
                                  const std::string& bottomText)
-    : TilePanel(position, computePanelSize(numTiles, orientation), numTiles,
+    : TilePanel(position, computeSidePanelSize(numTiles, orientation), numTiles,
                 orientation),
       topText_(topText),
       bottomText_(bottomText),
@@ -45,8 +35,11 @@ ActionTilePanel::ActionTilePanel(sf::Vector2f position, int numTiles,
       setupRight();
       break;
   }
+
+  selectionInfo_ = TileInfo{topText_, iconPath_, false, board::base, true};
 }
 
+namespace {
 LabelStyle topTextStyle() {
   return LabelStyle(typography::tileTopText, palette::black,
                     typography::regular, HorizontalAlign::Center,
@@ -64,6 +57,7 @@ LabelStyle bottomTextStyle() {
                      layout::actionTilePanel::textPaddingY},
                     true, typography::tileMinFont);
 }
+}  // namespace
 
 void ActionTilePanel::setupBottom() {
   const float textHeight = size_.y * layout::actionTilePanel::textHeightRatio;
@@ -179,6 +173,8 @@ void ActionTilePanel::setupRight() {
 }
 
 void ActionTilePanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
+  TilePanel::handleEvent(event, window);
+
   if (iconPanel_ && iconPanel_->isActive()) {
     iconPanel_->handleEvent(event, window);
   }
@@ -200,6 +196,7 @@ void ActionTilePanel::render(sf::RenderWindow& window) {
   }
   topLabel_->render(window);
   bottomLabel_->render(window);
+  TilePanel::render(window);
 }
 
 void ActionTilePanel::update(sf::RenderWindow& window) {
@@ -209,6 +206,7 @@ void ActionTilePanel::update(sf::RenderWindow& window) {
   }
   topLabel_->update(window);
   bottomLabel_->update(window);
+  TilePanel::update(window);
 }
 
 }  // namespace ui

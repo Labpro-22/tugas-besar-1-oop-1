@@ -46,8 +46,6 @@ class ActionTilePanel : public TilePanel {
   std::unique_ptr<Label> topLabel_;
   std::unique_ptr<ImagePanel> iconPanel_;
   std::unique_ptr<Label> bottomLabel_;
-
-  static sf::Vector2f computePanelSize(int numTiles, Orientation orientation);
 };
 
 }  // namespace ui

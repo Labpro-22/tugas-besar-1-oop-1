@@ -24,6 +24,24 @@ CornerTilePanel::CornerTilePanel(sf::Vector2f position, int numTiles,
   } else {
     setupNonJail();
   }
+
+  switch (cornerType_) {
+    case CornerType::GO:
+      selectionInfo_ = TileInfo{"MULAI", iconPath_, false, board::base, false};
+      break;
+    case CornerType::JAIL:
+      selectionInfo_ =
+          TileInfo{"PENJARA", iconPath_, false, board::base, false};
+      break;
+    case CornerType::FREE:
+      selectionInfo_ =
+          TileInfo{"BEBAS PARKIR", iconPath_, false, board::base, false};
+      break;
+    case CornerType::GO_TO_JAIL:
+      selectionInfo_ =
+          TileInfo{"PERGI KE PENJARA", iconPath_, false, board::base, false};
+      break;
+  }
 }
 
 sf::Vector2f CornerTilePanel::computeTopTextPos() {
@@ -255,6 +273,8 @@ void CornerTilePanel::setupJail() {
 }
 
 void CornerTilePanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
+  TilePanel::handleEvent(event, window);
+
   if (iconPanel_ && iconPanel_->isActive()) {
     iconPanel_->handleEvent(event, window);
   }
@@ -280,6 +300,7 @@ void CornerTilePanel::render(sf::RenderWindow& window) {
   if (bottomLabel_) {
     bottomLabel_->render(window);
   }
+  TilePanel::render(window);
 }
 
 void CornerTilePanel::update(sf::RenderWindow& window) {
@@ -293,6 +314,7 @@ void CornerTilePanel::update(sf::RenderWindow& window) {
   if (bottomLabel_) {
     bottomLabel_->update(window);
   }
+  TilePanel::update(window);
 }
 
 }  // namespace ui

@@ -52,7 +52,5 @@ class StreetTilePanel : public TilePanel {
   std::unique_ptr<Panel> accentPanel_;
   std::unique_ptr<Label> topLabel_;
   std::unique_ptr<Label> bottomLabel_;
-
-  static sf::Vector2f computePanelSize(int numTiles, Orientation orientation);
 };
 }  // namespace ui
