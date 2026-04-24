@@ -12,41 +12,30 @@ else()
     add_compile_options(-Wall -Wextra -pedantic)
 endif()
 
-find_package(SFML 2.5 REQUIRED COMPONENTS system window graphics)
+find_package(SFML 2.5 REQUIRED COMPONENTS system window graphics REQUIRED)
 
 add_library(
   nimonspoli_core STATIC
-  src/core/ActionCard.cpp
-  src/core/ChanceCard.cpp
-  src/core/COMPlayer.cpp
-  src/core/COMStrategy.cpp
-  src/core/CommunityChestCard.cpp
-  src/core/DemolitionCard.cpp
-  src/core/DiscountCard.cpp
-  src/core/GreedyCOMStrategy.cpp
-  src/core/HumanPlayer.cpp
-  src/core/LassoCard.cpp
-  src/core/MoveCard.cpp
+  src/core/Tiles.cpp 
   src/core/Player.cpp
   src/core/Property.cpp
   src/core/Railroad.cpp
-  src/core/ShieldCard.cpp
-  src/core/SimpleCOMStrategy.cpp
-  src/core/SkillCard.cpp
   src/core/Street.cpp
-  src/core/TeleportCard.cpp
-  src/core/Tiles.cpp
   src/core/Utility.cpp
+  # etc. lanjut sendiri
 )
 
 add_library(
   nimonspoli_logic STATIC
-  src/logic/Auction.cpp
   src/logic/Bank.cpp
   src/logic/BankruptcyHandler.cpp
   src/logic/Board.cpp
   src/logic/Game.cpp
   src/logic/TransactionLogger.cpp
+  src/logic/Bank.cpp
+  src/logic/Auction.cpp
+  src/logic/Board.cpp
+  # etc. lanjut sendiri
 )
 
 add_library(
@@ -58,7 +47,7 @@ add_library(
 )
 
 add_library(
-  nimonspoli_ui STATIC
+  nimonspoli_ui STATIC 
   src/ui/Widgets.cpp
   src/ui/GameWindow.cpp
   # etc. lanjut sendiri

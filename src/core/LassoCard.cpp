@@ -15,8 +15,8 @@ void LassoCard::execute(Player& player, GameContext& ctx) {
     const int myPos = player.getPosition();
     Player* victim = nullptr;
     int best = std::numeric_limits<int>::max();
-    
-    // search for the closest player with position index greater than the current player's position
+
+    // Prefer the closest player strictly ahead of the caster on the board.
     for (Player* candidate : ctx.getPlayers()) {
         if (candidate == nullptr || candidate == &player) {
             continue;
@@ -27,7 +27,7 @@ void LassoCard::execute(Player& player, GameContext& ctx) {
             victim = candidate;
         }
     }
-    // if no player is found, then that means all other players are behind the current player.
+    // Fall back to the lowest-positioned opponent when everyone else is behind us.
     if (victim == nullptr) {
         best = std::numeric_limits<int>::max();
         for (Player* candidate : ctx.getPlayers()) {

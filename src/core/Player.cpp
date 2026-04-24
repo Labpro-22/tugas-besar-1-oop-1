@@ -90,9 +90,9 @@ int Player::getPosition() const noexcept { return position_; }
 
 void Player::setPosition(int index) noexcept { position_ = index; }
 
-bool Player::getInJail() const noexcept { return inJail_; }
+bool Player::isInJail() const noexcept { return inJail_; }
 
-bool Player::getIsBankrupt() const noexcept { return isBankrupt_; }
+bool Player::isBankrupted() const noexcept { return isBankrupt_; }
 
 void Player::setBankrupted(bool value) noexcept { isBankrupt_ = value; }
 

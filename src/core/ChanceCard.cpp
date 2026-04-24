@@ -36,7 +36,8 @@ std::unique_ptr<ActionCard> ChanceCard::makeMoveBack(int spaces, std::string des
 
 std::unique_ptr<ActionCard> ChanceCard::makePayBank(int amount, std::string description) {
     return std::unique_ptr<ActionCard>(new ChanceCard(std::move(description), [amount](Player& player, GameContext& ctx) {
-            ctx.chargeTax(&player, amount, false);
+            // PBM tax is a flat, unconditional bank payment, matching the old "pay bank" semantics.
+            ctx.chargeTax(player, amount, 0, TaxType::PBM);
         }));
 }
 

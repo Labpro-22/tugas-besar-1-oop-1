@@ -22,7 +22,8 @@ std::string CommunityChestCard::getCardType() const {
 
 std::unique_ptr<ActionCard> CommunityChestCard::makePayBank(int amount, std::string description) {
     return std::unique_ptr<ActionCard>(new CommunityChestCard(std::move(description),  [amount](Player& player, GameContext& ctx) {
-            ctx.chargeTax(&player, amount, false);
+            // PBM tax is a flat, unconditional bank payment, matching the old "pay bank" semantics.
+            ctx.chargeTax(player, amount, 0, TaxType::PBM);
         }));
 }
 

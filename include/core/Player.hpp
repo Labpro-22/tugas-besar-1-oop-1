@@ -161,14 +161,14 @@ public:
      * @return `true` while the player must follow jail rules.
      * @note Extension (not in spec).
      */
-    bool getInJail() const noexcept;
+    bool isInJail() const noexcept;
 
     /**
      * @brief Bankruptcy predicate.
      * @return `true` when the player has been eliminated.
      * @note Extension (not in spec).
      */
-    bool getIsBankrupt() const noexcept;
+    bool isBankrupted() const noexcept;
 
     /**
      * @brief Mark bankruptcy (called by `BankruptcyHandler` later).
