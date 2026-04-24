@@ -326,4 +326,10 @@ int Game::getGoSalary() const {
     return 200; 
 }
 
+// NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
+const std::vector<core::Player*>& Game::getPlayers() const { return players_; }
+
+// NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
+int Game::getBoardSize() const { return board_.getTileCount(); }
+
 } // namespace logic

@@ -2,7 +2,8 @@
 
 namespace ui {
 GameWindow::GameWindow()
-    : sf::RenderWindow(sf::VideoMode(400, 400), "Game Window"), game_(0) {
+    : sf::RenderWindow(sf::VideoMode(400, 400), "Game Window"),
+      game_(std::vector<core::Player*>{}, nullptr) {
   dialogManager_ = std::make_unique<DialogManager>();
 }
 

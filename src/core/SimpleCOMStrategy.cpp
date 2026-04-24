@@ -1,6 +1,7 @@
 #include "core/SimpleCOMStrategy.hpp"
 
 #include "core/Player.hpp"
+#include "core/Property.hpp"
 #include "logic/Game.hpp"
 
 namespace core {
@@ -32,10 +33,10 @@ int SimpleCOMStrategy::bidAmount(Property* property, Player& player, logic::Game
 
 bool SimpleCOMStrategy::shouldBuild(Property* property, Player& player, logic::Game& game) const noexcept {
     (void)game;
-    if (property == nullptr) {
+    if (property == nullptr || property->getType() != PropertyType::STREET) {
         return false;
     }
-    const int houseCost = property->getHouseCost();
+    const int houseCost = static_cast<Street*>(property)->getHouseCost();
     if (houseCost <= 0) {
         return false;
     }

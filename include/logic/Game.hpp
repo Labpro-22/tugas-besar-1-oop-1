@@ -99,6 +99,12 @@ public:
 
   int getGoSalary() const override;
 
+  // NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
+  const std::vector<core::Player*>& getPlayers() const override;
+
+  // NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
+  int getBoardSize() const override;
+
   void logEvent(const std::string &action, core::Player &p, int value);
 
   void logEvent(const std::string &action, core::Player &p, core::Property &prop, int value);

@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "core/Player.hpp"
+#include "core/Property.hpp"
 #include "logic/Game.hpp"
 
 namespace core {
@@ -29,10 +30,10 @@ int GreedyCOMStrategy::bidAmount(Property* property, Player& player,
 bool GreedyCOMStrategy::shouldBuild(Property* property, Player& player,
                                     logic::Game& game) const noexcept {
   (void)game;
-  if (property == nullptr) {
+  if (property == nullptr || property->getType() != PropertyType::STREET) {
     return false;
   }
-  const int houseCost = property->getHouseCost();
+  const int houseCost = static_cast<Street*>(property)->getHouseCost();
   if (houseCost <= 0) {
     return false;
   }

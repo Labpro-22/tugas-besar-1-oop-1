@@ -1,10 +1,10 @@
 #include "core/Player.hpp"
 
-// #include "core/ActionCard.hpp"
+#include "core/ActionCard.hpp"
+#include "core/GameException.hpp"
 #include "core/Property.hpp"
 
 #include <algorithm>
-#include <stdexcept>
 #include <utility>
 
 namespace core {
@@ -27,7 +27,7 @@ int Player::getNetWorth() const noexcept {
     int total = balance_;
     for (Property* p : ownedProperties_) {
         if (p != nullptr) {
-            total += p->getPrice();
+            total += p->isMortgagedStatus() ? p->getMortgageValue() : p->getPrice();
         }
     }
     return total;
@@ -98,8 +98,7 @@ void Player::setBankrupted(bool value) noexcept { isBankrupt_ = value; }
 
 void Player::addCard(ActionCard* card) {
     if (heldCards_.size() >= 3U) {
-        // TODO: use game errors instead of built-in errors.
-        throw std::runtime_error("Player hand already holds three action cards.");
+        throw InvalidMoveException("Player hand already holds three action cards.");
     }
     if (card == nullptr) {
         return;
@@ -120,8 +119,7 @@ bool Player::isShielded() const noexcept { return shieldActive_; }
 
 void Player::consumeSkillUse() {
     if (usedSkillThisTurn_) {
-        // TODO: use game errors instead of built-in errors.
-        throw std::runtime_error("Skill card already used this turn.");
+        throw InvalidMoveException("Skill card already used this turn.");
     }
     usedSkillThisTurn_ = true;
 }
