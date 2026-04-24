@@ -9,11 +9,14 @@
 #include "ui/AssetsManager.hpp"
 #include "ui/component/Color.hpp"
 #include "ui/component/Constants.hpp"
+#include "ui/component/Style.hpp"
 
 namespace ui {
 
 ActionPanel::ActionPanel()
-    : Panel({0, 0}, {size::sideWidth, size::height}, component::sideBar),
+    : Panel(
+          {0, 0}, {size::sideWidth, size::height},
+          PanelStyle(component::sideBar, palette::black, size::lineThickness)),
       font_(AssetsManager::get().getFont(font::primaryFamily)) {
   setup();
 }
@@ -102,7 +105,7 @@ void ActionPanel::setupTileOptionPanel(float width, float& currentY) {
 
   const LabelStyle tileInfoTitleStyle(
       typography::infoTitle, palette::white, typography::infoTitleStyle,
-      HorizontalAlign::Left, VerticalAlign::Top,
+      HorizontalAlign::Center, VerticalAlign::Top,
       {layout::actionPanel::innerPadding, layout::actionPanel::innerPadding},
       true, typography::logBody);
 
@@ -318,17 +321,16 @@ void ActionPanel::setupLogPanel(float width, float& currentY) {
       {layout::actionPanel::textPaddingX, layout::actionPanel::textPaddingY},
       true, typography::logBody);
   const ButtonStyle showMoreStyle(
-      accent::brown, accent::orange50, accent::brown,
-      component::button::disabled, palette::black,
-      layout::actionPanel::borderThickness, showMoreLabelStyle);
+      accent::brown, palette::black, accent::brown, component::button::disabled,
+      palette::black, layout::actionPanel::borderThickness, showMoreLabelStyle);
 
   auto showMoreButton = std::make_unique<Button>(
       "LIHAT", font_,
-      sf::Vector2f(layout::actionPanel::outerPadding + logHeaderLabelWidth +
-                       layout::actionPanel::rowGap,
-                   currentY),
+      sf::Vector2f(layout::actionPanel::outerPadding + logHeaderLabelWidth,
+                   currentY + layout::actionPanel::rowGap),
       sf::Vector2f(layout::actionPanel::headerButtonWidth,
-                   layout::actionPanel::logHeaderHeight),
+                   layout::actionPanel::logHeaderHeight -
+                       (2.0f * layout::actionPanel::rowGap)),
       showMoreStyle, []() {
         // TODO: Open full game log dialog.
       });

@@ -18,7 +18,8 @@ namespace ui {
 
 BoardPanel::BoardPanel(int tileNum)
     : Panel({size::sideWidth, 0}, {size::boardSize, size::boardSize},
-            component::background),
+            PanelStyle(component::background, palette::black,
+                       size::lineThickness)),
       tileNum_(tileNum) {
   if (tileNum_ < minTilesPerSide || tileNum_ > maxTilesPerSide) {
     throw std::runtime_error("Invalid board configuration.");

@@ -61,9 +61,9 @@ const unsigned int tileMinFont = static_cast<unsigned int>(2.0f * scale);
 const sf::Uint32 titleStyle = sf::Text::Bold;
 const sf::Uint32 sectionStyle = sf::Text::Bold;
 const sf::Uint32 buttonStyle = sf::Text::Bold;
-const sf::Uint32 infoTitleStyle = sf::Text::Bold | sf::Text::Italic;
+const sf::Uint32 infoTitleStyle = sf::Text::Bold;
 const sf::Uint32 infoBodyStyle = sf::Text::Regular;
-const sf::Uint32 logStyle = sf::Text::Italic;
+const sf::Uint32 logStyle = sf::Text::Regular;
 
 const sf::Uint32 regular = sf::Text::Regular;
 
