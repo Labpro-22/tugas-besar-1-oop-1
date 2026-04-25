@@ -7,30 +7,6 @@
 #include "data/PropertyConfig.hpp"
 
 namespace data {
-
-/**
- * @brief Membaca semua config files dari baseConfigPath.
- *
- * File yang board-specific (property.txt, aksi.txt) dibaca dari subfolder
- * board_{boardSize}/ di dalam baseConfigPath.
- *
- * File shared (railroad.txt, utility.txt, tax.txt, special.txt, misc.txt)
- * dibaca langsung dari baseConfigPath.
- *
- * Contoh struktur folder:
- *   config/
- *     board_40/
- *       property.txt
- *       aksi.txt
- *     board_20/
- *       property.txt
- *       aksi.txt
- *     railroad.txt   ← shared
- *     utility.txt    ← shared
- *     tax.txt        ← shared
- *     special.txt    ← shared
- *     misc.txt       ← shared
- */
 class ConfigReader {
 public:
     /**
