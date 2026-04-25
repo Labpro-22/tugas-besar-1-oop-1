@@ -51,5 +51,9 @@ std::vector<data::LogEntry> TransactionLogger::getRecentLog(int n) const {
   return std::vector<data::LogEntry>(entries_.end() - n, entries_.end());
 }
 
+void TransactionLogger::restore(const std::vector<data::LogEntry>& entries) {
+    entries_ = entries;
+}
+
 void TransactionLogger::clear() { entries_.clear(); }
 }  // namespace logic
