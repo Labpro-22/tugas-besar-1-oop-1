@@ -28,13 +28,13 @@ add_library(
 add_library(
   nimonspoli_logic STATIC
   src/logic/Bank.cpp
-  src/logic/BankruptcyHandler.cpp
   src/logic/Board.cpp
   src/logic/Game.cpp
   src/logic/TransactionLogger.cpp
   src/logic/Bank.cpp
   src/logic/Auction.cpp
   src/logic/Board.cpp
+  src/logic/GameLoader.cpp
   # etc. lanjut sendiri
 )
 
@@ -43,6 +43,7 @@ add_library(
   src/data/ConfigReader.cpp
   src/data/SaveLoadManager.cpp
   src/data/LogSerializer.cpp
+  src/data/DomainBuilder.cpp
   # etc. lanjut sendiri
 )
 
