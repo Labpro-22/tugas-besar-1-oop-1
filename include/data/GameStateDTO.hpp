@@ -59,7 +59,7 @@ public:
 class GameStateDTO {
 public:
     // Dynamic Board
-    int boardSize = 40;  // 20|24|28|...|60 — disimpan di baris pertama save file
+    int boardSize = 40;  // 20|24|28|...|60. disimpan di baris pertama save file
 
     // Game meta
     int turnCount = 0;

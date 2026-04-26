@@ -14,17 +14,26 @@ DemolitionCard::DemolitionCard(std::string description)
 
 void DemolitionCard::execute(Player& player, GameContext& ctx) {
     player.consumeSkillUse();
-    const std::vector<Player*>& participants = ctx.getPlayers();
-    const int optionCount = static_cast<int>(participants.size());
-    // TODO: out-of-spec - `promptChoice` is not in the course spec; needed until UI exposes targets.
-    const int choice = player.promptChoice("DemolitionVictim", 0, optionCount);
-    if (choice < 0 || choice >= optionCount) {
+
+    std::vector<Player*> victims;
+    victims.reserve(ctx.getPlayers().size());
+    for (Player* candidate : ctx.getPlayers()) {
+        if (candidate == nullptr || candidate == &player) {
+            continue;
+        }
+        victims.push_back(candidate);
+    }
+    if (victims.empty()) {
+        ctx.logEvent("DEMOLITION_MISS", player, 0);
         return;
     }
-    Player* victim = participants[static_cast<std::size_t>(choice)];
-    if (victim == nullptr || victim == &player) {
+
+    const int victimChoice = player.promptChoice("DemolitionVictim", 0, static_cast<int>(victims.size()));
+    if (victimChoice < 0 || victimChoice >= static_cast<int>(victims.size())) {
         return;
     }
+    Player* victim = victims[static_cast<std::size_t>(victimChoice)];
+
     const std::vector<Property*>& props = victim->getOwnedProperties();
     if (props.empty()) {
         ctx.logEvent("DEMOLITION_MISS", player, 0);
@@ -35,11 +44,7 @@ void DemolitionCard::execute(Player& player, GameContext& ctx) {
         return;
     }
     Property* prop = props[static_cast<std::size_t>(propChoice)];
-    if (prop == nullptr) {
-        ctx.logEvent("DEMOLITION_MISS", player, 0);
-        return;
-    }
-    if (prop->getType() != PropertyType::STREET) {
+    if (prop == nullptr || prop->getType() != PropertyType::STREET) {
         ctx.logEvent("DEMOLITION_MISS", player, 0);
         return;
     }

@@ -6,14 +6,19 @@
 #include <core/Player.hpp>
 #include <core/SkillCard.hpp>
 
-// TODO: this class has out-of-spec method(s).
-
 namespace core {
 
 class GameContext;
 
 /**
- * @brief Skill that attempts to destroy an opponent building (stub hook).
+ * @brief Skill that destroys exactly one building on a chosen opponent's
+ *        Street property.
+ *
+ * @note Demolition removes a single house/hotel step per execution. A hotel
+ *       counts as a single building step, matching `Street::demolish(1)`.
+ *       repeated activations of multiple Demolition cards are required to
+ *       fully clear a property. We deliberately keep one-step demolition to
+ *       align with `Street::demolish` semantics owned by the property layer.
  */
 class DemolitionCard : public SkillCard {
 public:
@@ -23,7 +28,6 @@ public:
      */
     explicit DemolitionCard(std::string description);
 
-    // TODO: extend to hotels and multi-house removal when UI is ready.
     void execute(Player& player, GameContext& context) override;
 
     std::string getCardType() const override;

@@ -30,8 +30,8 @@ private:
 
     /**
      * @brief Resolve path file config.
-     * File board-specific → basePath_/board_{boardSize_}/filename
-     * File shared         → basePath_/filename
+     * File board-specific -> basePath_/board_{boardSize_}/filename
+     * File shared         -> basePath_/filename
      */
     std::string filePath(const std::string& filename) const;
 };

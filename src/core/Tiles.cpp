@@ -48,7 +48,9 @@ UtilityTile::UtilityTile(int position, const std::string& name, std::unique_ptr<
 
 void UtilityTile::onLanded(Player& p, GameContext& g){ 
 	if (property_->isAvailable()){ 
-		g.offerProperty(p, *property_.get()); 
+		property_->setOwner(&p); 
+		p.addProperty(property_.get());
+		g.logEvent("UTILITY", p, *property_, 0);
 	} else if (property_->getOwner() != &p && !property_->isMortgagedStatus()){
 		g.chargeRent(p, *property_.get()); 
 	} 

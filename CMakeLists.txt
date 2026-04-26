@@ -18,6 +18,11 @@ add_library(
   nimonspoli_core STATIC
   src/core/Tiles.cpp 
   src/core/Player.cpp
+  src/core/HumanPlayer.cpp
+  src/core/COMPlayer.cpp
+  src/core/COMStrategy.cpp
+  src/core/SimpleCOMStrategy.cpp
+  src/core/GreedyCOMStrategy.cpp
   src/core/Property.cpp
   src/core/Railroad.cpp
   src/core/Street.cpp

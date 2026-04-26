@@ -11,7 +11,7 @@ namespace logic { class Game; }
 
 namespace core {
 
-enum class TileType {
+enum class TileType : int {
     BASE,
     ACTION,
     PROPERTY,

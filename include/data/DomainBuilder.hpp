@@ -37,12 +37,12 @@ public:
  * @brief Converts raw config objects (from ConfigReader) into core domain objects.
  *
  * Tanggung jawab:
- *   - String warna config ("COKLAT") → enum ColorGroup
- *   - PropertyConfig* → concrete Property subclass (Street/Railroad/Utility)
- *   - ActionTileConfig → concrete Tile subclass (GoTile/TaxTile/dll)
+ *   - String warna config ("COKLAT") -> enum ColorGroup
+ *   - PropertyConfig* -> concrete Property subclass (Street/Railroad/Utility)
+ *   - ActionTileConfig -> concrete Tile subclass (GoTile/TaxTile/dll)
  *   - Menggabungkan property.txt + aksi.txt menjadi satu vector tile terurut
  *
- * Stateless — semua method static.
+ * Stateless. semua method static.
  */
 class DomainBuilder {
 public:

@@ -4,8 +4,6 @@
 
 #include <string>
 
-// TODO: this class uses out-of-spec methods. Might fix it later.
-
 namespace core {
 
 /**

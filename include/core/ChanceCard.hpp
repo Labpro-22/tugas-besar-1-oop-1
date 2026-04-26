@@ -7,8 +7,6 @@
 #include <core/ActionCard.hpp>
 #include <core/Player.hpp>
 
-//TODO: this class uses out-of-spec methods.
-
 namespace core {
 
 class GameContext;
@@ -60,6 +58,16 @@ public:
      * @note Extension (not in spec).
      */
     static std::unique_ptr<ActionCard> makeAdvanceTo(int index, std::string description);
+
+    /**
+     * @brief Factory for going to the nearest railroad. moves the player
+     *        forward to the next clockwise `RAILROAD` tile, firing
+     *        `onPassed` for every crossed tile.
+     * @param description Card flavour text.
+     * @note Spec card from `Spesifikasi.md:470`. Implementation uses the
+     *       extension hook `GameContext::findNearestTileOfType`.
+     */
+    static std::unique_ptr<ActionCard> makeAdvanceToNearestRailroad(std::string description);
 
 private:
     std::function<void(Player&, GameContext&)> effect_;  // Extension (not in spec).
