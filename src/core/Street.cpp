@@ -5,18 +5,29 @@
 
 namespace core {
 
-Street::Street(const std::string& name, int price, int mortgageValue, ColorGroup colorGroup, std::vector<int> rentValues, int houseCost, int hotelCost)
-    : Property(name, price, mortgageValue), colorGroup_(colorGroup), houseCount_(0), hotelCount_(0), rentValues_(move(rentValues)), houseCost_(houseCost), hotelCost_(hotelCost){
-    
-    if (rentValues_.size() != 6) {
-        throw InvalidConfigException("rentValues untuk '" + getName() + "'", "tepat 6 elemen (level 0-5)");
-    }
+Street::Street(const std::string& name, int price, int mortgageValue,
+               ColorGroup colorGroup, std::vector<int> rentValues,
+               int houseCost, int hotelCost)
+    : Property(name, price, mortgageValue),
+      colorGroup_(colorGroup),
+      houseCount_(0),
+      hotelCount_(0),
+      rentValues_(std::move(rentValues)),
+      houseCost_(houseCost),
+      hotelCost_(hotelCost)
+{
+    if (rentValues_.size() != 6)
+        throw InvalidConfigException(
+            "rentValues untuk '" + getName() + "'",
+            "tepat 6 elemen (level 0-5)");
 }
 
-int Street::calculateRent([[maybe_unused]] int diceRoll, [[maybe_unused]] int ownedSameType, bool hasMonopoly) const {
-    if (isMortgagedStatus()) {
-        return 0;
-    }
+int Street::calculateRent(
+    [[maybe_unused]] int diceRoll,
+    [[maybe_unused]] int ownedSameType,
+    bool hasMonopoly) const
+{
+    if (isMortgagedStatus()) return 0;
 
     int rent;
     if (hotelCount_ > 0) {
@@ -32,15 +43,12 @@ int Street::calculateRent([[maybe_unused]] int diceRoll, [[maybe_unused]] int ow
     return rent * getFestMultiplier();
 }
 
-PropertyType Street::getType() const { 
-    return PropertyType::STREET; 
-}
-
+PropertyType Street::getType() const { return PropertyType::STREET; }
 
 void Street::build() {
     if (hotelCount_ > 0)
         throw InvalidMoveException("Petak '" + getName() + "' sudah memiliki hotel");
- 
+
     if (houseCount_ < 4) {
         ++houseCount_;
     } else {
@@ -59,31 +67,26 @@ void Street::demolish(int n) {
     houseCount_ -= toRemove;
 }
 
+void Street::setLevel(int level) {
+    if (level < 0 || level > 5)
+        throw InvalidConfigException("Street level", "0-4 (rumah) atau 5 (hotel)");
+    if (level == 5) {
+        houseCount_ = 0;
+        hotelCount_ = 1;
+    } else {
+        houseCount_ = level;
+        hotelCount_ = 0;
+    }
+}
+
 bool Street::canBuild(bool hasMonopoly) const {
-    if (!hasMonopoly) {
-        return false;
-    }
-    if (hotelCount_ > 0) {
-        return false;
-    }
-    return true;
+    return hasMonopoly && hotelCount_ == 0;
 }
 
+ColorGroup Street::getColorGroup() const { return colorGroup_; }
+int Street::getHouseCount() const { return houseCount_; }
+int Street::getHotelCount() const { return hotelCount_; }
+int Street::getHouseCost() const { return houseCost_; }
+int Street::getHotelCost() const { return hotelCost_; }
 
-ColorGroup Street::getColorGroup() const { 
-    return colorGroup_; 
-}
-int Street::getHouseCount() const { 
-    return houseCount_; 
-}
-int Street::getHotelCount() const { 
-    return hotelCount_; 
-}
-int Street::getHouseCost() const {
-    return houseCost_;
-}
-int Street::getHotelCost() const {
-    return hotelCost_;
-}
-
-}
+}  // namespace core
