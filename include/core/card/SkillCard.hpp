@@ -1,8 +1,7 @@
 #pragma once
 
+#include <core/card/ActionCard.hpp>
 #include <string>
-
-#include <core/ActionCard.hpp>
 
 namespace core {
 
@@ -13,12 +12,12 @@ namespace core {
  * specification while sharing construction rules with `ActionCard`.
  */
 class SkillCard : public ActionCard {
-protected:
-    /**
-     * @brief Forward the flavour text to `ActionCard`.
-     * @param description Human-readable card description.
-     */
-    explicit SkillCard(std::string description);
+ protected:
+  /**
+   * @brief Forward the flavour text to `ActionCard`.
+   * @param description Human-readable card description.
+   */
+  explicit SkillCard(std::string description);
 };
 
-}
+}  // namespace core

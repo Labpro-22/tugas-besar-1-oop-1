@@ -1,26 +1,26 @@
 #pragma once
 
-#include "core/ActionCard.hpp"
-#include "core/CardDeck.hpp"
-#include "core/GameContext.hpp"
-#include "data/LogEntry.hpp"
-#include "logic/Bank.hpp"
-#include "logic/Board.hpp"
-
+#include <random>
 #include <string>
 #include <utility>
 #include <vector>
-#include <random>
+
+#include "core/GameContext.hpp"
+#include "core/card/ActionCard.hpp"
+#include "core/card/CardDeck.hpp"
+#include "data/LogEntry.hpp"
+#include "logic/Bank.hpp"
+#include "logic/Board.hpp"
 
 namespace core {
 class Player;
 class Tile;
 class Property;
-} // namespace core
+}  // namespace core
 namespace logic {
 class TransactionLogger;
 class UIInputMediator;
-} // namespace logic
+}  // namespace logic
 
 namespace logic {
 
@@ -34,47 +34,48 @@ enum class GameState {
   GAME_OVER
 };
 
-class Game : public core::GameContext{
-private:
+class Game : public core::GameContext {
+ private:
   Board board_;
-  std::vector<core::Player *> players_;
+  std::vector<core::Player*> players_;
   Bank bank_;
-  TransactionLogger *logger_;
-  UIInputMediator *mediator_;
+  TransactionLogger* logger_;
+  UIInputMediator* mediator_;
 
   int currentPlayerId_;
   GameState state_;
   std::pair<int, int> lastDiceRoll_;
   int turnCount_;
- 	std::mt19937 rng_;
-	int doubles_; 
-	bool hasExtraTurn_; 
+  std::mt19937 rng_;
+  int doubles_;
+  bool hasExtraTurn_;
 
   // Config-derived values — diisi oleh initialize()
-  int goSalary_  = 200;
-  int jailFine_  = 50;
-  int maxTurn_   = 0;
+  int goSalary_ = 200;
+  int jailFine_ = 50;
+  int maxTurn_ = 0;
   int boardSize_ = 40;
   std::string configPath_;
-  
+
   // Card decks — diisi oleh initialize() setelah board terbangun
   core::CardDeck<core::ActionCard> chanceDeck_;
   core::CardDeck<core::ActionCard> communityChestDeck_;
   core::CardDeck<core::ActionCard> skillDeck_;
-  
+
   void resolveFestival(core::Property* selectedProp);
 
   // Helpers untuk initialize()
   void buildChanceDeck();
   void buildCommunityChestDeck();
   void buildSkillDeck();
-  
-public:
-  Game(std::vector<core::Player *> players, TransactionLogger *logger);
+
+ public:
+  Game(std::vector<core::Player*> players, TransactionLogger* logger);
   ~Game() = default;
 
   /**
-   * @brief Baca config, bangun board via DomainBuilder, dan populate semua deck.
+   * @brief Baca config, bangun board via DomainBuilder, dan populate semua
+   * deck.
    *
    * Dipanggil untuk New Game maupun Load Game (sebelum GameLoader::applyDTO).
    * Boleh dipanggil ulang — Board::clear() dijalankan di awal.
@@ -83,10 +84,10 @@ public:
    * @param configPath Path ke folder config (misal "config/").
    */
   void initialize(int boardSize, const std::string& configPath);
-  void startGame(); 
+  void startGame();
   void setMediator(UIInputMediator* mediator);
-  void nextTurn(); 
-  bool checkWinCondition() const; 
+  void nextTurn();
+  bool checkWinCondition() const;
 
   // Accessors
   std::pair<int, int> getLastDiceRoll() const override;
@@ -123,12 +124,12 @@ public:
   void chargeRent(core::Player& p, core::Property& prop) override;
   void sendToJail(core::Player& p) override;
   void chargeTax(core::Player& p, int flatRate, int percentageRate,
-                  core::TaxType type) override;
+                 core::TaxType type) override;
   void activateFestival(core::Player& p) override;
   void drawChanceCard(core::Player& p) override;
   void drawCommunityChestCard(core::Player& p) override;
   void payPlayerFromBank(core::Player& p, int amount) override;
-  int  getGoSalary() const override;
+  int getGoSalary() const override;
 
   void logEvent(const std::string& action, core::Player& p, int value) override;
   void logEvent(const std::string& action, core::Player& p,
@@ -149,4 +150,4 @@ public:
   core::CardDeck<core::ActionCard>& getSkillDeck();
 };
 
-} // namespace logic
+}  // namespace logic
