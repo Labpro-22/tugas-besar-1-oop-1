@@ -16,6 +16,12 @@ namespace ui {
 class GameWindow : public sf::RenderWindow {
  public:
   explicit GameWindow(int boardTileCount = 9);
+
+  // =======
+  // public:
+  //   GameWindow();
+  // >>>>>>> main
+
   ~GameWindow();
 
   void onResize() override;

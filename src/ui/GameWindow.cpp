@@ -17,8 +17,15 @@ GameWindow::GameWindow(int boardTileCount)
   boardPanel_.setOnTileSelected(
       [this](const TileInfo& info) { actionPanel_.setSelectedTile(info); });
   playerInfoPanel_.setPlayers(game_.playerPointers());
-  dialogManager_ = std::make_unique<DialogManager>();
 }
+
+// =======
+// GameWindow::GameWindow()
+//     : sf::RenderWindow(sf::VideoMode(400, 400), "Game Window"),
+//       game_(std::vector<core::Player*>{}, nullptr) {
+// >>>>>>> main
+//   dialogManager_ = std::make_unique<DialogManager>();
+// }
 
 GameWindow::~GameWindow() = default;
 
