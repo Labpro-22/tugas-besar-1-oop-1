@@ -3,6 +3,9 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <memory>
+#include <unordered_map>
+#include <stdexcept>
+#include <string>
 
 namespace ui {
 
