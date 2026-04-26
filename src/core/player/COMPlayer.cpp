@@ -26,9 +26,9 @@ core::Tile* findTileFor(logic::Board& board, Property& target) {
 
 }  // namespace
 
-COMPlayer::COMPlayer(std::string name, std::string token,
+COMPlayer::COMPlayer(std::string name, Avatar avatar,
                      std::unique_ptr<COMStrategy> strategy)
-    : Player(std::move(name), std::move(token)),
+    : Player(std::move(name), avatar),
       strategy_(std::move(strategy)) {}
 
 void COMPlayer::setStrategy(std::unique_ptr<COMStrategy> strategy) {
@@ -55,13 +55,13 @@ void COMPlayer::takeTurn(logic::Game& game) {
   }
 
   for (Property* lot : getOwnedProperties()) {
-    if (lot != nullptr && strategy_->shouldMortgage(lot, *this, game)) {
+    if (lot != nullptr && strategy_->shouldMortgage(lot, *this)) {
       game.mortgageProperty(*lot);
     }
   }
 
   for (Property* lot : getOwnedProperties()) {
-    if (lot == nullptr || !strategy_->shouldBuild(lot, *this, game)) {
+    if (lot == nullptr || !strategy_->shouldBuild(lot, *this)) {
       continue;
     }
     core::Tile* at = findTileFor(game.getBoard(), *lot);

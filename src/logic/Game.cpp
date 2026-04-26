@@ -424,7 +424,7 @@ void Game::chargeTax(core::Player& p, int flatRate, int percentageRate,
       bank_.receive(flatRate);
       logEvent(data::LogAction::TAX_PAYMENT, p, flatRate);
     } else {
-      p.setBankrupted(true);
+      p.declareBankrupt();
       logEvent(data::LogAction::BANKRUPTCY, p, flatRate);
     }
   }

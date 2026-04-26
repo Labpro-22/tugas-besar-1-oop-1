@@ -3,13 +3,11 @@
 #include "core/Property.hpp"
 #include "core/Tiles.hpp"
 #include "core/player/Player.hpp"
-#include "logic/Game.hpp"
 
 namespace core {
 
-bool SimpleCOMStrategy::shouldBuy(Property* property, Player& player,
-                                  logic::Game& game) const noexcept {
-  (void)game;
+bool SimpleCOMStrategy::shouldBuy(Property* property,
+                                  Player& player) const noexcept {
   if (property == nullptr) {
     return false;
   }
@@ -18,9 +16,7 @@ bool SimpleCOMStrategy::shouldBuy(Property* property, Player& player,
 }
 
 int SimpleCOMStrategy::bidAmount(Property* property, Player& player,
-                                 logic::Game& game,
                                  int previous_bid) const noexcept {
-  (void)game;
   if (property == nullptr) {
     return previous_bid;
   }
@@ -36,9 +32,8 @@ int SimpleCOMStrategy::bidAmount(Property* property, Player& player,
   return cap;
 }
 
-bool SimpleCOMStrategy::shouldBuild(Property* property, Player& player,
-                                    logic::Game& game) const noexcept {
-  (void)game;
+bool SimpleCOMStrategy::shouldBuild(Property* property,
+                                    Player& player) const noexcept {
   if (property == nullptr || property->getType() != PropertyTileType::STREET) {
     return false;
   }
@@ -49,10 +44,9 @@ bool SimpleCOMStrategy::shouldBuild(Property* property, Player& player,
   return player.getBalance() > 3 * houseCost;
 }
 
-bool SimpleCOMStrategy::shouldMortgage(Property* property, Player& player,
-                                       logic::Game& game) const noexcept {
+bool SimpleCOMStrategy::shouldMortgage(Property* property,
+                                       Player& player) const noexcept {
   (void)property;
-  (void)game;
   return player.getBalance() < 200;
 }
 

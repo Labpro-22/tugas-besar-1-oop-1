@@ -10,9 +10,9 @@
 
 namespace core {
 
-Player::Player(std::string name, std::string token)
+Player::Player(std::string name, Avatar avatar)
     : name_(std::move(name)),
-      token_(std::move(token)),
+      avatar_(avatar),
       balance_(0),
       position_(0),
       inJail_(false),
@@ -87,7 +87,7 @@ bool Player::operator==(const Player& other) const noexcept {
 
 const std::string& Player::getName() const noexcept { return name_; }
 
-const std::string& Player::getToken() const noexcept { return token_; }
+Avatar Player::getAvatar() const noexcept { return avatar_; }
 
 int Player::getBalance() const noexcept { return balance_; }
 
@@ -99,7 +99,7 @@ bool Player::isInJail() const noexcept { return inJail_; }
 
 bool Player::isBankrupted() const noexcept { return isBankrupt_; }
 
-void Player::setBankrupted(bool value) noexcept { isBankrupt_ = value; }
+void Player::declareBankrupt() noexcept { isBankrupt_ = true; }
 
 void Player::addCard(ActionCard* card) {
   if (heldCards_.size() >= 3) {

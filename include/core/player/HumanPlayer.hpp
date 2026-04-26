@@ -12,10 +12,10 @@ class HumanPlayer : public Player {
   /**
    * @brief Construct a human-controlled seat.
    * @param name Display name persisted in saves/logs.
-   * @param token ASCII marker rendered on the board.
+   * @param avatar Avatar identity for this player.
    */
-  HumanPlayer(std::string name, std::string token)
-      : Player(std::move(name), std::move(token)) {}
+  HumanPlayer(std::string name, Avatar avatar)
+      : Player(std::move(name), avatar) {}
 
   ~HumanPlayer() override = default;
 

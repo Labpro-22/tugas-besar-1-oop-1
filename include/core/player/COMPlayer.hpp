@@ -15,10 +15,10 @@ class COMPlayer : public Player {
   /**
    * @brief Construct a COM seat with optional AI ownership transfer.
    * @param name Display name used in logs.
-   * @param token ASCII marker rendered on the board.
+     * @param avatar Avatar identity for this player.
    * @param strategy Optional AI implementation; may be replaced later.
    */
-  COMPlayer(std::string name, std::string token,
+    COMPlayer(std::string name, Avatar avatar,
             std::unique_ptr<COMStrategy> strategy = nullptr);
 
   ~COMPlayer() override = default;

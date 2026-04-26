@@ -54,7 +54,7 @@ std::unique_ptr<ActionCard> CommunityChestCard::makeCollectFromAll(
           } else {
             collected += candidate->getBalance();
             *candidate -= candidate->getBalance();
-            candidate->setBankrupted(true);
+            candidate->declareBankrupt();
           }
         }
         if (collected > 0) {
@@ -81,7 +81,7 @@ std::unique_ptr<ActionCard> CommunityChestCard::makePayToAll(
               player -= leftover;
               *candidate += leftover;
             }
-            player.setBankrupted(true);
+            player.declareBankrupt();
             return;
           }
         }

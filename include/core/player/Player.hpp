@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include "logic/Game.hpp"
-
 namespace logic {
 
 class Game;
@@ -15,6 +13,13 @@ namespace core {
 
 class ActionCard;
 class Property;
+
+enum class Avatar {
+  COPILOT,
+  CLAUDE,
+  GEMINI,
+  CHATGPT,
+};
 
 /**
  * @brief Abstract player controller shared by humans and COM opponents.
@@ -28,9 +33,9 @@ class Player {
   /**
    * @brief Construct a player with display metadata.
    * @param name Display name for logs and save files.
-   * @param token Short marker rendered on the ASCII board.
+   * @param avatar Player avatar identity used by UI and game metadata.
    */
-  Player(std::string name, std::string token);
+  Player(std::string name, Avatar avatar);
 
   Player(const Player&) = delete;
   Player& operator=(const Player&) = delete;
@@ -130,11 +135,10 @@ class Player {
   const std::string& getName() const noexcept;
 
   /**
-   * @brief Token glyph accessor for the board renderer.
-   * @return The configured token string.
-   * @note Extension (not in spec).
+   * @brief Avatar accessor for UI rendering and identification.
+   * @return The configured avatar enum.
    */
-  const std::string& getToken() const noexcept;
+  Avatar getAvatar() const noexcept;
 
   /**
    * @brief Liquid cash accessor.
@@ -172,11 +176,9 @@ class Player {
   bool isBankrupted() const noexcept;
 
   /**
-   * @brief Mark bankruptcy (called by `BankruptcyHandler` later).
-   * @param value `true` to eliminate the player from win checks.
-   * @note Extension (not in spec).
+   * @brief Mark this player as bankrupt and eliminated.
    */
-  void setBankrupted(bool value) noexcept;
+  void declareBankrupt() noexcept;
 
   /**
    * @brief Attempt to add a skill/community card reference to the hand.
@@ -280,7 +282,7 @@ class Player {
 
  protected:
   std::string name_;
-  std::string token_;
+  Avatar avatar_;
   int balance_;
   int position_;
   bool inJail_;

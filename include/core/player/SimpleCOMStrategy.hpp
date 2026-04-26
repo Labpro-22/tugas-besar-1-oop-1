@@ -12,26 +12,24 @@ class SimpleCOMStrategy : public COMStrategy {
   /**
    * @brief Approve purchases only when the list price is <= 40% of cash.
    */
-  bool shouldBuy(Property* property, Player& player,
-                 logic::Game& game) const noexcept override;
+  bool shouldBuy(Property* property, Player& player) const noexcept override;
 
   /**
    * @brief Cap bids at ~110% of list price without exceeding the cash stack.
    */
-  int bidAmount(Property* property, Player& player, logic::Game& game,
+  int bidAmount(Property* property, Player& player,
                 int previous_bid) const noexcept override;
 
   /**
    * @brief Build only when the player keeps >3x the next house cost in cash.
    */
-  bool shouldBuild(Property* property, Player& player,
-                   logic::Game& game) const noexcept override;
+  bool shouldBuild(Property* property, Player& player) const noexcept override;
 
   /**
    * @brief Mortgage aggressively whenever liquidity drops below `200`.
    */
-  bool shouldMortgage(Property* property, Player& player,
-                      logic::Game& game) const noexcept override;
+  bool shouldMortgage(Property* property,
+                      Player& player) const noexcept override;
 };
 
 }  // namespace core

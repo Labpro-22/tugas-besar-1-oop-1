@@ -5,13 +5,11 @@
 #include "core/Property.hpp"
 #include "core/Tiles.hpp"
 #include "core/player/Player.hpp"
-#include "logic/Game.hpp"
 
 namespace core {
 
-bool GreedyCOMStrategy::shouldBuy(Property* property, Player& player,
-                                  logic::Game& game) const noexcept {
-  (void)game;
+bool GreedyCOMStrategy::shouldBuy(Property* property,
+                                  Player& player) const noexcept {
   if (property == nullptr) {
     return false;
   }
@@ -19,18 +17,15 @@ bool GreedyCOMStrategy::shouldBuy(Property* property, Player& player,
 }
 
 int GreedyCOMStrategy::bidAmount(Property* property, Player& player,
-                                 logic::Game& game,
                                  int previous_bid) const noexcept {
   (void)property;
-  (void)game;
   const int aggressive =
       static_cast<int>(static_cast<double>(previous_bid) * 1.25 + 50.0);
   return std::min(player.getBalance(), aggressive);
 }
 
-bool GreedyCOMStrategy::shouldBuild(Property* property, Player& player,
-                                    logic::Game& game) const noexcept {
-  (void)game;
+bool GreedyCOMStrategy::shouldBuild(Property* property,
+                                    Player& player) const noexcept {
   if (property == nullptr || property->getType() != PropertyTileType::STREET) {
     return false;
   }
@@ -41,10 +36,9 @@ bool GreedyCOMStrategy::shouldBuild(Property* property, Player& player,
   return player.canAfford(houseCost);
 }
 
-bool GreedyCOMStrategy::shouldMortgage(Property* property, Player& player,
-                                       logic::Game& game) const noexcept {
+bool GreedyCOMStrategy::shouldMortgage(Property* property,
+                                       Player& player) const noexcept {
   (void)property;
-  (void)game;
   return player.getBalance() <= 0;
 }
 

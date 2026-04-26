@@ -94,7 +94,7 @@ void GameLoader::restorePlayers(const data::GameStateDTO& dto, Game& game) {
 
     // Status jail / bankrupt
     if (pDTO.isBankrupt) {
-      player->setBankrupted(true);
+      player->declareBankrupt();
     } else if (pDTO.jailTurns > 0) {
       player->goToJail();
       for (int i = 0; i < pDTO.jailTurns; ++i) player->incrementJailTurns();

@@ -1,5 +1,6 @@
 #include "core/Tiles.hpp"
 
+#include "core/GameContext.hpp"
 #include "data/LogEntry.hpp"
 
 namespace core {

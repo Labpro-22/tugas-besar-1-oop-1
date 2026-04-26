@@ -9,7 +9,7 @@ void BankruptcyHandler::handle(core::Player& debtor, core::Player* creditor) {
   if (creditor != nullptr) {
     transferAssets(debtor, *creditor);
   }
-  debtor.setBankrupted(true);
+  debtor.declareBankrupt();
 }
 
 int BankruptcyHandler::calcLiquidationValue(core::Player& player) {
