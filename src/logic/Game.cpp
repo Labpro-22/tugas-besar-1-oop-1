@@ -381,7 +381,7 @@ void Game::payPlayerFromBank(core::Player& p, int amount) {
 }
 
 int Game::getGoSalary() const { 
-    return 200; 
+    return goSalary_; 
 }
 
 core::Player* Game::getPlayerByName(const std::string& name) const {
