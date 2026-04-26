@@ -331,6 +331,8 @@ GameState Game::getState() const { return state_; }
 
 std::pair<int, int> Game::getLastDiceRoll() const { return lastDiceRoll_; }
 int Game::getTurnCount() const { return turnCount_; }
+int Game::getMaxTurn() const { return maxTurn_; }
+int Game::getJailFine() const { return jailFine_; }
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
   // use mediator 
@@ -399,9 +401,17 @@ void Game::resolveFestival(core::Property* selectedProp) {
 }
 
 void Game::drawChanceCard(core::Player& p) { 
+    core::ActionCard* card = chanceDeck_.draw();
+    if (card) {
+        card->execute(p, *this);
+    }
 }
 
 void Game::drawCommunityChestCard(core::Player& p) { 
+    core::ActionCard* card = communityChestDeck_.draw();
+    if (card) {
+        card->execute(p, *this);
+    }
 }
 
 void Game::payPlayerFromBank(core::Player& p, int amount) { 
@@ -442,6 +452,43 @@ void Game::restoreLog(const std::vector<data::LogEntry>& entries) {
 }
 
 core::CardDeck<core::ActionCard>& Game::getSkillDeck() { return skillDeck_; }
+
+void Game::buildChanceDeck() {
+    std::vector<std::unique_ptr<core::ActionCard>> cards;
+    cards.push_back(core::ChanceCard::makeAdvanceTo(0, "Advance to GO"));
+    cards.push_back(core::ChanceCard::makeGoToJail("Go to Jail"));
+    cards.push_back(core::ChanceCard::makePayBank(50, "Pay tax Rp50"));
+    cards.push_back(core::ChanceCard::makeMoveBack(3, "Move back 3 spaces"));
+    cards.push_back(std::unique_ptr<core::ActionCard>(new core::ChanceCard(
+        "Bank pays you Rp50",
+        [](core::Player& p, core::GameContext& ctx) { ctx.payPlayerFromBank(p, 50); })));
+    chanceDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
+    chanceDeck_.shuffle();
+}
+
+void Game::buildCommunityChestDeck() {
+    std::vector<std::unique_ptr<core::ActionCard>> cards;
+    cards.push_back(core::CommunityChestCard::makeCollect(100, "Bank pays you Rp100"));
+    cards.push_back(core::CommunityChestCard::makeCollect(50, "Bank pays you Rp50"));
+    cards.push_back(core::CommunityChestCard::makePayBank(50, "Pay hospital Rp50"));
+    cards.push_back(core::CommunityChestCard::makePayBank(100, "Pay tax Rp100"));
+    communityChestDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
+    communityChestDeck_.shuffle();
+}
+
+void Game::buildSkillDeck() {
+    std::vector<std::unique_ptr<core::ActionCard>> cards;
+    cards.push_back(core::ShieldCard::make("Shield"));
+    cards.push_back(core::ShieldCard::make("Shield"));
+    cards.push_back(core::DiscountCard::makeRandom("Discount"));
+    cards.push_back(core::DiscountCard::makeRandom("Discount"));
+    cards.push_back(core::TeleportCard::make(0, "Teleport to GO"));
+    cards.push_back(core::MoveCard::make(3, "Move forward 3 spaces"));
+    cards.push_back(core::LassoCard::make("Lasso"));
+    cards.push_back(core::DemolitionCard::make("Demolition"));
+    skillDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
+    skillDeck_.shuffle();
+}
 
 // NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
 const std::vector<core::Player*>& Game::getPlayers() const { return players_; }

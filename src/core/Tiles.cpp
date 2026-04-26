@@ -139,10 +139,11 @@ TileType FestivalTile::getType() const { return TileType::FESTIVAL; }
 
 CardTile::CardTile(int position, const std::string& name, bool isChance) : ActionTile(position, name), isChance_(isChance) {}
 
-void CardTile::onLanded([[maybe_unused]]Player& p,[[maybe_unused]] GameContext& g) {
+void CardTile::onLanded(Player& p, GameContext& g) {
     if (isChance_) {
-    	// draw chance 
+    	g.drawChanceCard(p);
     } else {
+    	g.drawCommunityChestCard(p);
     }
 }
 
