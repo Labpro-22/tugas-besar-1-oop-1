@@ -2,10 +2,10 @@
 
 #include <SFML/Graphics/View.hpp>
 
-#include "ui/ActionPanel.hpp"
-#include "ui/PlayerInfoPanel.hpp"
 #include "ui/board/BoardPanel.hpp"
 #include "ui/component/Constants.hpp"
+#include "ui/sidebar/ActionPanel.hpp"
+#include "ui/sidebar/PlayerInfoPanel.hpp"
 
 namespace ui {
 GameWindow::GameWindow(int boardTileCount)
@@ -16,6 +16,7 @@ GameWindow::GameWindow(int boardTileCount)
       actionPanel_() {
   boardPanel_.setOnTileSelected(
       [this](const TileInfo& info) { actionPanel_.setSelectedTile(info); });
+  playerInfoPanel_.setPlayers(game_.playerPointers());
   dialogManager_ = std::make_unique<DialogManager>();
 }
 
