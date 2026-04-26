@@ -97,7 +97,7 @@ bool Player::isBankrupted() const noexcept { return isBankrupt_; }
 void Player::setBankrupted(bool value) noexcept { isBankrupt_ = value; }
 
 void Player::addCard(ActionCard* card) {
-    if (heldCards_.size() >= 3U) {
+    if (heldCards_.size() >= 3){
         throw InvalidMoveException("Player hand already holds three action cards.");
     }
     if (card == nullptr) {

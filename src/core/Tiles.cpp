@@ -108,9 +108,7 @@ TileType JailTile::getType() const { return TileType::JAIL; }
 GoToJailTile::GoToJailTile(int position, const std::string& name) : ActionTile(position, name) {}
 
 void GoToJailTile::onLanded(Player& p, GameContext& g) { 
-	// go to jail 
-	// p.sendToJail(p); 
-	p.goToJail();
+	g.sendToJail(p);
 	g.logEvent("GO_TO_JAIL", p, 0);
 } 
 

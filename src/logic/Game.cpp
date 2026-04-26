@@ -276,6 +276,16 @@ void Game::unmortgageProperty(core::Property *prop) {
   prop->unmortgage();
 }
 
+void Game::giveCard(core::Player& player, core::ActionCard* card) {
+  if (player.getHeldCards().size() >= 3) {
+    core::ActionCard* dropped = mediator_->selectCardToDrop(player);
+    if (dropped) {
+      player.removeCard(dropped);
+    }
+  }
+  player.addCard(card);
+}
+
 void Game::startAuction(core::Property *prop) {
   if (prop->getOwner() != nullptr) {
     throw InvalidMoveException("auction exception");
@@ -349,7 +359,11 @@ void Game::chargeRent(core::Player& p, core::Property& prop) {
 }
 
 void Game::sendToJail(core::Player& p) { 
-    p.goToJail(); 
+    p.goToJail();
+    core::Tile* jailTile = board_.getTileByCode("PEN");
+    if (jailTile) {
+        p.setPosition(jailTile->getPosition());
+    }
 }
 
 void Game::chargeTax(core::Player& p, int flatRate, int percentageRate, core::TaxType type) {

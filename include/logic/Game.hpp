@@ -115,6 +115,9 @@ public:
   void unmortgageProperty(core::Property* prop);
   void startAuction(core::Property* prop);
 
+  // Card operations
+  void giveCard(core::Player& player, core::ActionCard* card);
+
   // GameContext interface
   void offerProperty(core::Player& p, core::Property& prop) override;
   void chargeRent(core::Player& p, core::Property& prop) override;
