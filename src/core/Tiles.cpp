@@ -52,10 +52,9 @@ void UtilityTile::onLanded(Player& p, GameContext& g){
 		p.addProperty(property_.get());
 		g.logEvent("UTILITY", p, *property_, 0);
 	} else if (property_->getOwner() != &p && !property_->isMortgagedStatus()){
-		// rent 
-		g.chargeRent(p, *property_.get());
+		g.chargeRent(p, *property_.get()); 
 	} 
-} 
+}
 
 TileType UtilityTile::getType() const { return TileType::UTILITY;} 
 
@@ -63,11 +62,8 @@ RailroadTile::RailroadTile(int position, const std::string& name, std::unique_pt
 
 void RailroadTile::onLanded(Player& p, GameContext& g) {
     if (property_->isAvailable()) {
-        property_->setOwner(&p);
-        p.addProperty(property_.get());
-		g.logEvent("RAILROAD", p, *property_, 0);
+        g.offerProperty(p, *property_);
     } else if (property_->getOwner() != &p && !property_->isMortgagedStatus()) {
-   	// rent  
 		g.chargeRent(p, *property_.get());
     }
 }
