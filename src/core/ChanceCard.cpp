@@ -2,6 +2,7 @@
 
 #include "core/GameContext.hpp"
 #include "core/Player.hpp"
+#include "core/Tiles.hpp"
 
 #include <utility>
 
@@ -24,13 +25,12 @@ std::unique_ptr<ActionCard> ChanceCard::makeMoveBack(int spaces, std::string des
             if (n <= 0) {
                 return;
             }
-            // TODO: out-of-spec - bypasses Game::moveCurrentPlayer / onPassed / pass-Go handling.
-            int pos = player.getPosition() - spaces;
-            pos %= n;
-            if (pos < 0) {
-                pos += n;
+            int target = player.getPosition() - spaces;
+            target %= n;
+            if (target < 0) {
+                target += n;
             }
-            player.setPosition(pos);
+            ctx.movePlayer(player, target);
         }));
 }
 
@@ -53,12 +53,25 @@ std::unique_ptr<ActionCard> ChanceCard::makeAdvanceTo(int index, std::string des
             if (n <= 0) {
                 return;
             }
-            // TODO: out-of-spec - bypasses Game::moveCurrentPlayer / onPassed / pass-Go handling.
-            int pos = index % n;
-            if (pos < 0) {
-                pos += n;
+            int target = index % n;
+            if (target < 0) {
+                target += n;
             }
-            player.setPosition(pos);
+            ctx.movePlayer(player, target);
+        }));
+}
+
+std::unique_ptr<ActionCard> ChanceCard::makeAdvanceToNearestRailroad(std::string description) {
+    return std::unique_ptr<ActionCard>(new ChanceCard(std::move(description), [](Player& player, GameContext& ctx) {
+            const int n = ctx.getBoardSize();
+            if (n <= 0) {
+                return;
+            }
+            const int target = ctx.findNearestTileOfType(player.getPosition(), TileType::RAILROAD);
+            if (target < 0) {
+                return;
+            }
+            ctx.movePlayer(player, target);
         }));
 }
 

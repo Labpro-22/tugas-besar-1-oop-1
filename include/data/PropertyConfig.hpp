@@ -18,12 +18,12 @@ class PropertyConfig {
 };
 
 // kolom property.txt setelah mortgageValue:
-// UPG_RUMAH  UPG_HT  RENT_L0 … RENT_L5
+// UPG_RUMAH  UPG_HT  RENT_L0 ... RENT_L5
 class StreetConfig : public PropertyConfig {
  public:
   int houseUpgradeCost = 0;
   int hotelUpgradeCost = 0;
-  int rent[6] = {};  // index 0 = unimproved … 5 = hotel
+  int rent[6] = {};  // index 0 = unimproved ... 5 = hotel
 
   std::string getType() const override { return "STREET"; }
 };

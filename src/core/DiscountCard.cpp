@@ -26,4 +26,8 @@ std::unique_ptr<ActionCard> DiscountCard::makeRandom(std::string description) {
     return std::unique_ptr<ActionCard>(new DiscountCard(rate, std::move(description)));
 }
 
+int DiscountCard::getRemainingDuration() const noexcept { return remainingDuration_; }
+
+float DiscountCard::getDiscountRate() const noexcept { return discountRate_; }
+
 }

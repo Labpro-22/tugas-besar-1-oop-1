@@ -234,7 +234,6 @@ public:
      * @note Extension (not in spec).
      */
     virtual int promptChoice(const std::string& context, int defaultIndex, int optionCount);
-    // TODO: minor refactor for this method when UI is implemented.
 
     /**
      * @brief Expose owned properties for demolition/build heuristics.

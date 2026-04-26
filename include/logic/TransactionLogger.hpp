@@ -29,7 +29,7 @@ public:
     /**
      * @brief Restore seluruh log dari entries yang dimuat dari save file.
      * Menggantikan semua entries yang ada.
-     * Dipanggil oleh Game::restoreLog() → GameLoader::restoreGameMeta().
+     * Dipanggil oleh Game::restoreLog() -> GameLoader::restoreGameMeta().
      */
     void restore(const std::vector<data::LogEntry>& entries);
 

@@ -10,8 +10,6 @@ namespace core {
 
 class GameContext;
 
-// TODO: this class has out-of-spec method(s).
-
 /**
  * @brief Skill that pulls the next opponent clockwise onto the activator tile.
  */

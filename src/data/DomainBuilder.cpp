@@ -55,7 +55,7 @@ std::unique_ptr<core::Property> DomainBuilder::buildProperty(const PropertyConfi
 std::unique_ptr<core::Tile> DomainBuilder::buildActionTile(
     const ActionTileConfig& cfg, const TaxConfig& taxCfg)
 {
-    int pos = cfg.id - 1;  // config 1-indexed → Tile 0-indexed
+    int pos = cfg.id - 1;  // config 1-indexed -> Tile 0-indexed
 
     if (cfg.tileType == "SPESIAL") {
         if (cfg.code == "GO")  return std::make_unique<core::GoTile>(pos, cfg.name);

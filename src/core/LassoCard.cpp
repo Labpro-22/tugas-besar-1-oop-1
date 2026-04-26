@@ -42,8 +42,8 @@ void LassoCard::execute(Player& player, GameContext& ctx) {
         }
     }
     if (victim != nullptr) {
-        // TODO: out-of-spec - `setPosition` is not named in the course spec; no GameContext hook for lasso yet.
-        victim->setPosition(myPos);
+        ctx.teleportPlayer(*victim, myPos);
+        ctx.logEvent("LASSO", player, victim->getPosition());
     }
 }
 

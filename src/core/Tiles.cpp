@@ -50,6 +50,7 @@ void UtilityTile::onLanded(Player& p, GameContext& g){
 	if (property_->isAvailable()){ 
 		property_->setOwner(&p); 
 		p.addProperty(property_.get());
+		g.logEvent("UTILITY", p, *property_, 0);
 	} else if (property_->getOwner() != &p && !property_->isMortgagedStatus()){
 		// rent 
 		g.chargeRent(p, *property_.get());
