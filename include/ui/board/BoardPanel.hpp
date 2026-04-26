@@ -28,6 +28,7 @@ class BoardPanel : public Panel {
   explicit BoardPanel(int tileNum = 9);
   ~BoardPanel() override = default;
 
+  void setTileCount(int tileNum);
   void populateTiles(const logic::Board& board);
   void setOnTileSelected(std::function<void(const TileInfo&)> onTileSelected);
   void setPlayers(const std::vector<core::Player*>& players);

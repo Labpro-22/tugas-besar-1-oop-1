@@ -4,8 +4,8 @@
 #include <SFML/Graphics/View.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
-#include <string>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "core/player/Player.hpp"
@@ -30,8 +30,23 @@ class GameWindow : public sf::RenderWindow {
  private:
   enum class StartupChoice { NewGame, ContinueGame, Exit };
 
+  struct PlayerSetup {
+    std::string name;
+    core::Avatar avatar;
+    bool isComputer = false;
+  };
+
+  struct StartupConfig {
+    int boardSize = 40;
+    std::vector<PlayerSetup> players;
+  };
+
   StartupChoice showStartupScreen();
+  bool runNewGameSetup(StartupConfig* outConfig);
+  bool runLoadSetup(std::string* outPath);
   bool loadFromSaveFile(const std::string& path);
+  bool startNewGame(const StartupConfig& config);
+  void rebuildUiBindings();
   void showStartupError(const std::string& title, const std::string& message);
 
   // Size
@@ -46,7 +61,7 @@ class GameWindow : public sf::RenderWindow {
   // Components
   std::vector<std::unique_ptr<core::Player>> playerStorage_;
   std::vector<core::Player*> playerPtrs_;
-  logic::Game game_;
+  std::unique_ptr<logic::Game> game_;
   BoardPanel boardPanel_;           /**< Main (center) panel */
   PlayerInfoPanel playerInfoPanel_; /**< Right Panel */
   ActionPanel actionPanel_;         /**< Left Panel */

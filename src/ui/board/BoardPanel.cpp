@@ -224,6 +224,10 @@ BoardPanel::BoardPanel(int tileNum)
   setup();
 }
 
+void BoardPanel::setTileCount(int tileNum) {
+  tileNum_ = std::max(minTilesPerSide, std::min(maxTilesPerSide, tileNum));
+}
+
 void BoardPanel::setPlayers(const std::vector<core::Player*>& players) {
   players_ = players;
 }
