@@ -50,14 +50,14 @@ private:
 	int doubles_; 
 	bool hasExtraTurn_; 
 
-  // Config-derived values — diisi oleh initialize()
+  // Config-derived values. Diisi oleh initialize()
   int goSalary_  = 200;
   int jailFine_  = 50;
   int maxTurn_   = 0;
   int boardSize_ = 40;
   std::string configPath_;
   
-  // Card decks — diisi oleh initialize() setelah board terbangun
+  // Card decks. Diisi oleh initialize() setelah board terbangun
   core::CardDeck<core::ActionCard> chanceDeck_;
   core::CardDeck<core::ActionCard> communityChestDeck_;
   core::CardDeck<core::ActionCard> skillDeck_;
@@ -77,7 +77,7 @@ public:
    * @brief Baca config, bangun board via DomainBuilder, dan populate semua deck.
    *
    * Dipanggil untuk New Game maupun Load Game (sebelum GameLoader::applyDTO).
-   * Boleh dipanggil ulang — Board::clear() dijalankan di awal.
+   * Boleh dipanggil ulang. Board::clear() dijalankan di awal.
    *
    * @param boardSize Ukuran papan: 20, 24, 28, ..., 60.
    * @param configPath Path ke folder config (misal "config/").
@@ -107,6 +107,19 @@ public:
   void moveCurrentPlayer();
   void handleTileAction(core::Tile* tile);
 
+private:
+  /**
+   * @brief Walks @p p from @p from to @p to clockwise, firing `onPassed` on
+   *        each crossed tile when @p firePassed is true and `onLanded` on the
+   *        destination.
+   *
+   * @note Extension helper. used by both `moveCurrentPlayer` and the
+   *       movement APIs added on top of `core::GameContext`.
+   */
+  void stepThrough(core::Player& p, int from, int to, bool firePassed);
+
+public:
+
   // Property operations
   void buyProperty(core::Property* prop);
   void buildHouse(core::Player* buyer, core::Tile* at);
@@ -129,6 +142,9 @@ public:
   void drawCommunityChestCard(core::Player& p) override;
   void payPlayerFromBank(core::Player& p, int amount) override;
   int  getGoSalary() const override;
+  void movePlayer(core::Player& p, int targetIndex) override;
+  void teleportPlayer(core::Player& p, int targetIndex) override;
+  int  findNearestTileOfType(int from, core::TileType type) const override;
 
   void logEvent(const std::string& action, core::Player& p, int value) override;
   void logEvent(const std::string& action, core::Player& p,

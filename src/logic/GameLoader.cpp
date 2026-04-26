@@ -47,7 +47,7 @@ static std::unique_ptr<core::ActionCard> buildCardFromDTO(
     if (dto.cardType == "DemolitionCard") {
         return core::DemolitionCard::make("Hancurkan bangunan lawan.");
     }
-    // Fallback: jenis tidak dikenal — kembalikan nullptr (diabaikan oleh caller)
+    // Fallback: jenis tidak dikenal, kembalikan nullptr (diabaikan oleh caller)
     return nullptr;
 }
 
@@ -56,7 +56,7 @@ void GameLoader::applyDTO(const data::GameStateDTO& dto, Game& game,
     // Step 1: rebuild board dari config sesuai boardSize yang tersimpan di save
     game.initialize(dto.boardSize, configPath);
 
-    // Step 2–5: restore runtime state
+    // Step 2-5: restore runtime state
     restoreGameMeta(dto, game);
     restorePlayers(dto, game);
     restoreProperties(dto, game);
@@ -83,10 +83,10 @@ void GameLoader::restorePlayers(const data::GameStateDTO& dto, Game& game) {
         core::Player* player = game.getPlayerByName(pDTO.name);
         if (!player) continue;
 
-        // Balance — setBalance dipakai agar tidak menambah ke nilai default
+        // Balance, setBalance dipakai agar tidak menambah ke nilai default
         player->setBalance(pDTO.balance);
 
-        // Position — resolve dari code tile ke 0-indexed board index
+        // Position, resolve dari code tile ke 0-indexed board index
         core::Tile* tile = board.getTileByCode(pDTO.positionCode);
         if (tile) player->setPosition(tile->getPosition());
 
@@ -99,13 +99,13 @@ void GameLoader::restorePlayers(const data::GameStateDTO& dto, Game& game) {
                 player->incrementJailTurns();
         }
 
-        // Kartu tangan — direstorasi AKURAT dari HeldCardDTO
+        // Kartu tangan, direstorasi AKURAT dari HeldCardDTO
         for (const auto& cardDTO : pDTO.heldCards) {
             auto card = buildCardFromDTO(cardDTO);
             if (card) {
                 // CardDeck memiliki kartu; player menyimpan pointer non-owning.
                 // Kartu tangan disimpan sementara di skillDeck_ agar lifetime
-                // dikelola oleh deck — ini tradeoff pragmatis sampai ada
+                // dikelola oleh deck, ini tradeoff pragmatis sampai ada
                 // dedicated hand-card storage dengan ownership yang jelas.
                 // TODO: pertimbangkan dedicated storage untuk kartu tangan
                 //       agar terpisah dari draw deck.
@@ -129,7 +129,7 @@ void GameLoader::restoreProperties(const data::GameStateDTO& dto, Game& game) {
         core::Property* prop = tile->getProperty();
         if (!prop) continue;
 
-        // 1. Set owner DULU — mortgage() butuh isOwned() == true
+        // 1. Set owner DULU, mortgage() butuh isOwned() == true
         if (!propDTO->ownerName.empty()) {
             core::Player* owner = game.getPlayerByName(propDTO->ownerName);
             if (owner) {

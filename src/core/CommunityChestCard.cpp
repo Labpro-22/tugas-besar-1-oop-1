@@ -33,4 +33,48 @@ std::unique_ptr<ActionCard> CommunityChestCard::makeCollect(int amount, std::str
         }));
 }
 
+std::unique_ptr<ActionCard> CommunityChestCard::makeCollectFromAll(int amount, std::string description) {
+    return std::unique_ptr<ActionCard>(new CommunityChestCard(std::move(description), [amount](Player& player, GameContext& ctx) {
+            int collected = 0;
+            for (Player* candidate : ctx.getPlayers()) {
+                if (candidate == nullptr || candidate == &player || candidate->isBankrupted()) {
+                    continue;
+                }
+                if (candidate->canAfford(amount)) {
+                    *candidate -= amount;
+                    collected += amount;
+                } else {
+                    collected += candidate->getBalance();
+                    *candidate -= candidate->getBalance();
+                    candidate->setBankrupted(true);
+                }
+            }
+            if (collected > 0) {
+                player += collected;
+            }
+        }));
+}
+
+std::unique_ptr<ActionCard> CommunityChestCard::makePayToAll(int amount, std::string description) {
+    return std::unique_ptr<ActionCard>(new CommunityChestCard(std::move(description), [amount](Player& player, GameContext& ctx) {
+            for (Player* candidate : ctx.getPlayers()) {
+                if (candidate == nullptr || candidate == &player || candidate->isBankrupted()) {
+                    continue;
+                }
+                if (player.canAfford(amount)) {
+                    player -= amount;
+                    *candidate += amount;
+                } else {
+                    const int leftover = player.getBalance();
+                    if (leftover > 0) {
+                        player -= leftover;
+                        *candidate += leftover;
+                    }
+                    player.setBankrupted(true);
+                    return;
+                }
+            }
+        }));
+}
+
 }

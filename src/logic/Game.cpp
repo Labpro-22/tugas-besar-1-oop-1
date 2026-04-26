@@ -66,7 +66,7 @@ void Game::initialize(int boardSize, const std::string& configPath) {
     for (auto* p : players_)
         if (p) p->setBalance(miscCfg.initialBalance);
 
-    // Step 6: bangun deck — setelah board siap (chance deck butuh posisi stasiun)
+    // Step 6: bangun deck, setelah board siap (chance deck butuh posisi stasiun)
     buildChanceDeck();
     buildCommunityChestDeck();
     buildSkillDeck();
@@ -93,6 +93,10 @@ void Game::nextTurn() {
         turnCount_++;
       }
     } while (players_[currentPlayerId_]->isBankrupted());
+  }
+
+  if (auto* incoming = players_[currentPlayerId_]) {
+    incoming->resetPerTurnFlags();
   }
 
   hasExtraTurn_ = false;
@@ -139,7 +143,7 @@ void Game::moveCurrentPlayer() {
   if (p->isInJail()) {
     return;
   }
-  
+
   int steps = lastDiceRoll_.first + lastDiceRoll_.second;
   int boardSize = board_.getTileCount();
 
@@ -150,16 +154,31 @@ void Game::moveCurrentPlayer() {
   int currentPos = p->getPosition();
   int newPos = (currentPos + steps) % boardSize;
 
-  if (currentPos + steps >= boardSize) {
-    core::Tile* goTile = board_.getTile(0);
-    if (goTile) {
-      goTile->onPassed(*p, *this);
+  stepThrough(*p, currentPos, newPos, /*firePassed=*/true);
+}
+
+void Game::stepThrough(core::Player& p, int from, int to, bool firePassed) {
+  int boardSize = board_.getTileCount();
+  if (boardSize <= 0) {
+    throw InvalidConfigException("Board", "at least 1 tile");
+  }
+
+  // Normalise to [0, boardSize)
+  int dest = ((to % boardSize) + boardSize) % boardSize;
+  int origin = ((from % boardSize) + boardSize) % boardSize;
+
+  if (firePassed && origin != dest) {
+    int idx = origin;
+    while (true) {
+      idx = (idx + 1) % boardSize;
+      if (idx == dest) break;
+      core::Tile* crossed = board_.getTile(idx);
+      if (crossed) crossed->onPassed(p, *this);
     }
   }
 
-  p->setPosition(newPos);
-  core::Tile *landedTile = board_.getTile(newPos);
-
+  p.setPosition(dest);
+  core::Tile* landedTile = board_.getTile(dest);
   handleTileAction(landedTile);
 }
 
@@ -454,46 +473,85 @@ void Game::restoreLog(const std::vector<data::LogEntry>& entries) {
 core::CardDeck<core::ActionCard>& Game::getSkillDeck() { return skillDeck_; }
 
 void Game::buildChanceDeck() {
+    // Spec card list
     std::vector<std::unique_ptr<core::ActionCard>> cards;
-    cards.push_back(core::ChanceCard::makeAdvanceTo(0, "Advance to GO"));
-    cards.push_back(core::ChanceCard::makeGoToJail("Go to Jail"));
-    cards.push_back(core::ChanceCard::makePayBank(50, "Pay tax Rp50"));
-    cards.push_back(core::ChanceCard::makeMoveBack(3, "Move back 3 spaces"));
-    cards.push_back(std::unique_ptr<core::ActionCard>(new core::ChanceCard(
-        "Bank pays you Rp50",
-        [](core::Player& p, core::GameContext& ctx) { ctx.payPlayerFromBank(p, 50); })));
+    cards.push_back(core::ChanceCard::makeAdvanceToNearestRailroad("Pergi ke stasiun terdekat."));
+    cards.push_back(core::ChanceCard::makeMoveBack(3, "Mundur 3 petak."));
+    cards.push_back(core::ChanceCard::makeGoToJail("Masuk Penjara."));
     chanceDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
     chanceDeck_.shuffle();
 }
 
 void Game::buildCommunityChestDeck() {
+    // Spec card list
     std::vector<std::unique_ptr<core::ActionCard>> cards;
-    cards.push_back(core::CommunityChestCard::makeCollect(100, "Bank pays you Rp100"));
-    cards.push_back(core::CommunityChestCard::makeCollect(50, "Bank pays you Rp50"));
-    cards.push_back(core::CommunityChestCard::makePayBank(50, "Pay hospital Rp50"));
-    cards.push_back(core::CommunityChestCard::makePayBank(100, "Pay tax Rp100"));
+    cards.push_back(core::CommunityChestCard::makeCollectFromAll(100, "Ulang tahun: dapat M100 dari tiap pemain."));
+    cards.push_back(core::CommunityChestCard::makePayBank(700, "Biaya dokter: bayar M700."));
+    cards.push_back(core::CommunityChestCard::makePayToAll(200, "Nyaleg: bayar M200 ke tiap pemain."));
     communityChestDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
     communityChestDeck_.shuffle();
 }
 
 void Game::buildSkillDeck() {
+    // Spec card counts
     std::vector<std::unique_ptr<core::ActionCard>> cards;
-    cards.push_back(core::ShieldCard::make("Shield"));
-    cards.push_back(core::ShieldCard::make("Shield"));
-    cards.push_back(core::DiscountCard::makeRandom("Discount"));
-    cards.push_back(core::DiscountCard::makeRandom("Discount"));
-    cards.push_back(core::TeleportCard::make(0, "Teleport to GO"));
-    cards.push_back(core::MoveCard::make(3, "Move forward 3 spaces"));
-    cards.push_back(core::LassoCard::make("Lasso"));
-    cards.push_back(core::DemolitionCard::make("Demolition"));
+    std::uniform_int_distribution<int> stepDist(1, 6);
+
+    for (int i = 0; i < 4; ++i) {
+        const int steps = stepDist(rng_);
+        cards.push_back(core::MoveCard::make(steps,
+            std::string("Maju ") + std::to_string(steps) + " petak."));
+    }
+    for (int i = 0; i < 3; ++i) {
+        cards.push_back(core::DiscountCard::makeRandom("Diskon properti."));
+    }
+    for (int i = 0; i < 2; ++i) {
+        cards.push_back(core::ShieldCard::make("Tameng pajak."));
+    }
+    for (int i = 0; i < 2; ++i) {
+        cards.push_back(core::TeleportCard::make(0, "Teleportasi ke GO."));
+    }
+    for (int i = 0; i < 2; ++i) {
+        cards.push_back(core::LassoCard::make("Laso pemain terdekat."));
+    }
+    for (int i = 0; i < 2; ++i) {
+        cards.push_back(core::DemolitionCard::make("Demolisi bangunan lawan."));
+    }
+
     skillDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
     skillDeck_.shuffle();
 }
 
-// NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
 const std::vector<core::Player*>& Game::getPlayers() const { return players_; }
 
-// NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
 int Game::getBoardSize() const { return board_.getTileCount(); }
+
+void Game::movePlayer(core::Player& p, int targetIndex) {
+    int boardSize = board_.getTileCount();
+    if (boardSize <= 0) return;
+    int dest = ((targetIndex % boardSize) + boardSize) % boardSize;
+    stepThrough(p, p.getPosition(), dest, /*firePassed=*/true);
+}
+
+void Game::teleportPlayer(core::Player& p, int targetIndex) {
+    int boardSize = board_.getTileCount();
+    if (boardSize <= 0) return;
+    int dest = ((targetIndex % boardSize) + boardSize) % boardSize;
+    stepThrough(p, p.getPosition(), dest, /*firePassed=*/false);
+}
+
+int Game::findNearestTileOfType(int from, core::TileType type) const {
+    int boardSize = board_.getTileCount();
+    if (boardSize <= 0) return -1;
+    int origin = ((from % boardSize) + boardSize) % boardSize;
+    for (int step = 1; step <= boardSize; ++step) {
+        int idx = (origin + step) % boardSize;
+        const core::Tile* tile = board_.getTile(idx);
+        if (tile && tile->getType() == type) {
+            return idx;
+        }
+    }
+    return -1;
+}
 
 } // namespace logic

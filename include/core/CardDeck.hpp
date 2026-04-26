@@ -84,7 +84,7 @@ public:
      * @brief Add one card to storage deck (for GameLoader).
      * Card is being added at RIGHT BEFORE topIndex_ so it can't be automatically
      * drawed (card is being held by players, not in draw pile).
-     * @note Extension — used by GameLoader::restorePlayers() to
+     * @note Extension. used by GameLoader::restorePlayers() to
      *       save player held cards' ownership inside the deck.
      */
     void addCard(std::unique_ptr<T> card);

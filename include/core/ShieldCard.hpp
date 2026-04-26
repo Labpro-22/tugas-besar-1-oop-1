@@ -6,8 +6,6 @@
 #include <core/Player.hpp>
 #include <core/SkillCard.hpp>
 
-// TODO: this class has out-of-spec method(s).
-
 namespace core {
 
 class GameContext;

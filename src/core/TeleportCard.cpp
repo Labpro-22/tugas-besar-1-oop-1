@@ -1,6 +1,7 @@
 #include "core/TeleportCard.hpp"
 
 #include "core/GameContext.hpp"
+#include "core/Player.hpp"
 
 #include <utility>
 
@@ -15,12 +16,11 @@ void TeleportCard::execute(Player& player, GameContext& ctx) {
     if (n <= 0) {
         return;
     }
-    // TODO: out-of-spec - bypasses Game::moveCurrentPlayer / onPassed / pass-Go handling.
     int idx = targetPosition_ % n;
     if (idx < 0) {
         idx += n;
     }
-    player.setPosition(idx);
+    ctx.teleportPlayer(player, idx);
 }
 
 std::string TeleportCard::getCardType() const { return "Teleport"; }
