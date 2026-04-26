@@ -350,7 +350,7 @@ void Game::chargeTax(core::Player& p, int flatRate, int percentageRate, core::Ta
             p -= flatRate;
             bank_.receive(flatRate);
         } else {
-            p.goToJail();
+            p.setBankrupted(true);
         }
     }
 }
