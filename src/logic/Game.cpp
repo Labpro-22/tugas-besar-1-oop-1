@@ -1,11 +1,24 @@
 #include "logic/Game.hpp"
-#include "logic/UIInputMediator.hpp"
+
+#include "core/ChanceCard.hpp"
+#include "core/CommunityChestCard.hpp"
+#include "core/DemolitionCard.hpp"
+#include "core/DiscountCard.hpp"
 #include "core/GameException.hpp"
+#include "core/LassoCard.hpp"
+#include "core/MoveCard.hpp"
 #include "core/Player.hpp"
 #include "core/Property.hpp"
+#include "core/ShieldCard.hpp"
+#include "core/TeleportCard.hpp"
 #include "core/Tiles.hpp"
+#include "data/ConfigReader.hpp"
+#include "data/DomainBuilder.hpp"
 #include "logic/Auction.hpp"
 #include "logic/TransactionLogger.hpp"
+#include "logic/UIInputMediator.hpp"
+
+#include <random>
 #include <iostream>
 namespace logic {
 
@@ -13,6 +26,50 @@ Game::Game(std::vector<core::Player *> players, TransactionLogger *logger)
     : players_(players), logger_(logger), mediator_(nullptr), currentPlayerId_(0),
       state_(GameState::PRE_ROLL), lastDiceRoll_({0, 0}), turnCount_(1),
       rng_(std::random_device{}()), doubles_(0), hasExtraTurn_(false) {}
+
+void Game::initialize(int boardSize, const std::string& configPath) {
+    boardSize_  = boardSize;
+    configPath_ = configPath;
+
+    board_.clear();
+
+    // Step 1: baca semua config
+    data::ConfigReader reader(configPath, boardSize);
+
+    auto propCfgs  = reader.readProperties();
+    auto actionCfgs = reader.readActionTiles();
+    auto taxCfg    = reader.readTax();
+    auto specialCfg = reader.readSpecial();
+    auto miscCfg   = reader.readMisc();
+    auto railRents  = reader.readRailroadRents();
+    auto utilMults  = reader.readUtilityMultipliers();
+
+    // Step 2: bangun tiles
+    auto entries = data::DomainBuilder::buildBoard(propCfgs, actionCfgs, taxCfg);
+
+    for (auto* cfg : propCfgs) delete cfg;
+
+    // Step 3: populate board
+    for (auto& entry : entries)
+        board_.addTile(std::move(entry.tile), entry.code);
+
+    // Step 4: inject config ke static tables dan game fields
+    core::Utility::setMultiplierTabel(utilMults);
+    core::Railroad::setRentTable(railRents);
+
+    goSalary_ = specialCfg.goSalary;
+    jailFine_ = specialCfg.jailFine;
+    maxTurn_  = miscCfg.maxTurn;
+
+    // Step 5: set initial balance (dioverride oleh GameLoader::restorePlayers saat load)
+    for (auto* p : players_)
+        if (p) p->setBalance(miscCfg.initialBalance);
+
+    // Step 6: bangun deck — setelah board siap (chance deck butuh posisi stasiun)
+    buildChanceDeck();
+    buildCommunityChestDeck();
+    buildSkillDeck();
+}
 
 void Game::startGame() { state_ = GameState::PRE_ROLL; }
 
@@ -325,6 +382,37 @@ void Game::payPlayerFromBank(core::Player& p, int amount) {
 int Game::getGoSalary() const { 
     return 200; 
 }
+
+core::Player* Game::getPlayerByName(const std::string& name) const {
+    for (auto* p : players_)
+        if (p && p->getName() == name) return p;
+    return nullptr;
+}
+
+void Game::setTurnCount(int count)       { turnCount_       = count; }
+void Game::setMaxTurn(int max)           { maxTurn_         = max;   }
+void Game::setCurrentPlayerIdx(int idx)  { currentPlayerId_ = idx;   }
+
+void Game::setTurnOrder(const std::vector<std::string>& order) {
+    std::vector<core::Player*> reordered;
+    reordered.reserve(order.size());
+    for (const auto& name : order) {
+        for (auto* p : players_) {
+            if (p && p->getName() == name) {
+                reordered.push_back(p);
+                break;
+            }
+        }
+    }
+    if (reordered.size() == players_.size())
+        players_ = reordered;
+}
+
+void Game::restoreLog(const std::vector<data::LogEntry>& entries) {
+    if (logger_) logger_->restore(entries);
+}
+
+core::CardDeck<core::ActionCard>& Game::getSkillDeck() { return skillDeck_; }
 
 // NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
 const std::vector<core::Player*>& Game::getPlayers() const { return players_; }

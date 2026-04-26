@@ -150,4 +150,6 @@ void Player::incrementJailTurns() noexcept { ++jailTurns_; }
 
 void Player::clearJailTurns() noexcept { jailTurns_ = 0; }
 
+void Player::setBalance(int amount) noexcept { balance_ = amount; }
+
 }

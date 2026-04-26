@@ -269,6 +269,13 @@ public:
      */
     void clearJailTurns() noexcept;
 
+    /**
+     * @brief Set balance directly to restore data from saved files.
+     * Do not use for normal transactions, use operator+= / operator-= instead.
+     * Only can be called by GameLoader.
+     */
+    void setBalance(int amount) noexcept;
+
 protected:
     std::string name_;
     std::string token_;

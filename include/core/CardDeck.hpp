@@ -80,6 +80,15 @@ public:
      */
     int size() const noexcept;
 
+    /**
+     * @brief Add one card to storage deck (for GameLoader).
+     * Card is being added at RIGHT BEFORE topIndex_ so it can't be automatically
+     * drawed (card is being held by players, not in draw pile).
+     * @note Extension — used by GameLoader::restorePlayers() to
+     *       save player held cards' ownership inside the deck.
+     */
+    void addCard(std::unique_ptr<T> card);
+
 private:
     /**
      * @brief Put all cards back into play and shuffle for a new cycle.
@@ -142,6 +151,14 @@ template <typename T>
 void CardDeck<T>::reshuffleDiscard() {
     reset();
     shuffle();
+}
+
+template <typename T>
+void CardDeck<T>::addCard(std::unique_ptr<T> card) {
+    if (!card) return;
+    cards_.insert(cards_.begin() + static_cast<std::ptrdiff_t>(topIndex_),
+                  std::move(card));
+    ++topIndex_;
 }
 
 }
