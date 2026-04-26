@@ -1,5 +1,6 @@
 #include "logic/Game.hpp"
 
+#include <algorithm>
 #include <random>
 
 #include "core/GameException.hpp"
@@ -336,6 +337,34 @@ std::pair<int, int> Game::getLastDiceRoll() const { return lastDiceRoll_; }
 int Game::getTurnCount() const { return turnCount_; }
 int Game::getMaxTurn() const { return maxTurn_; }
 int Game::getJailFine() const { return jailFine_; }
+
+void Game::setDice(int d1, int d2) {
+  if (state_ != GameState::PRE_ROLL && state_ != GameState::WAITING_FOR_DICE) {
+    throw InvalidStateException("setDice",
+                                std::to_string(static_cast<int>(state_)));
+  }
+
+  const int dieOne = std::max(1, std::min(6, d1));
+  const int dieTwo = std::max(1, std::min(6, d2));
+  lastDiceRoll_ = {dieOne, dieTwo};
+
+  if (dieOne == dieTwo) {
+    doubles_++;
+    if (doubles_ >= 3) {
+      core::Player* p = getCurrentPlayer();
+      p->goToJail();
+      doubles_ = 0;
+      hasExtraTurn_ = false;
+    } else {
+      hasExtraTurn_ = true;
+    }
+  } else {
+    doubles_ = 0;
+    hasExtraTurn_ = false;
+  }
+
+  logEvent(data::LogAction::DICE_ROLL, *getCurrentPlayer(), dieOne + dieTwo);
+}
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
   bool accept = requireMediator().offerProperty(p, prop);

@@ -29,9 +29,10 @@ core::Property* DialogManager::selectFestivalProperty(core::Player& player) {
   Panel* dialog = static_cast<Panel*>(overlay->getChild("dialog"));
 
   addTitleBand(*dialog, "FESTIVAL: PILIH PROPERTI", layout::dialog::modalWidth);
+    addCloseButton(*dialog, false, &done);
 
   const LabelStyle infoStyle(
-      typography::dialogBody, palette::white, typography::regular,
+      typography::dialogBody, palette::black, typography::regular,
       HorizontalAlign::Center, VerticalAlign::Top,
       {layout::dialog::padding * 0.5f, layout::dialog::padding * 0.3f}, false,
       typography::logBody);
@@ -107,6 +108,7 @@ bool DialogManager::offerProperty(core::Player& player,
   Panel* dialog = static_cast<Panel*>(overlay->getChild("dialog"));
 
   addTitleBand(*dialog, "TAWARAN PROPERTI", layout::dialog::modalWidth);
+    addCloseButton(*dialog, false, &done);
 
   const sf::Vector2f deedOrigin{
       layout::dialog::padding,
@@ -119,7 +121,7 @@ bool DialogManager::offerProperty(core::Player& player,
   buildDeedPanel(*dialog, property, deedOrigin, deedSize);
 
   const LabelStyle infoStyle(
-      typography::dialogBody, palette::white, typography::regular,
+      typography::dialogBody, palette::black, typography::regular,
       HorizontalAlign::Left, VerticalAlign::Top,
       {layout::dialog::padding * 0.4f, layout::dialog::padding * 0.3f}, false,
       typography::logBody);
@@ -185,9 +187,10 @@ bool DialogManager::chooseTaxMethod(core::Player& player, int flatAmount,
   const float modalHeight = layout::dialog::modalHeight * 0.5f;
 
   addTitleBand(*dialog, "PILIH METODE PAJAK", layout::dialog::modalWidth);
+    addCloseButton(*dialog, false, &done);
 
   const LabelStyle infoStyle(
-      typography::dialogBody, palette::white, typography::regular,
+      typography::dialogBody, palette::black, typography::regular,
       HorizontalAlign::Center, VerticalAlign::Middle,
       {layout::dialog::padding * 0.4f, 0}, false, typography::logBody);
 
@@ -258,8 +261,9 @@ std::pair<core::Player*, int> DialogManager::runAuction(
 
     addTitleBand(*dialog, "LELANG: " + property->getName(),
                  layout::dialog::modalWidth);
+    addCloseButton(*dialog, false, &done);
 
-    const LabelStyle bidStyle(typography::title, palette::white,
+    const LabelStyle bidStyle(typography::title, palette::black,
                               typography::titleStyle, HorizontalAlign::Center,
                               VerticalAlign::Middle, {0, 0}, false,
                               typography::logBody);
@@ -282,7 +286,7 @@ std::pair<core::Player*, int> DialogManager::runAuction(
     core::Player* bidder = remaining[activeIndex % remaining.size()];
 
     const LabelStyle promptStyle(
-        typography::dialogBody, palette::white, typography::regular,
+        typography::dialogBody, palette::black, typography::regular,
         HorizontalAlign::Center, VerticalAlign::Top,
         {layout::dialog::padding * 0.4f, layout::dialog::padding * 0.2f}, false,
         typography::logBody);
@@ -381,9 +385,10 @@ core::ActionCard* DialogManager::selectCardToDrop(core::Player& player) {
   const float modalHeight = layout::dialog::modalHeight * 0.55f;
 
   addTitleBand(*dialog, "BUANG KARTU", layout::dialog::modalWidth);
+    addCloseButton(*dialog, false, &done);
 
   const LabelStyle infoStyle(
-      typography::dialogBody, palette::white, typography::regular,
+      typography::dialogBody, palette::black, typography::regular,
       HorizontalAlign::Center, VerticalAlign::Top,
       {layout::dialog::padding * 0.4f, layout::dialog::padding * 0.3f}, false,
       typography::logBody);

@@ -126,6 +126,15 @@ class DialogManager : public logic::InputMediator {
    */
   void addTitleBand(Panel& panel, const std::string& title, float width);
 
+    /**
+     * @brief Add a shared top-right CLOSE button on the title area.
+     *
+     * @param panel Target dialog panel.
+     * @param enabled When false, the button is visible but disabled.
+     * @param done Pointer toggled to true when CLOSE is clicked.
+     */
+    void addCloseButton(Panel& panel, bool enabled, bool* done);
+
   /**
    * @brief Build a single property deed card panel and add it to @p parent.
    *

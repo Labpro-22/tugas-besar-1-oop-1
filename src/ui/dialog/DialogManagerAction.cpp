@@ -26,8 +26,9 @@ std::pair<int, int> DialogManager::promptDiceOverride() {
   const float modalHeight = layout::dialog::modalHeight * 0.6f;
 
   addTitleBand(*dialog, "ATUR DADU", layout::dialog::modalWidth);
+  addCloseButton(*dialog, false, &done);
 
-  const LabelStyle numberStyle(typography::title, palette::white,
+  const LabelStyle numberStyle(typography::title, palette::black,
                                typography::titleStyle, HorizontalAlign::Center,
                                VerticalAlign::Middle, {0, 0}, false,
                                typography::logBody);
@@ -119,6 +120,7 @@ int DialogManager::promptCardChoice(const core::Player& player) {
   const float modalHeight = layout::dialog::modalHeight * 0.55f;
 
   addTitleBand(*dialog, "GUNAKAN KARTU", layout::dialog::modalWidth);
+  addCloseButton(*dialog, false, &done);
 
   const float slotWidth =
       (layout::dialog::modalWidth - 2.0f * layout::dialog::padding -

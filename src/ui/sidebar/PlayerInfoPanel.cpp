@@ -32,10 +32,16 @@ void PlayerInfoPanel::setPlayers(const std::vector<core::Player*>& players,
     auto card = std::make_unique<PlayerCard>(
         sf::Vector2f{x, y0 + i * (size::playerCardHeight + gap)},
         sf::Vector2f{size::playerCardWidth, size::playerCardHeight});
+    card->setOnClick(onPlayerSelected_);
     card->setPlayer(*players[i], board, players[i] == currentPlayer,
                     static_cast<int>(i) + 1);
     playerCards_.push_back(std::move(card));
   }
+}
+
+void PlayerInfoPanel::setOnPlayerSelected(
+    std::function<void(core::Player&)> onPlayerSelected) {
+  onPlayerSelected_ = std::move(onPlayerSelected);
 }
 
 void PlayerInfoPanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {

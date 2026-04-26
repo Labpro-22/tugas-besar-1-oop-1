@@ -59,6 +59,7 @@ void Street::demolish(int n) {
   if (n <= 0) return;
   if (hotelCount_ > 0) {
     hotelCount_ = 0;
+    houseCount_ = 4;
     --n;
   }
   int toRemove = std::min(n, houseCount_);

@@ -28,19 +28,20 @@ CornerTilePanel::CornerTilePanel(sf::Vector2f position, int numTiles,
 
   switch (cornerType_) {
     case core::SpecialTileType::GO:
-      selectionInfo_ = TileInfo{"MULAI", iconPath_, false, board::base, false};
+      selectionInfo_ =
+          TileInfo{-1, "MULAI", iconPath_, false, false, board::base, false};
       break;
     case core::SpecialTileType::JAIL:
-      selectionInfo_ =
-          TileInfo{"PENJARA", iconPath_, false, board::base, false};
+      selectionInfo_ = TileInfo{-1, "PENJARA", iconPath_, false, false,
+                                board::base, false};
       break;
     case core::SpecialTileType::FREE_PARKING:
-      selectionInfo_ =
-          TileInfo{"BEBAS PARKIR", iconPath_, false, board::base, false};
+      selectionInfo_ = TileInfo{-1, "BEBAS PARKIR", iconPath_, false, false,
+                                board::base, false};
       break;
     case core::SpecialTileType::GO_TO_JAIL:
-      selectionInfo_ =
-          TileInfo{"PERGI KE PENJARA", iconPath_, false, board::base, false};
+      selectionInfo_ = TileInfo{-1, "PERGI KE PENJARA", iconPath_, false,
+                                false, board::base, false};
       break;
   }
 }

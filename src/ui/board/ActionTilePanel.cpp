@@ -36,7 +36,8 @@ ActionTilePanel::ActionTilePanel(sf::Vector2f position, int numTiles,
       break;
   }
 
-  selectionInfo_ = TileInfo{topText_, iconPath_, false, board::base, true};
+  selectionInfo_ =
+      TileInfo{-1, topText_, iconPath_, false, false, board::base, true};
 }
 
 namespace {

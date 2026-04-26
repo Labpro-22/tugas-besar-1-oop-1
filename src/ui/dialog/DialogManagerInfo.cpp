@@ -21,6 +21,7 @@ void DialogManager::showDeed(const core::Property& property) {
   Panel* dialog = static_cast<Panel*>(overlay->getChild("dialog"));
 
   addTitleBand(*dialog, "SERTIFIKAT PROPERTI", layout::dialog::modalWidth);
+    addCloseButton(*dialog, true, &done);
 
   const sf::Vector2f deedOrigin{
       layout::dialog::padding,
@@ -59,10 +60,11 @@ void DialogManager::showOwnedProperties(const core::Player& player) {
 
   addTitleBand(*dialog, "PROPERTI: " + player.getName(),
                layout::dialog::modalWidth);
+    addCloseButton(*dialog, true, &done);
 
   const auto& properties = player.getOwnedProperties();
   const LabelStyle rowStyle(
-      typography::dialogBody, palette::white, typography::regular,
+      typography::dialogBody, palette::black, typography::regular,
       HorizontalAlign::Left, VerticalAlign::Middle,
       {layout::dialog::padding * 0.4f, 0}, false, typography::logBody);
 
@@ -115,9 +117,10 @@ void DialogManager::showBankruptcy(const core::Player& player) {
   const float modalHeight = layout::dialog::modalHeight * 0.45f;
 
   addTitleBand(*dialog, "BANGKRUT", layout::dialog::modalWidth);
+    addCloseButton(*dialog, true, &done);
 
   const LabelStyle messageStyle(
-      typography::dialogBody, palette::white, typography::regular,
+      typography::dialogBody, palette::black, typography::regular,
       HorizontalAlign::Center, VerticalAlign::Middle,
       {layout::dialog::padding * 0.4f, 0}, false, typography::logBody);
 
@@ -156,13 +159,14 @@ void DialogManager::showAuctionResult(const core::Player* winner, int amount) {
   const float modalHeight = layout::dialog::modalHeight * 0.45f;
 
   addTitleBand(*dialog, "HASIL LELANG", layout::dialog::modalWidth);
+    addCloseButton(*dialog, true, &done);
 
   const std::string message = winner ? winner->getName() + " menang dengan " +
                                            dialog_detail::formatMoney(amount)
                                      : "Tidak ada pemenang.";
 
   const LabelStyle messageStyle(
-      typography::dialogBody, palette::white, typography::regular,
+      typography::dialogBody, palette::black, typography::regular,
       HorizontalAlign::Center, VerticalAlign::Middle,
       {layout::dialog::padding * 0.4f, 0}, false, typography::logBody);
 

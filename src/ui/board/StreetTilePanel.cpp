@@ -37,7 +37,8 @@ StreetTilePanel::StreetTilePanel(sf::Vector2f position, int numTiles,
       break;
   }
 
-  selectionInfo_ = TileInfo{topText_, bottomText_, true, accentColor_, true};
+  selectionInfo_ =
+      TileInfo{-1, topText_, "", true, true, accentColor_, true};
 }
 
 float StreetTilePanel::tileAccentHeight() const {

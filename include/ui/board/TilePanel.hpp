@@ -15,8 +15,10 @@ enum class Orientation { Bottom, Left, Top, Right };
 
 class TileInfo {
  public:
+  int tileIndex = -1;
   std::string title;
   std::string iconPath;
+  bool isProperty = false;
   bool useAccent = false;
   sf::Color accentColor = board::base;
   bool actionsEnabled = true;
@@ -31,6 +33,7 @@ class TilePanel : public Panel {
 
   void setOnSelected(std::function<void(const TileInfo&)> onSelected);
   const TileInfo& selectionInfo() const { return selectionInfo_; }
+  TileInfo& mutableSelectionInfo() { return selectionInfo_; }
 
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;

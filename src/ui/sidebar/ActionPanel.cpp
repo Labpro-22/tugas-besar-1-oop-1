@@ -1,14 +1,21 @@
 #include "ui/sidebar/ActionPanel.hpp"
 
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <algorithm>
+#include <cstdlib>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "core/Tiles.hpp"
 #include "core/card/Card.hpp"
 #include "core/player/Player.hpp"
+#include "data/LogEntry.hpp"
+#include "data/TransactionLogger.hpp"
 #include "logic/Game.hpp"
 #include "ui/AssetsManager.hpp"
 #include "ui/component/Color.hpp"
@@ -17,6 +24,53 @@
 #include "ui/dialog/DialogManager.hpp"
 
 namespace ui {
+
+namespace {
+
+std::string logActionText(data::LogAction action) {
+    switch (action) {
+        case data::LogAction::DICE_ROLL:
+            return "DADU";
+        case data::LogAction::PIECE_MOVEMENT:
+            return "GERAK";
+        case data::LogAction::PROPERTY_PURCHASE:
+            return "BELI";
+        case data::LogAction::RENT_PAYMENT:
+            return "SEWA";
+        case data::LogAction::TAX_PAYMENT:
+            return "PAJAK";
+        case data::LogAction::BUILD_HOUSE:
+            return "BANGUN";
+        case data::LogAction::SALE_HOUSE:
+            return "JUAL";
+        case data::LogAction::MORTGAGE:
+            return "GADAI";
+        case data::LogAction::UNMORTGAGE:
+            return "TEBUS";
+        case data::LogAction::SPECIAL_CARD_USE:
+            return "KARTU";
+        case data::LogAction::CHANCE_CARD_DRAW:
+            return "CHANCE";
+        case data::LogAction::COMMUNITY_CARD_DRAW:
+            return "DANA";
+        case data::LogAction::AUCTION_BID:
+            return "BID";
+        case data::LogAction::AUCTION_RESULT:
+            return "LELANG";
+        case data::LogAction::FESTIVAL_ACTIVATION:
+            return "FEST";
+        case data::LogAction::BANKRUPTCY:
+            return "BANGKRUT";
+        case data::LogAction::GAME_SAVE:
+            return "SAVE";
+        case data::LogAction::GAME_LOAD:
+            return "LOAD";
+        default:
+            return "LOG";
+    }
+}
+
+}  // namespace
 
 void ActionPanel::setGameContext(logic::Game* game,
                                                                  DialogManager* dialogManager) {
@@ -55,10 +109,57 @@ void ActionPanel::setup() {
   currentY +=
       layout::actionPanel::titleHeight + layout::actionPanel::sectionGap;
 
+    setupStatusRows(width, currentY);
+
   setupGameActionPanel(width, currentY);
   setupTileOptionPanel(width, currentY);
   setupLogPanel(width, currentY);
   setupGameOptionPanel(width, currentY);
+}
+
+void ActionPanel::setupStatusRows(float width, float& currentY) {
+    const float rowHeight = layout::actionPanel::topActionHeight * 0.9f;
+    const float valueWidth = 1.1f * size::multiplier;
+    const float titleWidth = std::max(0.0f, width - valueWidth);
+
+    const LabelStyle leftStyle(
+            typography::buttonSecondary, palette::black, typography::titleStyle,
+            HorizontalAlign::Left, VerticalAlign::Middle,
+            {layout::actionPanel::innerPadding, layout::actionPanel::textPaddingY},
+            false, typography::logBody);
+    const LabelStyle rightStyle(
+            typography::buttonPrimary, palette::black, typography::titleStyle,
+            HorizontalAlign::Center, VerticalAlign::Middle,
+            {layout::actionPanel::innerPadding, layout::actionPanel::textPaddingY},
+            false, typography::logBody);
+
+    auto addRow = [&](const std::string& title, Label** outValue) {
+        auto panel = std::make_unique<Panel>(
+                sf::Vector2f(layout::actionPanel::outerPadding, currentY),
+                sf::Vector2f(width, rowHeight),
+                PanelStyle(palette::white, palette::darkGrey,
+                                     layout::actionPanel::borderThickness));
+
+        panel->addChild(std::make_unique<Label>(
+                title, font_,
+                sf::Vector2f(layout::actionPanel::outerPadding, currentY),
+                sf::Vector2f(titleWidth, rowHeight), leftStyle));
+
+        auto valueLabel = std::make_unique<Label>(
+                "-", font_,
+                sf::Vector2f(layout::actionPanel::outerPadding + titleWidth, currentY),
+                sf::Vector2f(valueWidth, rowHeight), rightStyle);
+        *outValue = valueLabel.get();
+        panel->addChild(std::move(valueLabel));
+
+        addChild(std::move(panel));
+        currentY += rowHeight + layout::actionPanel::rowGap;
+    };
+
+    addRow("TURN", &turnValueLabel_);
+    addRow("DADU", &diceValueLabel_);
+
+    currentY += layout::actionPanel::sectionGap - layout::actionPanel::rowGap;
 }
 
 void ActionPanel::setupGameActionPanel(float width, float& currentY) {
@@ -100,17 +201,17 @@ void ActionPanel::setupGameActionPanel(float width, float& currentY) {
         } catch (...) {
         }
   });
+
     addTopButton("Lanjutkan | Atur Dadu", setDiceStyle, [this]() {
         if (game_ == nullptr || dialogManager_ == nullptr) return;
         const auto [d1, d2] = dialogManager_->promptDiceOverride();
-        (void)d1;
-        (void)d2;
         try {
-            game_->rollDice();
+            game_->setDice(d1, d2);
             game_->moveCurrentPlayer();
         } catch (...) {
         }
   });
+
     addTopButton("Gunakan Kartu", useCardStyle, [this]() {
         if (game_ == nullptr || dialogManager_ == nullptr) return;
         core::Player* current = game_->getCurrentPlayer();
@@ -120,8 +221,8 @@ void ActionPanel::setupGameActionPanel(float width, float& currentY) {
         if (hand.empty()) return;
 
         int chosenIdx = dialogManager_->promptCardChoice(*current);
-        chosenIdx = std::max(0, std::min(chosenIdx,
-                                                                         static_cast<int>(hand.size()) - 1));
+        chosenIdx =
+                std::max(0, std::min(chosenIdx, static_cast<int>(hand.size()) - 1));
         core::ActionCard* chosenCard = hand[static_cast<size_t>(chosenIdx)];
         auto owned = current->removeCard(chosenCard);
         if (owned) {
@@ -223,7 +324,7 @@ void ActionPanel::setupTileOptionPanel(float width, float& currentY) {
       });
 
   mortgageButton_ = std::make_unique<Button>(
-      "SEWA", font_, sf::Vector2f(x2, currentY),
+      "GADAI", font_, sf::Vector2f(x2, currentY),
       sf::Vector2f(tileActionButtonWidth,
                    layout::actionPanel::tileActionHeight),
             mortgageStyle, [this]() {
@@ -240,7 +341,7 @@ void ActionPanel::setupTileOptionPanel(float width, float& currentY) {
       });
 
   unmortgageButton_ = std::make_unique<Button>(
-      "GADAI", font_, sf::Vector2f(x3, currentY),
+      "TEBUS", font_, sf::Vector2f(x3, currentY),
       sf::Vector2f(tileActionButtonWidth,
                    layout::actionPanel::tileActionHeight),
             unmortgageStyle, [this]() {
@@ -403,8 +504,8 @@ void ActionPanel::setupLogPanel(float width, float& currentY) {
       sf::Vector2f(layout::actionPanel::headerButtonWidth,
                    layout::actionPanel::logHeaderHeight -
                        (2.0f * layout::actionPanel::rowGap)),
-      showMoreStyle, []() {
-        // TODO: Open full game log dialog.
+            showMoreStyle, [this]() {
+                logFirstVisibleLine_ = 0;
       });
   logHeaderPanel->addChild(std::move(showMoreButton));
 
@@ -416,26 +517,10 @@ void ActionPanel::setupLogPanel(float width, float& currentY) {
       sf::Vector2f(layout::actionPanel::outerPadding, currentY),
       sf::Vector2f(width, layout::actionPanel::logBodyHeight), palette::white);
 
-  const LabelStyle logEntryStyle(
-      typography::logBody, palette::black, typography::logStyle,
-      HorizontalAlign::Left, VerticalAlign::Top,
-      {layout::actionPanel::innerPadding, layout::actionPanel::innerPadding},
-      true, typography::logBody);
-
-  auto logEntryOne = std::make_unique<Label>(
-      "Belum ada transaksi", font_,
-      sf::Vector2f(layout::actionPanel::outerPadding, currentY),
-      sf::Vector2f(width, layout::actionPanel::logBodyHeight / 3.0f),
-      logEntryStyle);
-  logBodyPanel->addChild(std::move(logEntryOne));
-
-  auto logEntryTwo = std::make_unique<Label>(
-      "Transaksi akan terlihat di sini.", font_,
-      sf::Vector2f(layout::actionPanel::outerPadding,
-                   currentY + (layout::actionPanel::logBodyHeight / 3.0f)),
-      sf::Vector2f(width, layout::actionPanel::logBodyHeight / 3.0f),
-      logEntryStyle);
-  logBodyPanel->addChild(std::move(logEntryTwo));
+  logBodyRect_ = sf::FloatRect(layout::actionPanel::outerPadding, currentY,
+                               width, layout::actionPanel::logBodyHeight);
+  logLineHeight_ = static_cast<float>(typography::logBody) +
+                   layout::actionPanel::textPaddingY * 0.9f;
 
   addChild(std::move(logBodyPanel));
   currentY +=
@@ -466,8 +551,8 @@ void ActionPanel::setupGameOptionPanel(float width, float& currentY) {
       "SIMPAN", font_,
       sf::Vector2f(layout::actionPanel::outerPadding, currentY),
       sf::Vector2f(gameOptionWidth, layout::actionPanel::gameOptionHeight),
-      saveStyle, []() {
-        // TODO: Open save game dialog.
+            saveStyle, []() {
+                data::TransactionLogger::get().serialize("data/test_log.txt");
       }));
 
   addChild(std::make_unique<Button>(
@@ -476,8 +561,8 @@ void ActionPanel::setupGameOptionPanel(float width, float& currentY) {
                        layout::actionPanel::rowGap,
                    currentY),
       sf::Vector2f(gameOptionWidth, layout::actionPanel::gameOptionHeight),
-      loadStyle, []() {
-        // TODO: Open load game dialog.
+            loadStyle, []() {
+                data::TransactionLogger::get().deserialize("data/test_log.txt");
       }));
 
   addChild(std::make_unique<Button>(
@@ -486,9 +571,90 @@ void ActionPanel::setupGameOptionPanel(float width, float& currentY) {
                        (2.0f * (gameOptionWidth + layout::actionPanel::rowGap)),
                    currentY),
       sf::Vector2f(gameOptionWidth, layout::actionPanel::gameOptionHeight),
-      quitStyle, []() {
-        // TODO: Open quit confirmation dialog.
+            quitStyle, []() {
+                std::exit(0);
       }));
+}
+
+void ActionPanel::refreshStatusRows() {
+    if (game_ == nullptr) {
+        if (turnValueLabel_) turnValueLabel_->setText("-");
+        if (diceValueLabel_) diceValueLabel_->setText("-");
+        return;
+    }
+
+    if (turnValueLabel_) {
+        turnValueLabel_->setText(std::to_string(game_->getTurnCount()));
+    }
+
+    if (diceValueLabel_) {
+        const auto [d1, d2] = game_->getLastDiceRoll();
+        if (d1 <= 0 || d2 <= 0) {
+            diceValueLabel_->setText("-");
+        } else {
+            diceValueLabel_->setText(std::to_string(d1) + " + " +
+                                                             std::to_string(d2));
+        }
+    }
+}
+
+void ActionPanel::refreshLogLines() {
+    const auto& entries = data::TransactionLogger::get().getEntries();
+    logLines_.clear();
+    logLines_.reserve(entries.size());
+
+    for (auto it = entries.rbegin(); it != entries.rend(); ++it) {
+        const data::LogEntry& e = *it;
+        logLines_.push_back("T" + std::to_string(e.getTurnNumber()) + " [" +
+                                                logActionText(e.getActionType()) + "] " +
+                                                e.getPlayerName() + " - " + e.getDescription());
+    }
+
+    if (logLines_.empty()) {
+        logLines_.push_back("Belum ada transaksi.");
+    }
+
+    const float innerHeight =
+            std::max(0.0f, logBodyRect_.height - 2.0f * layout::actionPanel::innerPadding);
+    logVisibleLineCount_ =
+            std::max(1, static_cast<int>(innerHeight / std::max(1.0f, logLineHeight_)));
+    clampLogScroll();
+
+    const float trackWidth = layout::actionPanel::innerPadding * 0.75f;
+    logTrackRect_ = sf::FloatRect(
+            logBodyRect_.left + logBodyRect_.width - trackWidth -
+                    layout::actionPanel::innerPadding * 0.35f,
+            logBodyRect_.top + layout::actionPanel::innerPadding * 0.35f,
+            trackWidth,
+            logBodyRect_.height - layout::actionPanel::innerPadding * 0.7f);
+
+    const int total = static_cast<int>(logLines_.size());
+    const int maxFirst = std::max(0, total - logVisibleLineCount_);
+    const float ratio = std::min(1.0f,
+                                                             static_cast<float>(logVisibleLineCount_) /
+                                                                     static_cast<float>(std::max(1, total)));
+    const float thumbHeight = std::max(18.0f, logTrackRect_.height * ratio);
+    const float travel = std::max(0.0f, logTrackRect_.height - thumbHeight);
+    const float t = maxFirst == 0
+                                            ? 0.0f
+                                            : static_cast<float>(logFirstVisibleLine_) /
+                                                        static_cast<float>(maxFirst);
+
+    logThumbRect_ = sf::FloatRect(logTrackRect_.left,
+                                                                logTrackRect_.top + travel * t,
+                                                                logTrackRect_.width,
+                                                                thumbHeight);
+}
+
+void ActionPanel::clampLogScroll() {
+    const int maxFirst =
+            std::max(0, static_cast<int>(logLines_.size()) - logVisibleLineCount_);
+    logFirstVisibleLine_ = std::max(0, std::min(logFirstVisibleLine_, maxFirst));
+}
+
+bool ActionPanel::isInRect(const sf::Vector2f& point,
+                                                     const sf::FloatRect& rect) const {
+    return rect.contains(point);
 }
 
 void ActionPanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
@@ -498,6 +664,45 @@ void ActionPanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
   if (sellButton_) sellButton_->handleEvent(event, window);
   if (mortgageButton_) mortgageButton_->handleEvent(event, window);
   if (unmortgageButton_) unmortgageButton_->handleEvent(event, window);
+
+    const sf::Vector2f mousePos =
+            window.mapPixelToCoords(sf::Mouse::getPosition(window));
+
+    if (event.type == sf::Event::MouseWheelScrolled &&
+            isInRect(mousePos, logBodyRect_)) {
+        if (event.mouseWheelScroll.delta > 0.0f) {
+            logFirstVisibleLine_ = std::max(0, logFirstVisibleLine_ - 2);
+        } else if (event.mouseWheelScroll.delta < 0.0f) {
+            logFirstVisibleLine_ += 2;
+            clampLogScroll();
+        }
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed &&
+            event.mouseButton.button == sf::Mouse::Left &&
+            isInRect(mousePos, logThumbRect_)) {
+        draggingLogThumb_ = true;
+        logDragOffsetY_ = mousePos.y - logThumbRect_.top;
+    }
+
+    if (event.type == sf::Event::MouseButtonReleased &&
+            event.mouseButton.button == sf::Mouse::Left) {
+        draggingLogThumb_ = false;
+    }
+
+    if (event.type == sf::Event::MouseMoved && draggingLogThumb_) {
+        const float minY = logTrackRect_.top;
+        const float maxY = logTrackRect_.top + logTrackRect_.height - logThumbRect_.height;
+        const float rawTop = mousePos.y - logDragOffsetY_;
+        const float thumbTop = std::max(minY, std::min(rawTop, maxY));
+        const float travel = std::max(1.0f, maxY - minY);
+        const float t = (thumbTop - minY) / travel;
+
+        const int maxFirst =
+                std::max(0, static_cast<int>(logLines_.size()) - logVisibleLineCount_);
+        logFirstVisibleLine_ = static_cast<int>(t * static_cast<float>(maxFirst));
+        clampLogScroll();
+    }
 }
 
 void ActionPanel::render(sf::RenderWindow& window) {
@@ -507,6 +712,44 @@ void ActionPanel::render(sf::RenderWindow& window) {
   if (sellButton_) sellButton_->render(window);
   if (mortgageButton_) mortgageButton_->render(window);
   if (unmortgageButton_) unmortgageButton_->render(window);
+
+    const float textStartX = logBodyRect_.left + layout::actionPanel::innerPadding;
+    const float textStartY = logBodyRect_.top + layout::actionPanel::innerPadding;
+    const float usableWidth =
+            std::max(0.0f, logBodyRect_.width - logTrackRect_.width -
+                                                 2.4f * layout::actionPanel::innerPadding);
+
+    const LabelStyle lineStyle(
+            typography::logBody, palette::black, typography::logStyle,
+            HorizontalAlign::Left, VerticalAlign::Top, {0.0f, 0.0f}, true,
+            typography::logBody);
+
+    for (int i = 0; i < logVisibleLineCount_; ++i) {
+        const int index = logFirstVisibleLine_ + i;
+        if (index < 0 || index >= static_cast<int>(logLines_.size())) {
+            break;
+        }
+        Label line(logLines_[static_cast<size_t>(index)], font_,
+                             sf::Vector2f(textStartX, textStartY + i * logLineHeight_),
+                             sf::Vector2f(usableWidth, logLineHeight_), lineStyle);
+        line.render(window);
+    }
+
+    if (logLines_.size() > static_cast<size_t>(logVisibleLineCount_)) {
+        sf::RectangleShape track;
+        track.setPosition({logTrackRect_.left, logTrackRect_.top});
+        track.setSize({logTrackRect_.width, logTrackRect_.height});
+        track.setFillColor(palette::lightGrey);
+        track.setOutlineColor(palette::darkGrey);
+        track.setOutlineThickness(1.0f);
+        window.draw(track);
+
+        sf::RectangleShape thumb;
+        thumb.setPosition({logThumbRect_.left, logThumbRect_.top});
+        thumb.setSize({logThumbRect_.width, logThumbRect_.height});
+        thumb.setFillColor(accent::darkBlue);
+        window.draw(thumb);
+    }
 }
 
 void ActionPanel::update(sf::RenderWindow& window) {
@@ -516,6 +759,9 @@ void ActionPanel::update(sf::RenderWindow& window) {
   if (sellButton_) sellButton_->update(window);
   if (mortgageButton_) mortgageButton_->update(window);
   if (unmortgageButton_) unmortgageButton_->update(window);
+
+    refreshStatusRows();
+    refreshLogLines();
 }
 
 }  // namespace ui

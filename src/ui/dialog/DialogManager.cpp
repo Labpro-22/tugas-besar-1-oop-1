@@ -89,7 +89,7 @@ void DialogManager::runModalLoop(Panel& overlay,
       overlay.handleEvent(event, window_);
     }
     overlay.update(window_);
-    window_.clear(palette::backgroundGrey);
+    window_.clear(palette::white);
     overlay.render(window_);
     window_.display();
   }
@@ -105,7 +105,7 @@ std::unique_ptr<Panel> DialogManager::buildModalOverlay(
   const float y = (size::height - dialogSize.y) / 2.0f;
   auto dialog = std::make_unique<Panel>(
       sf::Vector2f{x, y}, dialogSize,
-      PanelStyle(component::panel, palette::black, size::lineThickness));
+      PanelStyle(palette::white, palette::lightGrey, size::lineThickness));
   overlay->addChild("dialog", std::move(dialog));
   return overlay;
 }
@@ -113,13 +113,13 @@ std::unique_ptr<Panel> DialogManager::buildModalOverlay(
 void DialogManager::addTitleBand(Panel& panel, const std::string& title,
                                  float width) {
   const LabelStyle labelStyle(
-      typography::dialogTitle, palette::white, typography::titleStyle,
+    typography::dialogTitle, palette::black, typography::titleStyle,
       HorizontalAlign::Center, VerticalAlign::Middle,
       {layout::dialog::padding, 0}, false, typography::logBody);
 
   auto band = std::make_unique<Panel>(
       sf::Vector2f{0, 0}, sf::Vector2f{width, layout::dialog::titleHeight},
-      PanelStyle(accent::darkRed));
+    PanelStyle(component::sideBar, palette::lightGrey, size::lineThickness));
 
   auto label = std::make_unique<Label>(
       title, font_, sf::Vector2f{0, 0},
@@ -127,6 +127,32 @@ void DialogManager::addTitleBand(Panel& panel, const std::string& title,
 
   band->addChild(std::move(label));
   panel.addChild("title-band", std::move(band));
+}
+
+void DialogManager::addCloseButton(Panel& panel, bool enabled, bool* done) {
+  if (done == nullptr) {
+    return;
+  }
+
+  const float closeHeight = layout::dialog::titleHeight * 0.58f;
+  const float closeWidth = closeHeight * 1.8f;
+  const float closeX = layout::dialog::modalWidth - layout::dialog::padding * 0.45f -
+                       closeWidth;
+  const float closeY = (layout::dialog::titleHeight - closeHeight) * 0.5f;
+
+  const ButtonStyle closeStyle(
+      palette::white, palette::lightGrey, palette::lightGrey,
+      component::button::disabled, palette::darkGrey, size::lineThickness,
+      LabelStyle(typography::buttonSecondary, palette::black,
+                 typography::buttonStyle, HorizontalAlign::Center,
+                 VerticalAlign::Middle, {0, 0}, false, typography::logBody));
+
+  auto close = std::make_unique<Button>(
+      "CLOSE", font_, sf::Vector2f{closeX, closeY},
+      sf::Vector2f{closeWidth, closeHeight}, closeStyle,
+      [done]() { *done = true; });
+  close->setActive(enabled);
+  panel.addChild("title-close", std::move(close), Panel::Layer::Overlay);
 }
 
 void DialogManager::buildDeedPanel(Panel& parent,

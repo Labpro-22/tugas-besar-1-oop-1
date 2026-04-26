@@ -12,6 +12,7 @@
 #include "ui/AssetsManager.hpp"
 #include "ui/component/Color.hpp"
 #include "ui/component/Constants.hpp"
+#include "ui/component/Style.hpp"
 
 namespace {
 
@@ -85,6 +86,18 @@ sf::Color actionTileColor(const core::ActionTile& tile) {
     default:
       return ui::board::property::defaultColor;
   }
+}
+
+ui::ButtonStyle transparentCardButtonStyle() {
+  const ui::LabelStyle hiddenLabel(ui::typography::tileMinFont,
+                                   sf::Color::Transparent,
+                                   ui::typography::regular,
+                                   ui::HorizontalAlign::Center,
+                                   ui::VerticalAlign::Middle, {0.0f, 0.0f},
+                                   false, ui::typography::tileMinFont);
+  return ui::ButtonStyle(sf::Color::Transparent, ui::palette::black20,
+                         sf::Color::Transparent, sf::Color::Transparent,
+                         sf::Color::Transparent, 0.0f, hiddenLabel);
 }
 
 }  // namespace
@@ -240,8 +253,18 @@ PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
 
   starSprite_.setTexture(starTexture_, true);
   mapPinSprite_.setTexture(mapPinBlackTexture_, true);
+  hitboxButton_ = std::make_unique<Button>(
+      "", font_, position_, size_, transparentCardButtonStyle(), [this]() {
+        if (player_ != nullptr && onClick_) {
+          onClick_(*player_);
+        }
+      });
 
   updateLayout();
+}
+
+void PlayerCard::setOnClick(std::function<void(core::Player&)> onClick) {
+  onClick_ = std::move(onClick);
 }
 
 void PlayerCard::setPlayer(core::Player& player, const logic::Board& board,
@@ -301,6 +324,26 @@ void PlayerCard::setPlayer(core::Player& player, const logic::Board& board,
       views.push_back(buildPropertyView(*property));
     }
   }
+
+  if (player.isBankrupted()) {
+    background_.setFillColor(palette::lightGrey);
+    avatarBackground_.setFillColor(palette::darkGrey);
+    namePlateBackground_.setFillColor(palette::darkGrey);
+    turnBoxBackground_.setFillColor(palette::darkGrey);
+    divider_.setFillColor(palette::darkGrey);
+    balanceText_.setFillColor(palette::darkGrey);
+    locationText_.setFillColor(palette::darkGrey);
+    avatarSprite_.setColor(sf::Color(255, 255, 255, 120));
+  } else {
+    background_.setFillColor(palette::white);
+    avatarBackground_.setFillColor(palette::lightGrey);
+    namePlateBackground_.setFillColor(palette::lightGrey);
+    turnBoxBackground_.setFillColor(palette::lightGrey);
+    divider_.setFillColor(palette::black);
+    balanceText_.setFillColor(palette::black);
+    avatarSprite_.setColor(sf::Color::White);
+  }
+
   rebuildPropertyGrid(views);
   updateLayout();
 }
@@ -514,6 +557,24 @@ void PlayerCard::render(sf::RenderWindow& window) {
   window.draw(locationText_);
   for (PropertyWidget& widget : propertyWidgets_) {
     widget.render(window);
+  }
+
+  if (hitboxButton_) {
+    hitboxButton_->render(window);
+  }
+}
+
+void PlayerCard::handleEvent(sf::Event& event, sf::RenderWindow& window) {
+  if (hitboxButton_) {
+    hitboxButton_->handleEvent(event, window);
+  }
+}
+
+void PlayerCard::update(sf::RenderWindow& window) {
+  if (hitboxButton_) {
+    hitboxButton_->setPosition(position_);
+    hitboxButton_->setSize(size_);
+    hitboxButton_->update(window);
   }
 }
 

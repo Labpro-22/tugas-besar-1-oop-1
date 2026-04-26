@@ -4,6 +4,7 @@
 #include <SFML/Graphics/View.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
+#include <string>
 #include <memory>
 #include <vector>
 
@@ -27,6 +28,12 @@ class GameWindow : public sf::RenderWindow {
   void close();
 
  private:
+  enum class StartupChoice { NewGame, ContinueGame, Exit };
+
+  StartupChoice showStartupScreen();
+  bool loadFromSaveFile(const std::string& path);
+  void showStartupError(const std::string& title, const std::string& message);
+
   // Size
   const sf::Vector2f virtualSize_{size::width, size::height};
   const sf::Vector2f mainBoardSize_{size::height, size::height};

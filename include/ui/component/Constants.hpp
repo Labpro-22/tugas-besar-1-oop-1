@@ -159,8 +159,8 @@ const float hotelSizeRatio = 0.20f;
 
 namespace ui::layout::dialog {
 
-const float modalWidth = 5.0f * size::multiplier;
-const float modalHeight = 6.0f * size::multiplier;
+const float modalWidth = 4.8f * size::multiplier;
+const float modalHeight = 5.0f * size::multiplier;
 const float padding = 0.25f * size::multiplier;
 const float titleHeight = 0.55f * size::multiplier;
 const float buttonHeight = 0.45f * size::multiplier;

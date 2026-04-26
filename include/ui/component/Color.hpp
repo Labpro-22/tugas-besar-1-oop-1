@@ -39,7 +39,7 @@ const auto background = palette::white;
 const auto sideBar = accent::lightBlue;
 const auto card = palette::darkGrey;
 const auto cardHover = palette::lightGrey;
-const auto panel = accent::darkBrown;
+const auto panel = palette::lightGrey;
 
 namespace button {
 const auto base = palette::black;

@@ -4,6 +4,8 @@
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -49,12 +51,13 @@ class PlayerCard : public Widget {
   PlayerCard(sf::Vector2f position, sf::Vector2f size);
   ~PlayerCard() override = default;
 
-  void handleEvent(sf::Event&, sf::RenderWindow&) override {}
+  void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;
-  void update(sf::RenderWindow&) override {}
+  void update(sf::RenderWindow& window) override;
 
   void setPlayer(core::Player& player, const logic::Board& board,
                  bool isCurrentTurn, int turnNumber);
+  void setOnClick(std::function<void(core::Player&)> onClick);
 
  private:
   void updateLayout();
@@ -88,6 +91,8 @@ class PlayerCard : public Widget {
 
   core::Player* player_ = nullptr;
   std::vector<PropertyWidget> propertyWidgets_;
+  std::function<void(core::Player&)> onClick_;
+  std::unique_ptr<Button> hitboxButton_;
 };
 
 }  // namespace ui

@@ -1,13 +1,19 @@
 #include "ui/board/BoardPanel.hpp"
 
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "core/Tiles.hpp"
+#include "core/player/Player.hpp"
 #include "logic/Board.hpp"
+#include "ui/AssetsManager.hpp"
 #include "ui/board/ActionTilePanel.hpp"
 #include "ui/board/CornerTilePanel.hpp"
 #include "ui/board/StreetTilePanel.hpp"
@@ -20,6 +26,21 @@
 namespace {
 
 std::string asMoney(int amount) { return "$ " + std::to_string(amount); }
+
+std::string avatarPathFor(core::Avatar avatar) {
+  switch (avatar) {
+    case core::Avatar::COPILOT:
+      return "assets/players/copilot.png";
+    case core::Avatar::CLAUDE:
+      return "assets/players/claude.png";
+    case core::Avatar::GEMINI:
+      return "assets/players/gemini.png";
+    case core::Avatar::CHATGPT:
+      return "assets/players/openai.png";
+    default:
+      return "assets/players/copilot.png";
+  }
+}
 
 struct TilePlacement {
   sf::Vector2f position;
@@ -190,7 +211,21 @@ BoardPanel::BoardPanel(int tileNum)
 
   auto backgroundPanel = std::make_unique<Panel>(position(), size(), board::base);
   addChild("board-bg", std::move(backgroundPanel));
+
+  avatarTextures_[core::Avatar::COPILOT] =
+      &AssetsManager::get().getTexture(avatarPathFor(core::Avatar::COPILOT));
+  avatarTextures_[core::Avatar::CLAUDE] =
+      &AssetsManager::get().getTexture(avatarPathFor(core::Avatar::CLAUDE));
+  avatarTextures_[core::Avatar::GEMINI] =
+      &AssetsManager::get().getTexture(avatarPathFor(core::Avatar::GEMINI));
+  avatarTextures_[core::Avatar::CHATGPT] =
+      &AssetsManager::get().getTexture(avatarPathFor(core::Avatar::CHATGPT));
+
   setup();
+}
+
+void BoardPanel::setPlayers(const std::vector<core::Player*>& players) {
+  players_ = players;
 }
 
 void BoardPanel::setOnTileSelected(
@@ -241,6 +276,10 @@ void BoardPanel::populateTiles(const logic::Board& gameBoard) {
       continue;
     }
 
+    TileInfo& info = panel->mutableSelectionInfo();
+    info.tileIndex = index;
+    info.isProperty = (tile->getType() == core::TileType::PROPERTY);
+
     panel->setOnSelected(onTileSelected_);
     addChild(std::move(panel));
   }
@@ -250,7 +289,64 @@ void BoardPanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {
   Panel::handleEvent(event, window);
 }
 
-void BoardPanel::render(sf::RenderWindow& window) { Panel::render(window); }
+void BoardPanel::render(sf::RenderWindow& window) {
+  Panel::render(window);
+
+  std::unordered_map<int, std::vector<core::Player*>> playersByTile;
+  for (core::Player* player : players_) {
+    if (player == nullptr || player->isBankrupted()) {
+      continue;
+    }
+    playersByTile[player->getPosition()].push_back(player);
+  }
+
+  for (auto& entry : children_) {
+    auto* tile = dynamic_cast<TilePanel*>(std::get<2>(entry).get());
+    if (tile == nullptr) {
+      continue;
+    }
+
+    const int tileIndex = tile->selectionInfo().tileIndex;
+    auto it = playersByTile.find(tileIndex);
+    if (it == playersByTile.end()) {
+      continue;
+    }
+
+    const sf::Vector2f tilePos = tile->position();
+    const sf::Vector2f tileSize = tile->size();
+    const float tokenSize = std::max(10.0f, std::min(tileSize.x, tileSize.y) * 0.24f);
+    const float gap = tokenSize * 0.12f;
+
+    for (size_t i = 0; i < it->second.size(); ++i) {
+      core::Player* player = it->second[i];
+      if (player == nullptr) {
+        continue;
+      }
+
+      auto textureIt = avatarTextures_.find(player->getAvatar());
+      if (textureIt == avatarTextures_.end() || textureIt->second == nullptr) {
+        continue;
+      }
+
+      sf::Sprite token;
+      token.setTexture(*textureIt->second, true);
+
+      const sf::Vector2u source = textureIt->second->getSize();
+      if (source.x == 0 || source.y == 0) {
+        continue;
+      }
+
+      const float scaleX = tokenSize / static_cast<float>(source.x);
+      const float scaleY = tokenSize / static_cast<float>(source.y);
+      token.setScale(scaleX, scaleY);
+
+      const float offsetX = gap + static_cast<float>(i % 2) * (tokenSize + gap);
+      const float offsetY = gap + static_cast<float>(i / 2) * (tokenSize + gap);
+      token.setPosition(tilePos.x + offsetX, tilePos.y + offsetY);
+      window.draw(token);
+    }
+  }
+}
 
 void BoardPanel::update(sf::RenderWindow& window) { Panel::update(window); }
 

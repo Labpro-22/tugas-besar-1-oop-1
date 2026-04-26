@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -20,6 +21,7 @@ class PlayerInfoPanel : public Panel {
 
   void setPlayers(const std::vector<core::Player*>& players,
                   const logic::Board& board, core::Player* currentPlayer);
+  void setOnPlayerSelected(std::function<void(core::Player&)> onPlayerSelected);
 
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;
@@ -27,6 +29,7 @@ class PlayerInfoPanel : public Panel {
 
  private:
   std::vector<std::unique_ptr<PlayerCard>> playerCards_;
+  std::function<void(core::Player&)> onPlayerSelected_;
 };
 
 }  // namespace ui
