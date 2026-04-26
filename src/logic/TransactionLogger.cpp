@@ -2,7 +2,7 @@
 
 // Overload 1: player action with amount
 
-namespace logic{
+namespace logic {
 void TransactionLogger::log(int turnNumber, const std::string& actionType,
                             const core::Player& player, int amount) {
   data::LogEntry entry;
@@ -15,8 +15,8 @@ void TransactionLogger::log(int turnNumber, const std::string& actionType,
 
 // Overload 2: player action involving a property
 void TransactionLogger::log(int turnNumber, const std::string& actionType,
-                            const core::Player& player, const core::Property& property,
-                            int amount) {
+                            const core::Player& player,
+                            const core::Property& property, int amount) {
   data::LogEntry entry;
   entry.turnNumber = turnNumber;
   entry.playerName = player.getName();
@@ -52,7 +52,7 @@ std::vector<data::LogEntry> TransactionLogger::getRecentLog(int n) const {
 }
 
 void TransactionLogger::restore(const std::vector<data::LogEntry>& entries) {
-    entries_ = entries;
+  entries_ = entries;
 }
 
 void TransactionLogger::clear() { entries_.clear(); }

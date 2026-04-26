@@ -27,16 +27,15 @@ add_library(
   src/core/Railroad.cpp
   src/core/Street.cpp
   src/core/Utility.cpp
-  src/core/ActionCard.cpp
-  src/core/ChanceCard.cpp
-  src/core/CommunityChestCard.cpp
-  src/core/SkillCard.cpp
-  src/core/TeleportCard.cpp
-  src/core/MoveCard.cpp
-  src/core/ShieldCard.cpp
-  src/core/DiscountCard.cpp
-  src/core/LassoCard.cpp
-  src/core/DemolitionCard.cpp
+  src/core/card/Card.cpp
+  src/core/card/ChanceCard.cpp
+  src/core/card/CommunityChestCard.cpp
+  src/core/card/TeleportCard.cpp
+  src/core/card/MoveCard.cpp
+  src/core/card/ShieldCard.cpp
+  src/core/card/DiscountCard.cpp
+  src/core/card/LassoCard.cpp
+  src/core/card/DemolitionCard.cpp
 )
 
 add_library(

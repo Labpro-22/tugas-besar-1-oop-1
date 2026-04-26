@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "LogEntry.hpp"
+#include "data/LogEntry.hpp"
 
 namespace data {
 class LogSerializer {

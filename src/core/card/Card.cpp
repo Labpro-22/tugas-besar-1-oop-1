@@ -1,7 +1,8 @@
-#include "core/ActionCard.hpp"
-#include "core/CardDeck.hpp"
+#include "core/card/Card.hpp"
 
 #include <utility>
+
+#include "core/card/CardDeck.hpp"
 
 namespace core {
 
@@ -10,6 +11,9 @@ ActionCard::ActionCard(std::string description)
 
 std::string ActionCard::getDescription() const { return description_; }
 
+SkillCard::SkillCard(std::string description)
+    : ActionCard(std::move(description)) {}
+
 template class CardDeck<ActionCard>;
 
-}
+}  // namespace core
