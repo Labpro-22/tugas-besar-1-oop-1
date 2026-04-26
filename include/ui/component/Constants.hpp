@@ -101,8 +101,12 @@ const float avatarSize = 0.35f * size::playerCardHeight;
 const float turnBoxWidthRatio = 0.28f;
 const float propertyGap = 0.02f * size::playerCardHeight;
 const float propertyIconHeight = 0.08f * size::playerCardHeight;
+const float propertyIconHeightRatio = 0.35f;
+const float propertyIconHeightRatioMax = 0.45f;
 const int propertyColumns = 5;
 const int maxPropertySlots = 10;
+
+const float verticalSpacing = 0.8f * size::defaultMargin;
 
 }  // namespace ui::layout::playerCard
 

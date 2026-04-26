@@ -36,7 +36,6 @@ class PropertyWidget : public Widget {
   bool isOverflow_ = false;
   int overflowCount_ = 0;
   bool hasIcon_ = false;
-  float iconHeightRatio_ = 0.35f;
   sf::Color boxColor_;
 };
 
@@ -49,12 +48,14 @@ class PlayerCard : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow&) override {}
 
-  void setPlayer(const temp::Player& player);
+  void setPlayer(temp::Player& player);
 
  private:
   void updateLayout();
   void rebuildPropertyGrid(const std::vector<temp::PropertyTuple>& properties);
   static std::string formatBalance(long long balance);
+
+  sf::Font& font_;
 
   sf::RectangleShape background_;
   sf::RectangleShape avatarBackground_;
@@ -67,7 +68,7 @@ class PlayerCard : public Widget {
   sf::RectangleShape turnBoxBackground_;
   sf::Text turnText_;
   sf::Sprite starSprite_;
-  sf::Texture* starTexture_ = nullptr;
+  sf::Texture& starTexture_;
   bool showStar_ = false;
 
   sf::RectangleShape divider_;
@@ -75,12 +76,11 @@ class PlayerCard : public Widget {
   sf::Text balanceText_;
   sf::RectangleShape locationBoxBackground_;
   sf::Sprite mapPinSprite_;
-  sf::Texture* mapPinBlackTexture_ = nullptr;
-  sf::Texture* mapPinWhiteTexture_ = nullptr;
+  sf::Texture& mapPinBlackTexture_;
+  sf::Texture& mapPinWhiteTexture_;
   sf::Text locationText_;
 
-  sf::Font& secondaryFont_;
-  const temp::Player* player_ = nullptr;
+  temp::Player* player_ = nullptr;
   std::vector<PropertyWidget> propertyWidgets_;
 };
 

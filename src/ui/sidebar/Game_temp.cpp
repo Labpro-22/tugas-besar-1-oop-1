@@ -66,10 +66,10 @@ Game::Game(int i) : ini_cuma_stub_aja_nanti_ganti_sendiri_(i) {
       });
 }
 
-std::vector<const Player*> Game::playerPointers() const {
-  std::vector<const Player*> pointers;
+std::vector<Player*> Game::playerPointers() {
+  std::vector<Player*> pointers;
   pointers.reserve(players_.size());
-  for (const Player& player : players_) {
+  for (Player& player : players_) {
     pointers.push_back(&player);
   }
   return pointers;

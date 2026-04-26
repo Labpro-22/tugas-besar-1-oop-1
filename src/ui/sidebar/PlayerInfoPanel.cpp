@@ -13,14 +13,13 @@ PlayerInfoPanel::PlayerInfoPanel()
 
 PlayerInfoPanel::~PlayerInfoPanel() = default;
 
-void PlayerInfoPanel::setPlayers(
-    const std::vector<const temp::Player*>& players) {
+void PlayerInfoPanel::setPlayers(const std::vector<temp::Player*>& players) {
   playerCards_.clear();
   playerCards_.reserve(players.size());
 
   const float x = position_.x + size::defaultMargin;
-  const float y0 = position_.y + size::defaultMargin;
-  const float gap = size::defaultMargin;
+  const float y0 = position_.y + layout::playerCard::verticalSpacing;
+  const float gap = layout::playerCard::verticalSpacing;
 
   for (size_t i = 0; i < players.size(); ++i) {
     auto card = std::make_unique<PlayerCard>(

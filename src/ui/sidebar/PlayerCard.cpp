@@ -78,9 +78,8 @@ void PropertyWidget::applyLayout(sf::Vector2f position, sf::Vector2f size,
                                  float iconHeightRatio) {
   position_ = position;
   size_ = size;
-  iconHeightRatio_ = iconHeightRatio;
 
-  const float iconHeight = size_.y * iconHeightRatio_;
+  const float iconHeight = size_.y * iconHeightRatio;
   const float boxHeight = std::max(1.0f, size_.y - iconHeight);
 
   box_.setPosition(position_);
@@ -133,51 +132,50 @@ void PropertyWidget::render(sf::RenderWindow& window) {
 
 PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
     : Widget(position, size),
-      secondaryFont_(AssetsManager::get().getFont(font::secondaryFamily)) {
+      font_(AssetsManager::get().getFont(font::primaryFamily)),
+      starTexture_(AssetsManager::get().getTexture("assets/icons/star.png")),
+      mapPinBlackTexture_(AssetsManager::get().getTexture(
+          "assets/icons/location_on_black.png")),
+      mapPinWhiteTexture_(AssetsManager::get().getTexture(
+          "assets/icons/location_on_white.png")) {
   background_.setFillColor(palette::white);
 
   avatarBackground_.setFillColor(palette::lightGrey);
 
   namePlateBackground_.setFillColor(palette::lightGrey);
 
-  nameText_.setFont(secondaryFont_);
+  nameText_.setFont(font_);
   nameText_.setCharacterSize(typography::playerCardTitle);
   nameText_.setStyle(typography::titleStyle);
   nameText_.setFillColor(palette::black);
 
   turnBoxBackground_.setFillColor(palette::lightGrey);
 
-  turnText_.setFont(secondaryFont_);
+  turnText_.setFont(font_);
   turnText_.setCharacterSize(typography::title);
   turnText_.setStyle(typography::titleStyle);
   turnText_.setFillColor(palette::black);
 
   divider_.setFillColor(palette::black);
 
-  balanceText_.setFont(secondaryFont_);
+  balanceText_.setFont(font_);
   balanceText_.setCharacterSize(typography::playerCardBody);
   balanceText_.setStyle(typography::titleStyle);
   balanceText_.setFillColor(palette::black);
 
   locationBoxBackground_.setFillColor(board::property::defaultColor);
-  locationText_.setFont(secondaryFont_);
+  locationText_.setFont(font_);
   locationText_.setCharacterSize(typography::playerCardBody);
   locationText_.setStyle(typography::titleStyle);
   locationText_.setFillColor(palette::black);
 
-  AssetsManager& assets = AssetsManager::get();
-  starTexture_ = &assets.getTexture("assets/icons/star.png");
-  mapPinBlackTexture_ =
-      &assets.getTexture("assets/icons/location_on_black.png");
-  mapPinWhiteTexture_ =
-      &assets.getTexture("assets/icons/location_on_white.png");
-  starSprite_.setTexture(*starTexture_, true);
-  mapPinSprite_.setTexture(*mapPinBlackTexture_, true);
+  starSprite_.setTexture(starTexture_, true);
+  mapPinSprite_.setTexture(mapPinBlackTexture_, true);
 
   updateLayout();
 }
 
-void PlayerCard::setPlayer(const temp::Player& player) {
+void PlayerCard::setPlayer(temp::Player& player) {
   player_ = &player;
 
   nameText_.setString(player.name());
@@ -194,12 +192,12 @@ void PlayerCard::setPlayer(const temp::Player& player) {
   if (player.currentTileColor() == board::property::white) {
     locationBoxBackground_.setOutlineColor(palette::black);
     locationBoxBackground_.setOutlineThickness(1.5f);
-    mapPinSprite_.setTexture(*mapPinBlackTexture_, true);
+    mapPinSprite_.setTexture(mapPinBlackTexture_, true);
   } else if (player.currentTileColor() == board::property::black) {
     locationText_.setFillColor(palette::white);
-    mapPinSprite_.setTexture(*mapPinWhiteTexture_, true);
+    mapPinSprite_.setTexture(mapPinWhiteTexture_, true);
   } else {
-    mapPinSprite_.setTexture(*mapPinBlackTexture_, true);
+    mapPinSprite_.setTexture(mapPinBlackTexture_, true);
   }
 
   avatarTexture_ = &AssetsManager::get().getTexture(player.avatarPath());
@@ -269,7 +267,7 @@ void PlayerCard::updateLayout() {
   turnText_.setPosition(turnCenterX + (showStar_ ? turnBoxW * 0.12f : 0.0f),
                         turnCenterY);
 
-  const sf::Vector2u starSource = starTexture_->getSize();
+  const sf::Vector2u starSource = starTexture_.getSize();
   if (starSource.x > 0 && starSource.y > 0) {
     const float starTarget = turnBoxH * 0.50f;
     const float starScale = starTarget / static_cast<float>(starSource.y);
@@ -296,29 +294,26 @@ void PlayerCard::updateLayout() {
   locationBoxBackground_.setPosition(col2X + col2W - locationBoxW, financeY);
   locationBoxBackground_.setSize({locationBoxW, financeH});
 
-  const sf::Texture* activePinTexture =
+  const sf::Texture& activePinTexture =
       locationText_.getFillColor() == palette::white ? mapPinWhiteTexture_
                                                      : mapPinBlackTexture_;
-  if (activePinTexture != nullptr) {
-    const sf::Vector2u pinSource = activePinTexture->getSize();
-    if (pinSource.x > 0 && pinSource.y > 0) {
-      const float pinTarget = financeH * 0.65f;
-      const float pinScale = pinTarget / static_cast<float>(pinSource.y);
-      mapPinSprite_.setScale(pinScale, pinScale);
-      sf::FloatRect pinBounds = mapPinSprite_.getGlobalBounds();
-      mapPinSprite_.setPosition(
-          locationBoxBackground_.getPosition().x + financeH * 0.18f,
-          locationBoxBackground_.getPosition().y +
-              (financeH - pinBounds.height) / 2.0f);
+  const sf::Vector2u pinSource = activePinTexture.getSize();
+  if (pinSource.x > 0 && pinSource.y > 0) {
+    const float pinTarget = financeH * 0.65f;
+    const float pinScale = pinTarget / static_cast<float>(pinSource.y);
+    mapPinSprite_.setScale(pinScale, pinScale);
+    sf::FloatRect pinBounds = mapPinSprite_.getGlobalBounds();
+    mapPinSprite_.setPosition(
+        locationBoxBackground_.getPosition().x + financeH * 0.18f,
+        locationBoxBackground_.getPosition().y +
+            (financeH - pinBounds.height) / 2.0f);
 
-      sf::FloatRect locationBounds = locationText_.getLocalBounds();
-      locationText_.setOrigin(
-          locationBounds.left,
-          locationBounds.top + locationBounds.height / 2.0f);
-      locationText_.setPosition(
-          mapPinSprite_.getPosition().x + pinBounds.width + financeH * 0.10f,
-          locationBoxBackground_.getPosition().y + financeH / 2.0f);
-    }
+    sf::FloatRect locationBounds = locationText_.getLocalBounds();
+    locationText_.setOrigin(locationBounds.left,
+                            locationBounds.top + locationBounds.height / 2.0f);
+    locationText_.setPosition(
+        mapPinSprite_.getPosition().x + pinBounds.width + financeH * 0.10f,
+        locationBoxBackground_.getPosition().y + financeH / 2.0f);
   }
 
   const float propertiesY =
@@ -338,7 +333,8 @@ void PlayerCard::updateLayout() {
         propertiesY + row * (cellH + layout::playerCard::propertyGap);
     propertyWidgets_[i].applyLayout(
         {x, y}, {cellW, cellH},
-        std::min(0.45f, layout::playerCard::propertyIconHeight / cellH));
+        std::min(layout::playerCard::propertyIconHeightRatioMax,
+                 layout::playerCard::propertyIconHeight / cellH));
   }
 }
 
@@ -351,7 +347,7 @@ void PlayerCard::rebuildPropertyGrid(
   if (count <= maxSlots) {
     propertyWidgets_.reserve(properties.size());
     for (const temp::PropertyTuple& property : properties) {
-      PropertyWidget widget(secondaryFont_);
+      PropertyWidget widget(font_);
       widget.setProperty(property);
       propertyWidgets_.push_back(std::move(widget));
     }
@@ -360,12 +356,12 @@ void PlayerCard::rebuildPropertyGrid(
 
   propertyWidgets_.reserve(maxSlots);
   for (int i = 0; i < maxSlots - 1; ++i) {
-    PropertyWidget widget(secondaryFont_);
+    PropertyWidget widget(font_);
     widget.setProperty(properties[static_cast<size_t>(i)]);
     propertyWidgets_.push_back(std::move(widget));
   }
 
-  PropertyWidget overflowWidget(secondaryFont_);
+  PropertyWidget overflowWidget(font_);
   overflowWidget.setOverflow(count - (maxSlots - 1));
   propertyWidgets_.push_back(std::move(overflowWidget));
 }

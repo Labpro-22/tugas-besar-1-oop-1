@@ -14,7 +14,7 @@ class PlayerInfoPanel : public Panel {
   PlayerInfoPanel();
   ~PlayerInfoPanel() override;
 
-  void setPlayers(const std::vector<const temp::Player*>& players);
+  void setPlayers(const std::vector<temp::Player*>& players);
 
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;

@@ -43,7 +43,7 @@ class Game {
  public:
   Game(int i);
 
-  std::vector<const Player*> playerPointers() const;
+  std::vector<Player*> playerPointers();
 
  private:
   int ini_cuma_stub_aja_nanti_ganti_sendiri_;
