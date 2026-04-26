@@ -83,7 +83,10 @@ public:
    * @param configPath Path ke folder config (misal "config/").
    */
   void initialize(int boardSize, const std::string& configPath);
-
+  void startGame(); 
+  void setMediator(UIInputMediator* mediator);
+  void nextTurn(); 
+  bool checkWinCondition() const; 
 
   // Accessors
   std::pair<int, int> getLastDiceRoll() const override;

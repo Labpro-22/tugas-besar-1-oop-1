@@ -51,8 +51,9 @@ void Game::initialize(int boardSize, const std::string& configPath) {
 
     // Step 3: populate board
     for (auto& entry : entries)
-        board_.addTile(std::move(entry.tile), entry.code);
-
+        board_.addTile(entry.releaseTile(), entry.getCode()); 
+    // fixing the steps above 
+    
     // Step 4: inject config ke static tables dan game fields
     core::Utility::setMultiplierTabel(utilMults);
     core::Railroad::setRentTable(railRents);
