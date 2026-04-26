@@ -1,8 +1,7 @@
-#include "core/card/ActionCard.hpp"
+#include "core/ActionCard.hpp"
+#include "core/CardDeck.hpp"
 
 #include <utility>
-
-#include "core/card/CardDeck.hpp"
 
 namespace core {
 
@@ -13,4 +12,4 @@ std::string ActionCard::getDescription() const { return description_; }
 
 template class CardDeck<ActionCard>;
 
-}  // namespace core
+}
