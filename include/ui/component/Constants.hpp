@@ -11,7 +11,7 @@ const float sideWidth = 3.5f * multiplier;
 const float defaultMargin = 0.25 * multiplier;
 
 const float playerCardWidth = 3 * multiplier;
-const float playerCardHeight = 1.75 * multiplier;
+const float playerCardHeight = 2 * multiplier;
 const float playerCardLogo = 0.75 * multiplier;
 
 const float boardSize = height;
@@ -90,6 +90,21 @@ const float textPaddingX = 0.10f * size::multiplier;
 const float textPaddingY = 0.06f * size::multiplier;
 
 }  // namespace ui::layout::actionPanel
+
+namespace ui::layout::playerCard {
+
+const float padding = 0.05f * size::playerCardWidth;
+const float headerRatio = 0.45f;
+const float propertyRatio = 0.55f;
+const float dividerThickness = 0.015f * size::playerCardHeight;
+const float avatarSize = 0.35f * size::playerCardHeight;
+const float turnBoxWidthRatio = 0.28f;
+const float propertyGap = 0.02f * size::playerCardHeight;
+const float propertyIconHeight = 0.08f * size::playerCardHeight;
+const int propertyColumns = 5;
+const int maxPropertySlots = 10;
+
+}  // namespace ui::layout::playerCard
 
 namespace ui::layout::streetTilePanel {
 const float textPaddingX = 0.08f * size::multiplier;

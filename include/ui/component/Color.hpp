@@ -71,5 +71,6 @@ const auto lightGreen = accent::lightGreen;
 const auto lavender = accent::lavender;
 const auto white = palette::white;
 const auto black = palette::black;
+const auto defaultColor = accent::mint;
 }  // namespace property
 }  // namespace ui::board
