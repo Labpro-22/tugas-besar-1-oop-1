@@ -323,9 +323,13 @@ std::pair<int, int> Game::getLastDiceRoll() const { return lastDiceRoll_; }
 int Game::getTurnCount() const { return turnCount_; }
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
-  if (p.canAfford(prop.getPrice())) {
+  // use mediator 
+  bool accept = mediator_->offerProperty(p, prop);
+  if (accept) {
     buyProperty(&prop);
-  } 
+  } else {
+    startAuction(&prop);
+  }
 }
 
 void Game::chargeRent(core::Player& p, core::Property& prop) {
