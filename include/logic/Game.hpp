@@ -83,7 +83,10 @@ public:
    * @param configPath Path ke folder config (misal "config/").
    */
   void initialize(int boardSize, const std::string& configPath);
-
+  void startGame(); 
+  void setMediator(UIInputMediator* mediator);
+  void nextTurn(); 
+  bool checkWinCondition() const; 
 
   // Accessors
   std::pair<int, int> getLastDiceRoll() const override;
@@ -111,6 +114,9 @@ public:
   void mortgageProperty(core::Property* prop);
   void unmortgageProperty(core::Property* prop);
   void startAuction(core::Property* prop);
+
+  // Card operations
+  void giveCard(core::Player& player, core::ActionCard* card);
 
   // GameContext interface
   void offerProperty(core::Player& p, core::Property& prop) override;

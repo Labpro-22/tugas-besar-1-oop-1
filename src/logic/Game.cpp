@@ -51,8 +51,9 @@ void Game::initialize(int boardSize, const std::string& configPath) {
 
     // Step 3: populate board
     for (auto& entry : entries)
-        board_.addTile(std::move(entry.tile), entry.code);
-
+        board_.addTile(entry.releaseTile(), entry.getCode()); 
+    // fixing the steps above 
+    
     // Step 4: inject config ke static tables dan game fields
     core::Utility::setMultiplierTabel(utilMults);
     core::Railroad::setRentTable(railRents);
@@ -149,7 +150,7 @@ void Game::moveCurrentPlayer() {
   int currentPos = p->getPosition();
   int newPos = (currentPos + steps) % boardSize;
 
-  if (newPos < currentPos && newPos != 0) {
+  if (currentPos + steps >= boardSize) {
     core::Tile* goTile = board_.getTile(0);
     if (goTile) {
       goTile->onPassed(*p, *this);
@@ -275,6 +276,16 @@ void Game::unmortgageProperty(core::Property *prop) {
   prop->unmortgage();
 }
 
+void Game::giveCard(core::Player& player, core::ActionCard* card) {
+  if (player.getHeldCards().size() >= 3) {
+    core::ActionCard* dropped = mediator_->selectCardToDrop(player);
+    if (dropped) {
+      player.removeCard(dropped);
+    }
+  }
+  player.addCard(card);
+}
+
 void Game::startAuction(core::Property *prop) {
   if (prop->getOwner() != nullptr) {
     throw InvalidMoveException("auction exception");
@@ -320,21 +331,41 @@ GameState Game::getState() const { return state_; }
 
 std::pair<int, int> Game::getLastDiceRoll() const { return lastDiceRoll_; }
 int Game::getTurnCount() const { return turnCount_; }
+int Game::getMaxTurn() const { return maxTurn_; }
+int Game::getJailFine() const { return jailFine_; }
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
-  if (p.canAfford(prop.getPrice())) {
+  // use mediator 
+  bool accept = mediator_->offerPropertyUI(p, prop);
+  if (accept) {
     buyProperty(&prop);
-  } 
+  } else {
+    startAuction(&prop);
+  }
 }
 
 void Game::chargeRent(core::Player& p, core::Property& prop) {
-  int rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
+  // int rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
+  // p -= rent;
+  // *(prop.getOwner()) += rent;
+  // if railroad and utility, rent is calculated based on number of property owned by owner 
+  int rent = 0, owned = 0; 
+  if (prop.getType() == core::PropertyType::RAILROAD || prop.getType() == core::PropertyType::UTILITY) { 
+    owned = p.getOwnedProperties().size();
+    rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, owned, false);
+  }else { 
+    rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
+  }
   p -= rent;
   *(prop.getOwner()) += rent;
 }
 
 void Game::sendToJail(core::Player& p) { 
-    p.goToJail(); 
+    p.goToJail();
+    core::Tile* jailTile = board_.getTileByCode("PEN");
+    if (jailTile) {
+        p.setPosition(jailTile->getPosition());
+    }
 }
 
 void Game::chargeTax(core::Player& p, int flatRate, int percentageRate, core::TaxType type) {
@@ -349,7 +380,7 @@ void Game::chargeTax(core::Player& p, int flatRate, int percentageRate, core::Ta
             p -= flatRate;
             bank_.receive(flatRate);
         } else {
-            p.goToJail();
+            p.setBankrupted(true);
         }
     }
 }
@@ -370,9 +401,17 @@ void Game::resolveFestival(core::Property* selectedProp) {
 }
 
 void Game::drawChanceCard(core::Player& p) { 
+    core::ActionCard* card = chanceDeck_.draw();
+    if (card) {
+        card->execute(p, *this);
+    }
 }
 
 void Game::drawCommunityChestCard(core::Player& p) { 
+    core::ActionCard* card = communityChestDeck_.draw();
+    if (card) {
+        card->execute(p, *this);
+    }
 }
 
 void Game::payPlayerFromBank(core::Player& p, int amount) { 
@@ -380,7 +419,7 @@ void Game::payPlayerFromBank(core::Player& p, int amount) {
 }
 
 int Game::getGoSalary() const { 
-    return 200; 
+    return goSalary_; 
 }
 
 core::Player* Game::getPlayerByName(const std::string& name) const {
@@ -413,6 +452,43 @@ void Game::restoreLog(const std::vector<data::LogEntry>& entries) {
 }
 
 core::CardDeck<core::ActionCard>& Game::getSkillDeck() { return skillDeck_; }
+
+void Game::buildChanceDeck() {
+    std::vector<std::unique_ptr<core::ActionCard>> cards;
+    cards.push_back(core::ChanceCard::makeAdvanceTo(0, "Advance to GO"));
+    cards.push_back(core::ChanceCard::makeGoToJail("Go to Jail"));
+    cards.push_back(core::ChanceCard::makePayBank(50, "Pay tax Rp50"));
+    cards.push_back(core::ChanceCard::makeMoveBack(3, "Move back 3 spaces"));
+    cards.push_back(std::unique_ptr<core::ActionCard>(new core::ChanceCard(
+        "Bank pays you Rp50",
+        [](core::Player& p, core::GameContext& ctx) { ctx.payPlayerFromBank(p, 50); })));
+    chanceDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
+    chanceDeck_.shuffle();
+}
+
+void Game::buildCommunityChestDeck() {
+    std::vector<std::unique_ptr<core::ActionCard>> cards;
+    cards.push_back(core::CommunityChestCard::makeCollect(100, "Bank pays you Rp100"));
+    cards.push_back(core::CommunityChestCard::makeCollect(50, "Bank pays you Rp50"));
+    cards.push_back(core::CommunityChestCard::makePayBank(50, "Pay hospital Rp50"));
+    cards.push_back(core::CommunityChestCard::makePayBank(100, "Pay tax Rp100"));
+    communityChestDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
+    communityChestDeck_.shuffle();
+}
+
+void Game::buildSkillDeck() {
+    std::vector<std::unique_ptr<core::ActionCard>> cards;
+    cards.push_back(core::ShieldCard::make("Shield"));
+    cards.push_back(core::ShieldCard::make("Shield"));
+    cards.push_back(core::DiscountCard::makeRandom("Discount"));
+    cards.push_back(core::DiscountCard::makeRandom("Discount"));
+    cards.push_back(core::TeleportCard::make(0, "Teleport to GO"));
+    cards.push_back(core::MoveCard::make(3, "Move forward 3 spaces"));
+    cards.push_back(core::LassoCard::make("Lasso"));
+    cards.push_back(core::DemolitionCard::make("Demolition"));
+    skillDeck_ = core::CardDeck<core::ActionCard>(std::move(cards));
+    skillDeck_.shuffle();
+}
 
 // NOTE: extension beyond M1 spec - see `core::GameContext` for rationale.
 const std::vector<core::Player*>& Game::getPlayers() const { return players_; }

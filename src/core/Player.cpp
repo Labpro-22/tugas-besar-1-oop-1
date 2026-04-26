@@ -26,8 +26,16 @@ Player::Player(std::string name, std::string token)
 int Player::getNetWorth() const noexcept {
     int total = balance_;
     for (Property* p : ownedProperties_) {
-        if (p != nullptr) {
-            total += p->isMortgagedStatus() ? p->getMortgageValue() : p->getPrice();
+        if (p == nullptr) continue;
+        if (p->isMortgagedStatus()) {
+            total += p->getMortgageValue();
+        } else {
+            total += p->getPrice();
+        }
+        if (p->getType() == PropertyType::STREET) {
+            auto* street = static_cast<const Street*>(p);
+            total += street->getHouseCount() * street->getHouseCost();
+            total += street->getHotelCount() * street->getHotelCost();
         }
     }
     return total;
@@ -97,7 +105,7 @@ bool Player::isBankrupted() const noexcept { return isBankrupt_; }
 void Player::setBankrupted(bool value) noexcept { isBankrupt_ = value; }
 
 void Player::addCard(ActionCard* card) {
-    if (heldCards_.size() >= 3U) {
+    if (heldCards_.size() >= 3){
         throw InvalidMoveException("Player hand already holds three action cards.");
     }
     if (card == nullptr) {

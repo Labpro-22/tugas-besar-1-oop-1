@@ -108,9 +108,7 @@ TileType JailTile::getType() const { return TileType::JAIL; }
 GoToJailTile::GoToJailTile(int position, const std::string& name) : ActionTile(position, name) {}
 
 void GoToJailTile::onLanded(Player& p, GameContext& g) { 
-	// go to jail 
-	// p.sendToJail(p); 
-	p.goToJail();
+	g.sendToJail(p);
 	g.logEvent("GO_TO_JAIL", p, 0);
 } 
 
@@ -141,10 +139,11 @@ TileType FestivalTile::getType() const { return TileType::FESTIVAL; }
 
 CardTile::CardTile(int position, const std::string& name, bool isChance) : ActionTile(position, name), isChance_(isChance) {}
 
-void CardTile::onLanded([[maybe_unused]]Player& p,[[maybe_unused]] GameContext& g) {
+void CardTile::onLanded(Player& p, GameContext& g) {
     if (isChance_) {
-    	// draw chance 
+    	g.drawChanceCard(p);
     } else {
+    	g.drawCommunityChestCard(p);
     }
 }
 

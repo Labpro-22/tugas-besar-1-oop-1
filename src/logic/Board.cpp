@@ -11,7 +11,7 @@ void Board::addTile(std::unique_ptr<core::Tile> tile, const std::string& code) {
     }
     tiles_.push_back(std::move(tile));
 }
- 
+
 void Board::clear() {
     tiles_.clear();
     codeIndex_.clear();
