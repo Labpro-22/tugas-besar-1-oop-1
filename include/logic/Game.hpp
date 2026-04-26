@@ -1,26 +1,27 @@
 #pragma once
 
-#include "core/ActionCard.hpp"
-#include "core/CardDeck.hpp"
-#include "core/GameContext.hpp"
-#include "data/LogEntry.hpp"
-#include "logic/Bank.hpp"
-#include "logic/Board.hpp"
-
+#include <core/card/Card.hpp>
+#include <memory>
+#include <random>
 #include <string>
 #include <utility>
 #include <vector>
-#include <random>
+
+#include "core/GameContext.hpp"
+#include "core/card/CardDeck.hpp"
+#include "core/player/PlayerTurnContext.hpp"
+#include "data/LogEntry.hpp"
+#include "logic/Bank.hpp"
+#include "logic/Board.hpp"
 
 namespace core {
 class Player;
 class Tile;
 class Property;
-} // namespace core
+}  // namespace core
 namespace logic {
-class TransactionLogger;
-class UIInputMediator;
-} // namespace logic
+class InputMediator;
+}  // namespace logic
 
 namespace logic {
 
@@ -34,47 +35,49 @@ enum class GameState {
   GAME_OVER
 };
 
-class Game : public core::GameContext{
-private:
+class Game : public core::GameContext, public core::PlayerTurnContext {
+ private:
   Board board_;
-  std::vector<core::Player *> players_;
+  std::vector<core::Player*> players_;
   Bank bank_;
-  TransactionLogger *logger_;
-  UIInputMediator *mediator_;
+  InputMediator* mediator_;
 
   int currentPlayerId_;
   GameState state_;
   std::pair<int, int> lastDiceRoll_;
   int turnCount_;
- 	std::mt19937 rng_;
-	int doubles_; 
-	bool hasExtraTurn_; 
+  std::mt19937 rng_;
+  int doubles_;
+  bool hasExtraTurn_;
 
   // Config-derived values. Diisi oleh initialize()
-  int goSalary_  = 200;
-  int jailFine_  = 50;
-  int maxTurn_   = 0;
+  int goSalary_ = 200;
+  int jailFine_ = 50;
+  int maxTurn_ = 0;
   int boardSize_ = 40;
   std::string configPath_;
-  
+
   // Card decks. Diisi oleh initialize() setelah board terbangun
   core::CardDeck<core::ActionCard> chanceDeck_;
   core::CardDeck<core::ActionCard> communityChestDeck_;
   core::CardDeck<core::ActionCard> skillDeck_;
-  
-  void resolveFestival(core::Property* selectedProp);
+
+  InputMediator& requireMediator() const;
+  void tickFestivalEffects();
+  void resolveFestival(core::Property& selectedProp);
 
   // Helpers untuk initialize()
   void buildChanceDeck();
   void buildCommunityChestDeck();
   void buildSkillDeck();
-  
-public:
-  Game(std::vector<core::Player *> players, TransactionLogger *logger);
+
+ public:
+  explicit Game(std::vector<core::Player*> players);
   ~Game() = default;
 
   /**
-   * @brief Baca config, bangun board via DomainBuilder, dan populate semua deck.
+   * @brief Baca config, bangun board via ConfigReader, dan populate semua
+   * deck.
    *
    * Dipanggil untuk New Game maupun Load Game (sebelum GameLoader::applyDTO).
    * Boleh dipanggil ulang. Board::clear() dijalankan di awal.
@@ -83,10 +86,10 @@ public:
    * @param configPath Path ke folder config (misal "config/").
    */
   void initialize(int boardSize, const std::string& configPath);
-  void startGame(); 
-  void setMediator(UIInputMediator* mediator);
-  void nextTurn(); 
-  bool checkWinCondition() const; 
+  void startGame();
+  void setMediator(InputMediator* mediator);
+  void nextTurn();
+  bool checkWinCondition() const;
 
   // Accessors
   std::pair<int, int> getLastDiceRoll() const override;
@@ -101,13 +104,13 @@ public:
 
   // Dice
   void setDice(int d1, int d2);
-  void rollDice();
+  void rollDice() override;
 
   // Movement
-  void moveCurrentPlayer();
+  void moveCurrentPlayer() override;
   void handleTileAction(core::Tile* tile);
 
-private:
+ private:
   /**
    * @brief Walks @p p from @p from to @p to clockwise, firing `onPassed` on
    *        each crossed tile when @p firePassed is true and `onLanded` on the
@@ -118,37 +121,39 @@ private:
    */
   void stepThrough(core::Player& p, int from, int to, bool firePassed);
 
-public:
-
+ public:
   // Property operations
-  void buyProperty(core::Property* prop);
+  void buyProperty(core::Property& prop);
   void buildHouse(core::Player* buyer, core::Tile* at);
+  void buildHouse(core::Player& buyer, core::Property& property) override;
   void sellHouse(core::Player* seller, core::Tile* at);
-  void mortgageProperty(core::Property* prop);
-  void unmortgageProperty(core::Property* prop);
-  void startAuction(core::Property* prop);
+  void mortgageProperty(core::Property& prop);
+  void mortgageProperty(core::Player& actor, core::Property& prop) override;
+  void unmortgageProperty(core::Property& prop);
+  void startAuction(core::Property& prop);
 
   // Card operations
-  void giveCard(core::Player& player, core::ActionCard* card);
+  void giveCard(core::Player& player, std::unique_ptr<core::ActionCard> card);
 
   // GameContext interface
   void offerProperty(core::Player& p, core::Property& prop) override;
   void chargeRent(core::Player& p, core::Property& prop) override;
   void sendToJail(core::Player& p) override;
   void chargeTax(core::Player& p, int flatRate, int percentageRate,
-                  core::TaxType type) override;
+                 core::TaxType type) override;
   void activateFestival(core::Player& p) override;
   void drawChanceCard(core::Player& p) override;
   void drawCommunityChestCard(core::Player& p) override;
   void payPlayerFromBank(core::Player& p, int amount) override;
-  int  getGoSalary() const override;
+  int getGoSalary() const override;
   void movePlayer(core::Player& p, int targetIndex) override;
   void teleportPlayer(core::Player& p, int targetIndex) override;
-  int  findNearestTileOfType(int from, core::TileType type) const override;
+  int findNearestPropertyTileType(int from,
+                                  core::PropertyTileType type) const override;
 
-  void logEvent(const std::string& action, core::Player& p, int value) override;
-  void logEvent(const std::string& action, core::Player& p,
-                core::Property& prop, int value) override;
+  void logEvent(data::LogAction action, core::Player& p, int value) override;
+  void logEvent(data::LogAction action, core::Player& p, core::Property& prop,
+                int value) override;
 
   // Setters untuk GameLoader
   core::Player* getPlayerByName(const std::string& name) const;
@@ -156,7 +161,6 @@ public:
   void setMaxTurn(int max);
   void setCurrentPlayerIdx(int idx);
   void setTurnOrder(const std::vector<std::string>& order);
-  void restoreLog(const std::vector<data::LogEntry>& entries);
 
   /**
    * @brief Expose skill deck untuk GameLoader::restoreDeck().
@@ -165,4 +169,4 @@ public:
   core::CardDeck<core::ActionCard>& getSkillDeck();
 };
 
-} // namespace logic
+}  // namespace logic

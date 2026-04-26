@@ -17,26 +17,24 @@ find_package(SFML 2.5 REQUIRED COMPONENTS system window graphics REQUIRED)
 add_library(
   nimonspoli_core STATIC
   src/core/Tiles.cpp 
-  src/core/Player.cpp
-  src/core/HumanPlayer.cpp
-  src/core/COMPlayer.cpp
-  src/core/COMStrategy.cpp
-  src/core/SimpleCOMStrategy.cpp
-  src/core/GreedyCOMStrategy.cpp
+
+  src/core/player/Player.cpp
+  src/core/player/COMPlayer.cpp
+  src/core/player/SimpleCOMStrategy.cpp
+  src/core/player/GreedyCOMStrategy.cpp
+
   src/core/Property.cpp
   src/core/Railroad.cpp
   src/core/Street.cpp
   src/core/Utility.cpp
-  src/core/ActionCard.cpp
-  src/core/ChanceCard.cpp
-  src/core/CommunityChestCard.cpp
-  src/core/SkillCard.cpp
-  src/core/TeleportCard.cpp
-  src/core/MoveCard.cpp
-  src/core/ShieldCard.cpp
-  src/core/DiscountCard.cpp
-  src/core/LassoCard.cpp
-  src/core/DemolitionCard.cpp
+  src/core/card/ChanceCard.cpp
+  src/core/card/CommunityChestCard.cpp
+  src/core/card/TeleportCard.cpp
+  src/core/card/MoveCard.cpp
+  src/core/card/ShieldCard.cpp
+  src/core/card/DiscountCard.cpp
+  src/core/card/LassoCard.cpp
+  src/core/card/DemolitionCard.cpp
 )
 
 add_library(
@@ -44,29 +42,48 @@ add_library(
   src/logic/Bank.cpp
   src/logic/Board.cpp
   src/logic/Game.cpp
-  src/logic/TransactionLogger.cpp
   src/logic/Bank.cpp
   src/logic/Auction.cpp
   src/logic/Board.cpp
   src/logic/GameLoader.cpp
-  src/logic/BankruptcyHandler.cpp
   # etc. lanjut sendiri
 )
 
 add_library(
   nimonspoli_data STATIC
+  src/data/ConfigStructs.cpp
   src/data/ConfigReader.cpp
+  src/data/TransactionLogger.cpp
   src/data/SaveLoadManager.cpp
-  src/data/LogSerializer.cpp
-  src/data/DomainBuilder.cpp
+  src/data/PropertyConfig.cpp
   # etc. lanjut sendiri
 )
 
 add_library(
   nimonspoli_ui STATIC 
-  src/ui/Widgets.cpp
+
+  src/ui/component/Panel.cpp
+  src/ui/component/Label.cpp
+  src/ui/component/ImagePanel.cpp
+  src/ui/component/Button.cpp
+  src/ui/component/Style.cpp
+
+  src/ui/board/TileGeometry.cpp
+  src/ui/board/TilePanel.cpp
+  src/ui/board/StreetTilePanel.cpp
+  src/ui/board/ActionTilePanel.cpp
+  src/ui/board/CornerTilePanel.cpp
+  src/ui/board/BoardPanel.cpp
+ 
+  src/ui/sidebar/ActionPanel.cpp
+  src/ui/sidebar/PlayerCard.cpp
+  src/ui/sidebar/PlayerInfoPanel.cpp
+  
+  src/ui/dialog/DialogManager.cpp
+  src/ui/dialog/DialogManagerMediator.cpp
+  src/ui/dialog/DialogManagerInfo.cpp
+  src/ui/dialog/DialogManagerAction.cpp
   src/ui/GameWindow.cpp
-  # etc. lanjut sendiri
 )
 
 add_executable(nimonspoli src/main.cpp)
