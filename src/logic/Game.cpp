@@ -324,7 +324,7 @@ int Game::getTurnCount() const { return turnCount_; }
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
   // use mediator 
-  bool accept = mediator_->offerProperty(p, prop);
+  bool accept = mediator_->offerPropertyUI(p, prop);
   if (accept) {
     buyProperty(&prop);
   } else {
