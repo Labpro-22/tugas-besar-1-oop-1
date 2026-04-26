@@ -5,14 +5,17 @@ namespace logic {
 
 Board::~Board() = default;
 
-// logging logging 
-// void Board::loadFromConfig(data::ConfigReader& config) {
-//     // data::BoardConfig bConfig = config.readBoardConfig();
-//
-//     // for(auto* t : tiles_) delete t;
-//     // tiles_.clear();
-//
-// }
+void Board::addTile(std::unique_ptr<core::Tile> tile, const std::string& code) {
+    if (!code.empty()) {
+        codeIndex_[code] = static_cast<int>(tiles_.size());
+    }
+    tiles_.push_back(std::move(tile));
+}
+ 
+void Board::clear() {
+    tiles_.clear();
+    codeIndex_.clear();
+}
 
 core::Tile *Board::getTile(int index) const {
   if (index >= 0 && index < static_cast<int>(tiles_.size())) {
@@ -23,8 +26,10 @@ core::Tile *Board::getTile(int index) const {
 
 int Board::getTileCount() const { return static_cast<int>(tiles_.size()); }
 
-void Board::addTile(std::unique_ptr<core::Tile> tile){ 
-	tiles_.push_back(std::move(tile));
-} 
+core::Tile* Board::getTileByCode(const std::string& code) const {
+    auto it = codeIndex_.find(code);
+    if (it == codeIndex_.end()) return nullptr;
+    return getTile(it->second);
+}
 
 } // namespace logic

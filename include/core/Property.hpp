@@ -82,6 +82,8 @@ class Street : public Property {
 		void build();
 		void demolish(int n);
 
+		void setLevel(int level);
+
 		bool canBuild(bool hasMonopoly) const; 
 		
 		ColorGroup getColorGroup() const;
@@ -97,6 +99,7 @@ class Railroad : public Property {
 		int baseFare_; 
 	public: 
 		Railroad(const std::string& name, int mortgageValue, int baseFare);
+		static void setRentTable(const std::map<int, int>& table);
 		int calculateRent(int diceRoll, int ownedSameType, bool hasMonopoly) const override; 
 		PropertyType getType() const override ; 
 		int getBaseFare() const;

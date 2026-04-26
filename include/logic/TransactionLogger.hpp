@@ -1,32 +1,40 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "core/Player.hpp" 
+
+#include "core/Player.hpp"
 #include "core/Property.hpp"
 #include "data/LogEntry.hpp"
 
 namespace logic {
-// Declare stub sementara, full class ada di include/core/
+
 class TransactionLogger {
- public:
-  void log(int turnNumber, const std::string& actionType, const core::Player& player,
-           int amount = 0);
+public:
+    void log(int turnNumber, const std::string& actionType,
+             const core::Player& player, int amount = 0);
 
-  void log(int turnNumber, const std::string& actionType, const core::Player& player,
-           const core::Property& property, int amount = 0);
+    void log(int turnNumber, const std::string& actionType,
+             const core::Player& player, const core::Property& property,
+             int amount = 0);
 
-  // Overload incase ada deskripsi bebas
-  void log(int turnNumber, const std::string& actionType, const core::Player& player,
-           const std::string& description);
+    void log(int turnNumber, const std::string& actionType,
+             const core::Player& player, const std::string& description);
 
-  const std::vector<data::LogEntry>& getLog() const;
+    const std::vector<data::LogEntry>& getLog() const;
 
-  // Ambil n entries terakhir untuk CETAK_LOG <n> (n=0 artinya semua)
-  std::vector<data::LogEntry> getRecentLog(int n = 0) const;
+    std::vector<data::LogEntry> getRecentLog(int n = 0) const;
 
-  void clear();
+    void clear();
 
- private:
-  std::vector<data::LogEntry> entries_;
+    /**
+     * @brief Restore seluruh log dari entries yang dimuat dari save file.
+     * Menggantikan semua entries yang ada.
+     * Dipanggil oleh Game::restoreLog() → GameLoader::restoreGameMeta().
+     */
+    void restore(const std::vector<data::LogEntry>& entries);
+
+private:
+    std::vector<data::LogEntry> entries_;
 };
+
 }  // namespace logic

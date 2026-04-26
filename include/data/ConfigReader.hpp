@@ -8,31 +8,32 @@
 
 namespace data {
 class ConfigReader {
- public:
-  explicit ConfigReader(const std::string& basePath);
+public:
+    /**
+     * @param baseConfigPath Path ke folder config (misal: "config/")
+     * @param boardSize Ukuran papan (20, 24, ..., 60). Default 40.
+     */
+    explicit ConfigReader(const std::string& baseConfigPath, int boardSize = 40);
 
-  // mengembalikan heap-allocated configs
-  std::vector<PropertyConfig*> readProperties();
+    std::vector<PropertyConfig*> readProperties();
+    std::map<int, int> readRailroadRents();
+    std::map<int, int> readUtilityMultipliers();
+    TaxConfig readTax();
+    SpecialConfig readSpecial();
+    MiscConfig readMisc();
+    std::vector<ActionTileConfig> readActionTiles();
+    BoardConfig readBoardConfig();
 
-  // railroad.txt: count -> rent
-  std::map<int, int> readRailroadRents();
+private:
+    std::string basePath_;
+    int boardSize_;
 
-  // utility.txt: count -> multiplier
-  std::map<int, int> readUtilityMultipliers();
-
-  TaxConfig readTax();
-  SpecialConfig readSpecial();
-  MiscConfig readMisc();
-
-  // aksi.txt: daftar action tile beserta atributnya
-  std::vector<ActionTileConfig> readActionTiles();
-
-  // untuk Dynamic Board bonus: board.txt -> ordered tile list (20-60 tiles)
-  BoardConfig readBoardConfig();
-
- private:
-  std::string basePath_;
-
-  std::string filePath(const std::string& filename) const;
+    /**
+     * @brief Resolve path file config.
+     * File board-specific → basePath_/board_{boardSize_}/filename
+     * File shared         → basePath_/filename
+     */
+    std::string filePath(const std::string& filename) const;
 };
+
 }  // namespace data
