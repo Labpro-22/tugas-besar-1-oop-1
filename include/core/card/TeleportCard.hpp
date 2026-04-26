@@ -1,7 +1,7 @@
 #pragma once
 
-#include <core/Player.hpp>
 #include <core/card/Card.hpp>
+#include <core/player/Player.hpp>
 #include <memory>
 #include <string>
 

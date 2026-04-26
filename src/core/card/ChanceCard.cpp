@@ -3,8 +3,8 @@
 #include <utility>
 
 #include "core/GameContext.hpp"
-#include "core/Player.hpp"
 #include "core/Tiles.hpp"
+#include "core/player/Player.hpp"
 
 namespace core {
 

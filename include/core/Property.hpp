@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "core/Player.hpp"
+#include "core/player/Player.hpp"
 
 namespace core {
 class Player;

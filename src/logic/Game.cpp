@@ -3,7 +3,6 @@
 #include <random>
 
 #include "core/GameException.hpp"
-#include "core/Player.hpp"
 #include "core/Property.hpp"
 #include "core/Tiles.hpp"
 #include "core/card/ChanceCard.hpp"
@@ -14,6 +13,7 @@
 #include "core/card/MoveCard.hpp"
 #include "core/card/ShieldCard.hpp"
 #include "core/card/TeleportCard.hpp"
+#include "core/player/Player.hpp"
 #include "data/ConfigReader.hpp"
 #include "data/DomainBuilder.hpp"
 #include "logic/Auction.hpp"

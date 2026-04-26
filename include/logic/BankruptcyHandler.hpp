@@ -1,14 +1,14 @@
 #pragma once
 
-#include "core/Player.hpp"
+#include "core/player/Player.hpp"
 
 namespace logic {
 
 class BankruptcyHandler {
-public:
-    void handle(core::Player& debtor, core::Player* creditor);
-    int calcLiquidationValue(core::Player& player);
-    void transferAssets(core::Player& from, core::Player& to);
+ public:
+  void handle(core::Player& debtor, core::Player* creditor);
+  int calcLiquidationValue(core::Player& player);
+  void transferAssets(core::Player& from, core::Player& to);
 };
 
-} // namespace logic
+}  // namespace logic

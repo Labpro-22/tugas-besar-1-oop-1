@@ -1,9 +1,9 @@
-#include "core/GreedyCOMStrategy.hpp"
+#include "core/player/GreedyCOMStrategy.hpp"
 
 #include <algorithm>
 
-#include "core/Player.hpp"
 #include "core/Property.hpp"
+#include "core/player/Player.hpp"
 #include "logic/Game.hpp"
 
 namespace core {
@@ -57,4 +57,4 @@ int GreedyCOMStrategy::suggestChoice(const std::string& context,
   return defaultIndex;
 }
 
-}
+}  // namespace core

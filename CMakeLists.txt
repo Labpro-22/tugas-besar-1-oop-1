@@ -17,16 +17,19 @@ find_package(SFML 2.5 REQUIRED COMPONENTS system window graphics REQUIRED)
 add_library(
   nimonspoli_core STATIC
   src/core/Tiles.cpp 
-  src/core/Player.cpp
-  src/core/HumanPlayer.cpp
-  src/core/COMPlayer.cpp
-  src/core/COMStrategy.cpp
-  src/core/SimpleCOMStrategy.cpp
-  src/core/GreedyCOMStrategy.cpp
+
+  src/core/player/Player.cpp
+  src/core/player/HumanPlayer.cpp
+  src/core/player/COMPlayer.cpp
+  src/core/player/COMStrategy.cpp
+  src/core/player/SimpleCOMStrategy.cpp
+  src/core/player/GreedyCOMStrategy.cpp
+
   src/core/Property.cpp
   src/core/Railroad.cpp
   src/core/Street.cpp
   src/core/Utility.cpp
+
   src/core/card/Card.cpp
   src/core/card/ChanceCard.cpp
   src/core/card/CommunityChestCard.cpp

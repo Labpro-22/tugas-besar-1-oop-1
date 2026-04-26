@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "core/Player.hpp"
 #include "core/Property.hpp"
 #include "core/Tiles.hpp"
 #include "core/card/Card.hpp"
@@ -13,8 +12,10 @@
 #include "core/card/MoveCard.hpp"
 #include "core/card/ShieldCard.hpp"
 #include "core/card/TeleportCard.hpp"
+#include "core/player/Player.hpp"
 #include "logic/Board.hpp"
 #include "logic/Game.hpp"
+
 
 namespace logic {
 
