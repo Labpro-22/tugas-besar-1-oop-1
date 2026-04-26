@@ -21,8 +21,8 @@ class UIInputMediator {
 
   virtual core::Property* selectFestivalProperty(core::Player& player) = 0;
 
-  virtual core::Property* offerPropertyUI(core::Player& player,
-                                          core::Property& property) = 0;
+  virtual bool offerPropertyUI(core::Player& player,
+                               core::Property& property) = 0;
 
   virtual bool chooseTaxMethod(core::Player& player, int flatAmount,
                                int percentageAmount) = 0;

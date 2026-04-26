@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -181,19 +182,19 @@ class Player {
   void declareBankrupt() noexcept;
 
   /**
-   * @brief Attempt to add a skill/community card reference to the hand.
-   * @param card Non-owning pointer managed by a deck.
+    * @brief Attempt to add an owned action card to the hand.
+    * @param card Owned pointer transferred into the player hand.
    * @throws InvalidMoveException When the hand already holds three cards.
    * @note Extension (not in spec).
    */
-  void addCard(ActionCard* card);
+    void addCard(std::unique_ptr<ActionCard> card);
 
   /**
-   * @brief Remove a card reference without deleting the underlying object.
+    * @brief Remove a card from the hand and transfer ownership to the caller.
    * @param card Pointer previously inserted via `addCard`.
-   * @note Extension (not in spec).
+    * @return Owned pointer when found; otherwise `nullptr`.
    */
-  void removeCard(ActionCard* card);
+    std::unique_ptr<ActionCard> removeCard(ActionCard* card);
 
   /**
    * @brief Activate shield protection until the next `resetPerTurnFlags`.
@@ -230,6 +231,12 @@ class Player {
   void applyDiscount(float rate) noexcept;
 
   /**
+   * @brief Read the active discount multiplier for the next property purchase.
+   * @return Fractional discount between `0` and `1`.
+   */
+  float getDiscountRate() const noexcept;
+
+  /**
    * @brief Hook for cards that need a discrete UI choice.
    * @param context Developer-readable reason string for logging.
    * @param defaultIndex Fallback index when automation declines to choose.
@@ -249,10 +256,10 @@ class Player {
 
   /**
    * @brief Expose held cards for UI deck rendering.
-   * @return Read-only view of the cached `ActionCard*` list.
+    * @return Snapshot of the currently held raw pointers.
    * @note Extension (not in spec).
    */
-  const std::vector<ActionCard*>& getHeldCards() const noexcept;
+    std::vector<ActionCard*> getHeldCards() const;
 
   /**
    * @brief Failed jail-roll counter accessor.
@@ -289,7 +296,7 @@ class Player {
   bool isBankrupt_;
   int jailTurns_;
   std::vector<Property*> ownedProperties_;
-  std::vector<ActionCard*> heldCards_;
+  std::vector<std::unique_ptr<ActionCard>> heldCards_;
   bool shieldActive_;       // Extension (not in spec).
   bool usedSkillThisTurn_;  // Extension (not in spec).
   float discountRate_;      // Extension (not in spec).

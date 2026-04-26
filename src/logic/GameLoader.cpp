@@ -104,15 +104,7 @@ void GameLoader::restorePlayers(const data::GameStateDTO& dto, Game& game) {
     for (const auto& cardDTO : pDTO.heldCards) {
       auto card = buildCardFromDTO(cardDTO);
       if (card) {
-        // CardDeck memiliki kartu; player menyimpan pointer non-owning.
-        // Kartu tangan disimpan sementara di skillDeck_ agar lifetime
-        // dikelola oleh deck, ini tradeoff pragmatis sampai ada
-        // dedicated hand-card storage dengan ownership yang jelas.
-        // TODO: pertimbangkan dedicated storage untuk kartu tangan
-        //       agar terpisah dari draw deck.
-        core::ActionCard* rawPtr = card.get();
-        game.getSkillDeck().addCard(std::move(card));
-        player->addCard(rawPtr);
+        player->addCard(std::move(card));
       }
     }
   }

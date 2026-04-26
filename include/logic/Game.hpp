@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/card/Card.hpp>
+#include <memory>
 #include <random>
 #include <string>
 #include <utility>
@@ -60,6 +61,8 @@ class Game : public core::GameContext {
   core::CardDeck<core::ActionCard> communityChestDeck_;
   core::CardDeck<core::ActionCard> skillDeck_;
 
+  UIInputMediator& requireMediator() const;
+  void tickFestivalEffects();
   void resolveFestival(core::Property& selectedProp);
 
   // Helpers untuk initialize()
@@ -127,7 +130,7 @@ class Game : public core::GameContext {
   void startAuction(core::Property& prop);
 
   // Card operations
-  void giveCard(core::Player& player, core::ActionCard* card);
+  void giveCard(core::Player& player, std::unique_ptr<core::ActionCard> card);
 
   // GameContext interface
   void offerProperty(core::Player& p, core::Property& prop) override;
@@ -142,7 +145,6 @@ class Game : public core::GameContext {
   int getGoSalary() const override;
   void movePlayer(core::Player& p, int targetIndex) override;
   void teleportPlayer(core::Player& p, int targetIndex) override;
-  int findNearestTileOfType(int from, core::TileType type) const override;
   int findNearestPropertyTileType(int from,
                                   core::PropertyTileType type) const override;
 

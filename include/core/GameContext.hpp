@@ -94,16 +94,6 @@ class GameContext {
    */
   virtual void teleportPlayer(Player& p, int targetIndex) = 0;
 
-  /**
-   * @brief Returns the index of the next clockwise tile of @p type starting
-   *        AFTER @p from, or -1 if none exists.
-   *
-   * @note Extension. used by
-   *       `ChanceCard::makeAdvanceToNearestRailroad` (and any future
-   *       "advance to nearest X" cards) to locate destinations without
-   *       cards iterating over `logic::Board` directly.
-   */
-  virtual int findNearestTileOfType(int from, TileType type) const = 0;
   virtual int findNearestPropertyTileType(int from,
                                           PropertyTileType type) const = 0;
 };

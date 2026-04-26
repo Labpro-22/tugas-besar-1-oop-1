@@ -19,7 +19,8 @@ void LassoCard::execute(Player& player, GameContext& ctx) {
 
   // Prefer the closest player strictly ahead of the caster on the board.
   for (Player* candidate : ctx.getPlayers()) {
-    if (candidate == nullptr || candidate == &player) {
+    if (candidate == nullptr || candidate == &player ||
+        candidate->isBankrupted()) {
       continue;
     }
     const int pos = candidate->getPosition();
@@ -33,7 +34,8 @@ void LassoCard::execute(Player& player, GameContext& ctx) {
   if (victim == nullptr) {
     best = std::numeric_limits<int>::max();
     for (Player* candidate : ctx.getPlayers()) {
-      if (candidate == nullptr || candidate == &player) {
+      if (candidate == nullptr || candidate == &player ||
+          candidate->isBankrupted()) {
         continue;
       }
       const int pos = candidate->getPosition();

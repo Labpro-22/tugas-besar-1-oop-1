@@ -53,7 +53,6 @@ class Property {
   void setOwner(Player* p);
   Player* getOwner() const;
   bool isOwned() const;
-  bool isAvailable() const;
   bool isMortgagedStatus() const;
   const std::string& getName() const;
   int getPrice() const;

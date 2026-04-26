@@ -89,6 +89,13 @@ class CardDeck {
    */
   void addCard(std::unique_ptr<T> card);
 
+  /**
+   * @brief Remove a specific card from deck storage and transfer ownership.
+   * @param card Raw pointer previously obtained from this deck.
+   * @return Owning pointer when found; otherwise `nullptr`.
+   */
+  std::unique_ptr<T> extractCard(T* card);
+
  private:
   /**
    * @brief Put all cards back into play and shuffle for a new cycle.
@@ -164,6 +171,33 @@ void CardDeck<T>::addCard(std::unique_ptr<T> card) {
   cards_.insert(cards_.begin() + static_cast<std::ptrdiff_t>(topIndex_),
                 std::move(card));
   ++topIndex_;
+}
+
+template <typename T>
+std::unique_ptr<T> CardDeck<T>::extractCard(T* card) {
+  if (card == nullptr) {
+    return nullptr;
+  }
+
+  const auto it = std::find_if(
+      cards_.begin(), cards_.end(),
+      [card](const std::unique_ptr<T>& owned) { return owned.get() == card; });
+  if (it == cards_.end()) {
+    return nullptr;
+  }
+
+  const std::size_t index =
+      static_cast<std::size_t>(std::distance(cards_.begin(), it));
+  std::unique_ptr<T> ownedCard = std::move(*it);
+  cards_.erase(it);
+
+  if (index < topIndex_) {
+    --topIndex_;
+  }
+  if (topIndex_ > cards_.size()) {
+    topIndex_ = cards_.size();
+  }
+  return ownedCard;
 }
 
 }  // namespace core

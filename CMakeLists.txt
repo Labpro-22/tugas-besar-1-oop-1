@@ -46,7 +46,6 @@ add_library(
   src/logic/Auction.cpp
   src/logic/Board.cpp
   src/logic/GameLoader.cpp
-  src/logic/BankruptcyHandler.cpp
   # etc. lanjut sendiri
 )
 

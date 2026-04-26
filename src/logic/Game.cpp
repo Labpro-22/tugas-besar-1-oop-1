@@ -32,6 +32,26 @@ Game::Game(std::vector<core::Player*> players)
       doubles_(0),
       hasExtraTurn_(false) {}
 
+UIInputMediator& Game::requireMediator() const {
+  if (mediator_ == nullptr) {
+    throw GameSetupException("UIInputMediator belum di-set.");
+  }
+  return *mediator_;
+}
+
+void Game::tickFestivalEffects() {
+  for (core::Player* player : players_) {
+    if (player == nullptr || player->isBankrupted()) {
+      continue;
+    }
+    for (core::Property* property : player->getOwnedProperties()) {
+      if (property != nullptr) {
+        property->tickFestival();
+      }
+    }
+  }
+}
+
 void Game::initialize(int boardSize, const std::string& configPath) {
   boardSize_ = boardSize;
   configPath_ = configPath;
@@ -68,7 +88,10 @@ void Game::initialize(int boardSize, const std::string& configPath) {
   buildSkillDeck();
 }
 
-void Game::startGame() { state_ = GameState::PRE_ROLL; }
+void Game::startGame() {
+  requireMediator();
+  state_ = GameState::PRE_ROLL;
+}
 
 Board& Game::getBoard() { return board_; }
 
@@ -79,6 +102,8 @@ void Game::nextTurn() {
     state_ = GameState::GAME_OVER;
     return;
   }
+
+  tickFestivalEffects();
 
   if (!hasExtraTurn_) {
     doubles_ = 0;
@@ -193,21 +218,7 @@ void Game::handleTileAction(core::Tile* tile) {
 
 void Game::buyProperty(core::Property& prop) {
   core::Player* p = getCurrentPlayer();
-  int price = prop.getPrice();
-
-  if (prop.getOwner() != nullptr) {
-    throw InvalidMoveException("owned property exception");
-  }
-
-  if (!p->canAfford(price)) {
-    throw InsufficientFundsException(p->getBalance(), price);
-  }
-
-  *p -= price;
-  bank_.receive(price);
-
-  prop.setOwner(p);
-  p->addProperty(prop);
+  const int price = bank_.buyProperty(*p, prop);
   logEvent(data::LogAction::PROPERTY_PURCHASE, *p, prop, price);
 }
 
@@ -227,21 +238,7 @@ void Game::buildHouse(core::Player* buyer, core::Tile* at) {
 
   core::Street* street = static_cast<core::Street*>(&prop);
 
-  if (street->getOwner() != buyer) {
-    throw UnauthorizedActionException(
-        buyer->getName(),
-        street->getOwner() ? street->getOwner()->getName() : "none",
-        street->getName());
-  }
-
-  int cost = street->getHouseCost();
-  if (!buyer->canAfford(cost)) {
-    throw InsufficientFundsException(buyer->getBalance(), cost);
-  }
-
-  *buyer -= cost;
-  bank_.receive(cost);
-  street->build();
+  int cost = bank_.buildHouse(*buyer, *street);
   logEvent(data::LogAction::BUILD_HOUSE, *buyer, *street, cost);
 }
 
@@ -258,73 +255,34 @@ void Game::sellHouse(core::Player* seller, core::Tile* at) {
 
   core::Street* street = static_cast<core::Street*>(&prop);
 
-  if (street->getHouseCount() == 0 && street->getHotelCount() == 0) {
-    throw InvalidMoveException("no building exception");
-  }
-
-  if (street->getOwner() != seller) {
-    throw UnauthorizedActionException(
-        seller->getName(),
-        street->getOwner() ? street->getOwner()->getName() : "none",
-        street->getName());
-  }
-
-  int refund = street->getHouseCost() / 2;
-
-  street->demolish(1);
-  bank_.pay(*seller, refund);
+  int refund = bank_.sellHouse(*seller, *street);
   logEvent(data::LogAction::SALE_HOUSE, *seller, *street, refund);
 }
 
 void Game::mortgageProperty(core::Property& prop) {
-  core::Player* p = prop.getOwner();
-
-  if (p != getCurrentPlayer()) {
-    throw UnauthorizedActionException(getCurrentPlayer()->getName(),
-                                      p ? p->getName() : "none",
-                                      prop.getName());
-  }
-  if (prop.isMortgagedStatus()) {
-    throw InvalidMoveException("Properti sudah digadaikan.");
-  }
-
-  prop.mortgage();
-  bank_.pay(*p, prop.getMortgageValue());
-  logEvent(data::LogAction::MORTGAGE, *p, prop, prop.getMortgageValue());
+  core::Player* actor = getCurrentPlayer();
+  const int proceeds = bank_.mortgageProperty(*actor, prop);
+  logEvent(data::LogAction::MORTGAGE, *actor, prop, proceeds);
 }
 
 void Game::unmortgageProperty(core::Property& prop) {
-  core::Player* p = prop.getOwner();
-
-  if (p != getCurrentPlayer()) {
-    throw UnauthorizedActionException(getCurrentPlayer()->getName(),
-                                      p ? p->getName() : "none",
-                                      prop.getName());
-  }
-  if (!prop.isMortgagedStatus()) {
-    throw InvalidMoveException("Properti tidak sedang digadaikan.");
-  }
-
-  int cost = prop.getPrice();
-
-  if (!p->canAfford(cost)) {
-    throw InsufficientFundsException(p->getBalance(), cost);
-  }
-
-  *p -= cost;
-  bank_.receive(cost);
-  prop.unmortgage();
-  logEvent(data::LogAction::UNMORTGAGE, *p, prop, cost);
+  core::Player* actor = getCurrentPlayer();
+  const int cost = bank_.unmortgageProperty(*actor, prop);
+  logEvent(data::LogAction::UNMORTGAGE, *actor, prop, cost);
 }
 
-void Game::giveCard(core::Player& player, core::ActionCard* card) {
+void Game::giveCard(core::Player& player,
+                    std::unique_ptr<core::ActionCard> card) {
+  if (!card) {
+    return;
+  }
   if (player.getHeldCards().size() >= 3) {
-    core::ActionCard* dropped = mediator_->selectCardToDrop(player);
+    core::ActionCard* dropped = requireMediator().selectCardToDrop(player);
     if (dropped) {
       player.removeCard(dropped);
     }
   }
-  player.addCard(card);
+  player.addCard(std::move(card));
 }
 
 void Game::startAuction(core::Property& prop) {
@@ -334,12 +292,12 @@ void Game::startAuction(core::Property& prop) {
 
   std::vector<core::Player*> eligiblePlayers;
   for (auto* p : players_) {
-    if (!p->isBankrupted()) {
+    if (p != nullptr && !p->isBankrupted()) {
       eligiblePlayers.push_back(p);
     }
   }
 
-  AuctionResult result = mediator_->runAuction(&prop, eligiblePlayers);
+  AuctionResult result = requireMediator().runAuction(&prop, eligiblePlayers);
   if (result.winner != nullptr) {
     *result.winner -= result.finalBid;
     bank_.receive(result.finalBid);
@@ -375,7 +333,7 @@ int Game::getMaxTurn() const { return maxTurn_; }
 int Game::getJailFine() const { return jailFine_; }
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
-  bool accept = mediator_->offerPropertyUI(p, prop);
+  bool accept = requireMediator().offerPropertyUI(p, prop);
   if (accept) {
     buyProperty(prop);
   } else {
@@ -384,19 +342,12 @@ void Game::offerProperty(core::Player& p, core::Property& prop) {
 }
 
 void Game::chargeRent(core::Player& p, core::Property& prop) {
-  int rent = 0;
-  int owned = 0;
-  if (prop.getType() == core::PropertyTileType::RAILROAD ||
-      prop.getType() == core::PropertyTileType::UTILITY) {
-    owned = static_cast<int>(prop.getOwner()->getOwnedProperties().size());
-    rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, owned,
-                              false);
-  } else {
-    rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1,
-                              false);
+  const int diceTotal = lastDiceRoll_.first + lastDiceRoll_.second;
+  const int rent = bank_.collectRent(p, prop, diceTotal);
+  if (p.isBankrupted()) {
+    logEvent(data::LogAction::BANKRUPTCY, p, prop, rent);
+    return;
   }
-  p -= rent;
-  *(prop.getOwner()) += rent;
   logEvent(data::LogAction::RENT_PAYMENT, p, prop, rent);
 }
 
@@ -413,20 +364,21 @@ void Game::chargeTax(core::Player& p, int flatRate, int percentageRate,
   if (type == core::TaxType::PPH) {
     int percentageAmount = p.getBalance() * percentageRate / 100;
     bool usePercentage =
-        mediator_->chooseTaxMethod(p, flatRate, percentageAmount);
+      requireMediator().chooseTaxMethod(p, flatRate, percentageAmount);
     int amount = usePercentage ? percentageAmount : flatRate;
-    p -= amount;
-    bank_.receive(amount);
+    bank_.collectTax(p, amount);
+    if (p.isBankrupted()) {
+      logEvent(data::LogAction::BANKRUPTCY, p, amount);
+      return;
+    }
     logEvent(data::LogAction::TAX_PAYMENT, p, amount);
   } else {
-    if (p.canAfford(flatRate)) {
-      p -= flatRate;
-      bank_.receive(flatRate);
-      logEvent(data::LogAction::TAX_PAYMENT, p, flatRate);
-    } else {
-      p.declareBankrupt();
+    bank_.collectTax(p, flatRate);
+    if (p.isBankrupted()) {
       logEvent(data::LogAction::BANKRUPTCY, p, flatRate);
+      return;
     }
+    logEvent(data::LogAction::TAX_PAYMENT, p, flatRate);
   }
 }
 
@@ -434,7 +386,7 @@ void Game::activateFestival(core::Player& p) {
   if (p.getOwnedProperties().empty()) {
     throw InvalidMoveException("festival exception");
   }
-  core::Property* selectedProp = mediator_->selectFestivalProperty(p);
+  core::Property* selectedProp = requireMediator().selectFestivalProperty(p);
   if (selectedProp != nullptr) {
     resolveFestival(*selectedProp);
   }
@@ -561,20 +513,6 @@ void Game::teleportPlayer(core::Player& p, int targetIndex) {
   if (boardSize <= 0) return;
   int dest = ((targetIndex % boardSize) + boardSize) % boardSize;
   stepThrough(p, p.getPosition(), dest, /*firePassed=*/false);
-}
-
-int Game::findNearestTileOfType(int from, core::TileType type) const {
-  int boardSize = board_.getTileCount();
-  if (boardSize <= 0) return -1;
-  int origin = ((from % boardSize) + boardSize) % boardSize;
-  for (int step = 1; step <= boardSize; ++step) {
-    int idx = (origin + step) % boardSize;
-    const core::Tile* tile = board_.getTile(idx);
-    if (tile && tile->getType() == type) {
-      return idx;
-    }
-  }
-  return -1;
 }
 
 int Game::findNearestPropertyTileType(int from,

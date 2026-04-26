@@ -44,7 +44,7 @@ PropertyTileType PropertyTile::getPropertyTileType() const {
 void PropertyTile::onLanded(Player& p, GameContext& g) {
   Property& property = getProperty();
 
-  if (property.isAvailable()) {
+  if (!property.isOwned()) {
     // purchase
     g.offerProperty(p, property);
   } else if (property.getOwner() != &p && !property.isMortgagedStatus()) {
@@ -72,7 +72,7 @@ const Property& UtilityTile::getProperty() const { return property_; }
 
 void UtilityTile::onLanded(Player& p, GameContext& g) {
   Property& property = getProperty();
-  if (property.isAvailable()) {
+  if (!property.isOwned()) {
     property.setOwner(&p);
     p.addProperty(property);
     g.logEvent(data::LogAction::PROPERTY_PURCHASE, p, property, 0);
@@ -92,7 +92,7 @@ const Property& RailroadTile::getProperty() const { return property_; }
 
 void RailroadTile::onLanded(Player& p, GameContext& g) {
   Property& property = getProperty();
-  if (property.isAvailable()) {
+  if (!property.isOwned()) {
     g.offerProperty(p, property);
   } else if (property.getOwner() != &p && !property.isMortgagedStatus()) {
     g.chargeRent(p, property);

@@ -50,8 +50,6 @@ Player* Property::getOwner() const { return owner_; }
 
 bool Property::isOwned() const { return (owner_ != nullptr); }
 
-bool Property::isAvailable() const { return (owner_ == nullptr); }
-
 bool Property::isMortgagedStatus() const { return isMortgaged_; }
 
 const string& Property::getName() const { return name_; }
