@@ -19,9 +19,7 @@ add_library(
   src/core/Tiles.cpp 
 
   src/core/player/Player.cpp
-  src/core/player/HumanPlayer.cpp
   src/core/player/COMPlayer.cpp
-  src/core/player/COMStrategy.cpp
   src/core/player/SimpleCOMStrategy.cpp
   src/core/player/GreedyCOMStrategy.cpp
 
@@ -29,8 +27,6 @@ add_library(
   src/core/Railroad.cpp
   src/core/Street.cpp
   src/core/Utility.cpp
-
-  src/core/card/Card.cpp
   src/core/card/ChanceCard.cpp
   src/core/card/CommunityChestCard.cpp
   src/core/card/TeleportCard.cpp

@@ -14,13 +14,18 @@ class HumanPlayer : public Player {
    * @param name Display name persisted in saves/logs.
    * @param token ASCII marker rendered on the board.
    */
-  HumanPlayer(std::string name, std::string token);
+  HumanPlayer(std::string name, std::string token)
+      : Player(std::move(name), std::move(token)) {}
 
   ~HumanPlayer() override = default;
 
-  void takeTurn(logic::Game& game) override;
+  void takeTurn(logic::Game& game) override {
+    resetPerTurnFlags();
+    (void)game;
+    // UI layer is responsible for issuing commands; this stub simply yields.
+  }
 
-  bool isHuman() override;
+  bool isHuman() override { return true; }
 };
 
 }  // namespace core

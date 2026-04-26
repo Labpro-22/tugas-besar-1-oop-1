@@ -6,10 +6,10 @@ namespace data {
 class PropertyConfig {
  public:
   int id = 0;
-  std::string code;   // kode huruf unik, misal: "GRT"
-  std::string name;   // nama lengkap, misal: "GARUT"
-  std::string type;   // "STREET" | "RAILROAD" | "UTILITY"
-  std::string color; 
+  std::string code;  // kode huruf unik, misal: "GRT"
+  std::string name;  // nama lengkap, misal: "GARUT"
+  std::string type;  // "STREET" | "RAILROAD" | "UTILITY"
+  std::string color;
   int purchasePrice = 0;
   int mortgageValue = 0;
 

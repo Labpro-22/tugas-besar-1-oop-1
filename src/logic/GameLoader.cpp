@@ -16,7 +16,6 @@
 #include "logic/Board.hpp"
 #include "logic/Game.hpp"
 
-
 namespace logic {
 
 static std::unique_ptr<core::ActionCard> buildCardFromDTO(

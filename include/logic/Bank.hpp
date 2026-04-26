@@ -7,14 +7,14 @@ class Player;
 namespace logic {
 
 class Bank {
-private:
+ private:
   int totalMoney_;
 
-public:
+ public:
   Bank(int initialMoney = 999999);
   ~Bank() = default;
   void pay(core::Player &p, int amount);
   void receive(int amount);
 };
 
-} // namespace logic
+}  // namespace logic

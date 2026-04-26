@@ -20,7 +20,8 @@ class ActionCard {
    * @brief Construct a card with human-readable text.
    * @param description Text shown when the card is revealed.
    */
-  explicit ActionCard(std::string description);
+  explicit ActionCard(std::string description)
+      : description_(std::move(description)) {}
 
   ActionCard(const ActionCard&) = delete;
   ActionCard& operator=(const ActionCard&) = delete;
@@ -47,7 +48,7 @@ class ActionCard {
    * @brief Expose the configured flavour text.
    * @return The description string passed to the constructor.
    */
-  std::string getDescription() const;
+  std::string getDescription() const { return description_; }
 
  protected:
   std::string description_;
@@ -65,7 +66,8 @@ class SkillCard : public ActionCard {
    * @brief Forward the flavour text to `ActionCard`.
    * @param description Human-readable card description.
    */
-  explicit SkillCard(std::string description);
+  explicit SkillCard(std::string description)
+      : ActionCard(std::move(description)) {}
 };
 
 }  // namespace core
