@@ -1,4 +1,5 @@
 #include "core/Property.hpp"
+#include "core/Tiles.hpp"
 
 using namespace std;
 
@@ -23,7 +24,7 @@ int Utility::calculateRent(int diceRoll, int ownedSameType,
   return rent * getFestMultiplier();
 }
 
-PropertyType Utility::getType() const { return PropertyType::UTILITY; }
+PropertyTileType Utility::getType() const { return PropertyTileType::UTILITY; }
 
 int Utility::getCurrentMultiplier(int ownedUtilities) const {
   auto it = multiplierTable_.find(ownedUtilities);

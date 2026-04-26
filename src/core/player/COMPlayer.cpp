@@ -11,14 +11,14 @@ namespace core {
 
 namespace {
 
-core::Tile* findTileFor(logic::Board& board, Property* target) {
-  if (target == nullptr) {
-    return nullptr;
-  }
+core::Tile* findTileFor(logic::Board& board, Property& target) {
   for (int i = 0; i < board.getTileCount(); ++i) {
     core::Tile* t = board.getTile(i);
-    if (t != nullptr && t->getProperty() == target) {
-      return t;
+    if (t != nullptr && t->getType() == core::TileType::PROPERTY) {
+      auto* propertyTile = static_cast<core::PropertyTile*>(t);
+      if (&propertyTile->getProperty() == &target) {
+        return t;
+      }
     }
   }
   return nullptr;
@@ -56,7 +56,7 @@ void COMPlayer::takeTurn(logic::Game& game) {
 
   for (Property* lot : getOwnedProperties()) {
     if (lot != nullptr && strategy_->shouldMortgage(lot, *this, game)) {
-      game.mortgageProperty(lot);
+      game.mortgageProperty(*lot);
     }
   }
 
@@ -64,7 +64,7 @@ void COMPlayer::takeTurn(logic::Game& game) {
     if (lot == nullptr || !strategy_->shouldBuild(lot, *this, game)) {
       continue;
     }
-    core::Tile* at = findTileFor(game.getBoard(), lot);
+    core::Tile* at = findTileFor(game.getBoard(), *lot);
     if (at != nullptr) {
       game.buildHouse(this, at);
       break;

@@ -2,6 +2,7 @@
 
 #include "core/GameException.hpp"
 #include "core/Property.hpp"
+#include "core/Tiles.hpp"
 
 namespace core {
 
@@ -39,7 +40,7 @@ int Street::calculateRent([[maybe_unused]] int diceRoll,
   return rent * getFestMultiplier();
 }
 
-PropertyType Street::getType() const { return PropertyType::STREET; }
+PropertyTileType Street::getType() const { return PropertyTileType::STREET; }
 
 void Street::build() {
   if (hotelCount_ > 0)

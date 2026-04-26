@@ -6,6 +6,7 @@
 
 #include "core/GameContext.hpp"
 #include "core/Property.hpp"
+#include "core/Tiles.hpp"
 #include "data/LogEntry.hpp"
 
 namespace core {
@@ -47,7 +48,7 @@ void DemolitionCard::execute(Player& player, GameContext& ctx) {
     return;
   }
   Property* prop = props[static_cast<std::size_t>(propChoice)];
-  if (prop == nullptr || prop->getType() != PropertyType::STREET) {
+  if (prop == nullptr || prop->getType() != PropertyTileType::STREET) {
     ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, 0);
     return;
   }

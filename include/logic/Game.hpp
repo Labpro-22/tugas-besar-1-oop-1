@@ -60,7 +60,7 @@ class Game : public core::GameContext {
   core::CardDeck<core::ActionCard> communityChestDeck_;
   core::CardDeck<core::ActionCard> skillDeck_;
 
-  void resolveFestival(core::Property* selectedProp);
+  void resolveFestival(core::Property& selectedProp);
 
   // Helpers untuk initialize()
   void buildChanceDeck();
@@ -119,12 +119,12 @@ class Game : public core::GameContext {
 
  public:
   // Property operations
-  void buyProperty(core::Property* prop);
+  void buyProperty(core::Property& prop);
   void buildHouse(core::Player* buyer, core::Tile* at);
   void sellHouse(core::Player* seller, core::Tile* at);
-  void mortgageProperty(core::Property* prop);
-  void unmortgageProperty(core::Property* prop);
-  void startAuction(core::Property* prop);
+  void mortgageProperty(core::Property& prop);
+  void unmortgageProperty(core::Property& prop);
+  void startAuction(core::Property& prop);
 
   // Card operations
   void giveCard(core::Player& player, core::ActionCard* card);
@@ -143,6 +143,8 @@ class Game : public core::GameContext {
   void movePlayer(core::Player& p, int targetIndex) override;
   void teleportPlayer(core::Player& p, int targetIndex) override;
   int findNearestTileOfType(int from, core::TileType type) const override;
+  int findNearestPropertyTileType(int from,
+                                  core::PropertyTileType type) const override;
 
   void logEvent(data::LogAction action, core::Player& p, int value) override;
   void logEvent(data::LogAction action, core::Player& p, core::Property& prop,

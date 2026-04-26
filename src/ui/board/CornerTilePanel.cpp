@@ -9,7 +9,8 @@
 namespace ui {
 
 CornerTilePanel::CornerTilePanel(sf::Vector2f position, int numTiles,
-                                 CornerType cornerType, Orientation orientation,
+                                 core::SpecialTileType cornerType,
+                                 Orientation orientation,
                                  const std::string& iconPath,
                                  const std::string& topText,
                                  const std::string& bottomText)
@@ -19,25 +20,25 @@ CornerTilePanel::CornerTilePanel(sf::Vector2f position, int numTiles,
       topText_(topText),
       bottomText_(bottomText),
       iconPath_(iconPath) {
-  if (cornerType_ == CornerType::JAIL) {
+  if (cornerType_ == core::SpecialTileType::JAIL) {
     setupJail();
   } else {
     setupNonJail();
   }
 
   switch (cornerType_) {
-    case CornerType::GO:
+    case core::SpecialTileType::GO:
       selectionInfo_ = TileInfo{"MULAI", iconPath_, false, board::base, false};
       break;
-    case CornerType::JAIL:
+    case core::SpecialTileType::JAIL:
       selectionInfo_ =
           TileInfo{"PENJARA", iconPath_, false, board::base, false};
       break;
-    case CornerType::FREE:
+    case core::SpecialTileType::FREE_PARKING:
       selectionInfo_ =
           TileInfo{"BEBAS PARKIR", iconPath_, false, board::base, false};
       break;
-    case CornerType::GO_TO_JAIL:
+    case core::SpecialTileType::GO_TO_JAIL:
       selectionInfo_ =
           TileInfo{"PERGI KE PENJARA", iconPath_, false, board::base, false};
       break;
@@ -45,7 +46,7 @@ CornerTilePanel::CornerTilePanel(sf::Vector2f position, int numTiles,
 }
 
 sf::Vector2f CornerTilePanel::computeTopTextPos() {
-  if (cornerType_ == CornerType::JAIL) {
+  if (cornerType_ == core::SpecialTileType::JAIL) {
     const float bandW = size_.x * layout::cornerTilePanel::jailTextBandRatio;
     const float bandH = size_.y * layout::cornerTilePanel::jailTextBandRatio;
     switch (orientation_) {
@@ -82,7 +83,7 @@ sf::Vector2f CornerTilePanel::computeTopTextPos() {
 }
 
 sf::Vector2f CornerTilePanel::computeTopTextSize() const {
-  if (cornerType_ == CornerType::JAIL) {
+  if (cornerType_ == core::SpecialTileType::JAIL) {
     const float bandW = size_.x * layout::cornerTilePanel::jailTextBandRatio;
     const float bandH = size_.y * layout::cornerTilePanel::jailTextBandRatio;
     switch (orientation_) {
@@ -102,7 +103,7 @@ sf::Vector2f CornerTilePanel::computeTopTextSize() const {
 
 sf::Vector2f CornerTilePanel::computeIconPos() {
   const auto iconSize = computeIconSize();
-  if (cornerType_ != CornerType::JAIL) {
+  if (cornerType_ != core::SpecialTileType::JAIL) {
     return {position_.x + ((size_.x - iconSize.x) / 2.0f),
             position_.y + ((size_.y - iconSize.y) / 2.0f)};
   }
@@ -126,14 +127,14 @@ sf::Vector2f CornerTilePanel::computeIconPos() {
 }
 
 sf::Vector2f CornerTilePanel::computeIconSize() const {
-  const float ratio = (cornerType_ == CornerType::JAIL)
+  const float ratio = (cornerType_ == core::SpecialTileType::JAIL)
                           ? layout::cornerTilePanel::jailLogoSizeRatio
                           : layout::cornerTilePanel::logoSizeRatio;
   return {size_.x * ratio, size_.y * ratio};
 }
 
 sf::Vector2f CornerTilePanel::computeBottomTextPos() {
-  if (cornerType_ == CornerType::JAIL) {
+  if (cornerType_ == core::SpecialTileType::JAIL) {
     const float bandW = size_.x * layout::cornerTilePanel::jailTextBandRatio;
     const float bandH = size_.y * layout::cornerTilePanel::jailTextBandRatio;
     switch (orientation_) {
@@ -169,7 +170,7 @@ sf::Vector2f CornerTilePanel::computeBottomTextPos() {
 }
 
 sf::Vector2f CornerTilePanel::computeBottomTextSize() const {
-  if (cornerType_ == CornerType::JAIL) {
+  if (cornerType_ == core::SpecialTileType::JAIL) {
     const float bandW = size_.x * layout::cornerTilePanel::jailTextBandRatio;
     const float bandH = size_.y * layout::cornerTilePanel::jailTextBandRatio;
     switch (orientation_) {

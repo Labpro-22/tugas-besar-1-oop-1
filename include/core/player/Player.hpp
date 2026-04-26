@@ -79,13 +79,13 @@ class Player {
    * @brief Register a newly acquired property pointer.
    * @param property Non-owning observer; must outlive the player.
    */
-  void addProperty(Property* property);
+  void addProperty(Property& property);
 
   /**
    * @brief Drop a property from the local cache (ownership unchanged).
-   * @param property Pointer previously passed to `addProperty`.
+   * @param property Reference previously passed to `addProperty`.
    */
-  void removeProperty(Property* property);
+  void removeProperty(Property& property);
 
   /**
    * @brief Credit cash from the bank or another player.

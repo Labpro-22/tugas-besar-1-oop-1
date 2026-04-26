@@ -34,8 +34,8 @@ void BankruptcyHandler::transferAssets(core::Player& from, core::Player& to) {
   for (core::Property* prop : properties) {
     if (prop == nullptr) continue;
     prop->setOwner(&to);
-    to.addProperty(prop);
-    from.removeProperty(prop);
+    to.addProperty(*prop);
+    from.removeProperty(*prop);
   }
 
   auto cards = from.getHeldCards();

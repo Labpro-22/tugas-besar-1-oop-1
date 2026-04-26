@@ -1,6 +1,7 @@
 #include <cmath>
 
 #include "core/Property.hpp"
+#include "core/Tiles.hpp"
 
 using namespace std;
 
@@ -36,7 +37,9 @@ int Railroad::calculateRent([[maybe_unused]] int diceRoll, int ownedSameType,
   return rent * getFestMultiplier();
 }
 
-PropertyType Railroad::getType() const { return PropertyType::RAILROAD; }
+PropertyTileType Railroad::getType() const {
+  return PropertyTileType::RAILROAD;
+}
 
 int Railroad::getBaseFare() const { return baseFare_; }
 

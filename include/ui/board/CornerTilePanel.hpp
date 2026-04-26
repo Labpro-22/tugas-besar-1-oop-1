@@ -4,16 +4,15 @@
 #include <memory>
 #include <string>
 
+#include "core/Tiles.hpp"
 #include "ui/board/TilePanel.hpp"
 
 namespace ui {
 
-enum class CornerType { GO, JAIL, FREE, GO_TO_JAIL };
-
 class CornerTilePanel : public TilePanel {
  public:
-  CornerTilePanel(sf::Vector2f position, int numTiles, CornerType cornerType,
-                  Orientation orientation,
+  CornerTilePanel(sf::Vector2f position, int numTiles,
+                  core::SpecialTileType cornerType, Orientation orientation,
                   const std::string& iconPath = "assets/icons/train.png",
                   const std::string& topText = "PETAK",
                   const std::string& bottomText = "UJUNG");
@@ -28,7 +27,7 @@ class CornerTilePanel : public TilePanel {
   void setupNonJail();
   void setupJail();
 
-  CornerType cornerType_;
+  core::SpecialTileType cornerType_;
   std::string topText_;
   std::string bottomText_;
   std::string iconPath_;

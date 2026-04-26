@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "core/Property.hpp"
+#include "core/Tiles.hpp"
 #include "core/player/Player.hpp"
 #include "logic/Game.hpp"
 
@@ -30,7 +31,7 @@ int GreedyCOMStrategy::bidAmount(Property* property, Player& player,
 bool GreedyCOMStrategy::shouldBuild(Property* property, Player& player,
                                     logic::Game& game) const noexcept {
   (void)game;
-  if (property == nullptr || property->getType() != PropertyType::STREET) {
+  if (property == nullptr || property->getType() != PropertyTileType::STREET) {
     return false;
   }
   const int houseCost = static_cast<Street*>(property)->getHouseCost();

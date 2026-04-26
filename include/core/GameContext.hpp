@@ -9,8 +9,8 @@ namespace core {
 class Player;
 class Property;
 enum class TileType : int;
-
-enum class TaxType { PPH, PBM };
+enum class PropertyTileType : int;
+enum class TaxType : int;
 
 /**
  * @brief Abstract collaborator handed to tiles and action cards so they can
@@ -104,6 +104,8 @@ class GameContext {
    *       cards iterating over `logic::Board` directly.
    */
   virtual int findNearestTileOfType(int from, TileType type) const = 0;
+  virtual int findNearestPropertyTileType(int from,
+                                          PropertyTileType type) const = 0;
 };
 
 }  // namespace core

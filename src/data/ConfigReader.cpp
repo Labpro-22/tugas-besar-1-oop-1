@@ -14,11 +14,11 @@ namespace {
 
 std::unique_ptr<ConfigReader> gReader;
 
-ActionTileType parseActionTileType(const std::string& value) {
-  if (value == "SPESIAL") return ActionTileType::SPECIAL;
-  if (value == "KARTU") return ActionTileType::CARD;
-  if (value == "PAJAK") return ActionTileType::TAX;
-  if (value == "FESTIVAL") return ActionTileType::FESTIVAL;
+core::ActionTileType parseActionTileType(const std::string& value) {
+  if (value == "SPESIAL") return core::ActionTileType::SPECIAL;
+  if (value == "KARTU") return core::ActionTileType::CARD;
+  if (value == "PAJAK") return core::ActionTileType::TAX;
+  if (value == "FESTIVAL") return core::ActionTileType::FESTIVAL;
   throw InvalidConfigException(
       "aksi.txt",
       "JENIS_PETAK must be SPESIAL|KARTU|PAJAK|FESTIVAL, got '" + value + "'");
@@ -324,20 +324,9 @@ std::vector<TileEntry> ConfigReader::buildBoard() {
     }
 
     const int pos = cfg->id - 1;
-    auto prop = cfg->buildProperty();
-
     TileEntry entry;
     entry.setCode(cfg->code);
-    if (cfg->getType() == "RAILROAD") {
-      entry.setTile(std::make_unique<core::RailroadTile>(pos, cfg->name,
-                                                         std::move(prop)));
-    } else if (cfg->getType() == "UTILITY") {
-      entry.setTile(
-          std::make_unique<core::UtilityTile>(pos, cfg->name, std::move(prop)));
-    } else {
-      entry.setTile(std::make_unique<core::PropertyTile>(pos, cfg->name,
-                                                         std::move(prop)));
-    }
+    entry.setTile(cfg->buildTile(pos));
     tileMap[cfg->id] = std::move(entry);
   }
 

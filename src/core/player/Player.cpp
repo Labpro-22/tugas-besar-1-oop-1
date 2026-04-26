@@ -5,6 +5,7 @@
 
 #include "core/GameException.hpp"
 #include "core/Property.hpp"
+#include "core/Tiles.hpp"
 #include "core/card/Card.hpp"
 
 namespace core {
@@ -32,7 +33,7 @@ int Player::getNetWorth() const noexcept {
     } else {
       total += p->getPrice();
     }
-    if (p->getType() == PropertyType::STREET) {
+    if (p->getType() == PropertyTileType::STREET) {
       auto* street = static_cast<const Street*>(p);
       total += street->getHouseCount() * street->getHouseCost();
       total += street->getHotelCount() * street->getHotelCost();
@@ -50,16 +51,13 @@ void Player::releaseFromJail() {
   jailTurns_ = 0;
 }
 
-void Player::addProperty(Property* property) {
-  if (property == nullptr) {
-    return;
-  }
-  ownedProperties_.push_back(property);
+void Player::addProperty(Property& property) {
+  ownedProperties_.push_back(&property);
 }
 
-void Player::removeProperty(Property* property) {
+void Player::removeProperty(Property& property) {
   const auto it =
-      std::find(ownedProperties_.begin(), ownedProperties_.end(), property);
+      std::find(ownedProperties_.begin(), ownedProperties_.end(), &property);
   if (it != ownedProperties_.end()) {
     ownedProperties_.erase(it);
   }

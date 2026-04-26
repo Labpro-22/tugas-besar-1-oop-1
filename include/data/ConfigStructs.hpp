@@ -35,14 +35,12 @@ class BoardConfig {
   std::vector<TileSpec> tileOrder;
 };
 
-enum class ActionTileType { SPECIAL, CARD, TAX, FESTIVAL };
-
 class ActionTileConfig {
  public:
   int id = 0;
   std::string code;
   std::string name;
-  ActionTileType tileType = ActionTileType::SPECIAL;
+  core::ActionTileType tileType = core::ActionTileType::SPECIAL;
   std::string color;
 
   std::unique_ptr<core::Tile> buildTile(const TaxConfig& taxCfg) const;

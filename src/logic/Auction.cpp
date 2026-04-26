@@ -42,7 +42,7 @@ void Auction::resolveWinner() {
   if (currentWinner_ != nullptr) {
     *currentWinner_ -= currentBid_;
     subject_->setOwner(currentWinner_);
-    currentWinner_->addProperty(subject_);
+    currentWinner_->addProperty(*subject_);
   }
 }
 

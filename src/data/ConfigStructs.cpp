@@ -9,7 +9,7 @@ std::unique_ptr<core::Tile> ActionTileConfig::buildTile(
     const TaxConfig& taxCfg) const {
   const int pos = id - 1;
 
-  if (tileType == ActionTileType::SPECIAL) {
+  if (tileType == core::ActionTileType::SPECIAL) {
     if (code == "GO") return std::make_unique<core::GoTile>(pos, name);
     if (code == "PEN") return std::make_unique<core::JailTile>(pos, name);
     if (code == "BBP") {
@@ -22,12 +22,12 @@ std::unique_ptr<core::Tile> ActionTileConfig::buildTile(
                                  "GO|PEN|BBP|PPJ, got '" + code + "'");
   }
 
-  if (tileType == ActionTileType::CARD) {
+  if (tileType == core::ActionTileType::CARD) {
     const bool isChance = (code == "KSP");
     return std::make_unique<core::CardTile>(pos, name, isChance);
   }
 
-  if (tileType == ActionTileType::TAX) {
+  if (tileType == core::ActionTileType::TAX) {
     if (code == "PPH") {
       return std::make_unique<core::TaxTile>(pos, name, taxCfg.incomeTaxFlat,
                                              taxCfg.incomeTaxPercent,
@@ -41,7 +41,7 @@ std::unique_ptr<core::Tile> ActionTileConfig::buildTile(
                                  "PPH|PBM, got '" + code + "'");
   }
 
-  if (tileType == ActionTileType::FESTIVAL) {
+  if (tileType == core::ActionTileType::FESTIVAL) {
     return std::make_unique<core::FestivalTile>(pos, name);
   }
 

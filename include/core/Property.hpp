@@ -11,6 +11,8 @@ class Player;
 }
 namespace core {
 
+enum class PropertyTileType : int;
+
 enum class ColorGroup {
   BROWN,
   LIGHT_BLUE,
@@ -29,8 +31,6 @@ enum class ColorGroup {
   DEFAULT
 };
 
-enum class PropertyType { STREET, RAILROAD, UTILITY };
-
 class Property {
  protected:
   std::string name_;
@@ -47,7 +47,7 @@ class Property {
 
   virtual int calculateRent(int diceRoll, int ownedSameType,
                             bool hasMonopoly) const = 0;
-  virtual PropertyType getType() const = 0;
+  virtual PropertyTileType getType() const = 0;
   void mortgage();
   void unmortgage();
   void setOwner(Player* p);
@@ -81,7 +81,7 @@ class Street : public Property {
          int hotelCost);
   int calculateRent(int diceRoll, int ownedSameType,
                     bool hasMonopoly) const override;
-  PropertyType getType() const override;
+  PropertyTileType getType() const override;
 
   void build();
   void demolish(int n);
@@ -107,7 +107,7 @@ class Railroad : public Property {
   static void setRentTable(const std::map<int, int>& table);
   int calculateRent(int diceRoll, int ownedSameType,
                     bool hasMonopoly) const override;
-  PropertyType getType() const override;
+  PropertyTileType getType() const override;
   int getBaseFare() const;
 };
 
@@ -119,7 +119,7 @@ class Utility : public Property {
   static void setMultiplierTabel(const std::map<int, int>& table);
   int calculateRent(int diceRoll, int ownedSameType,
                     bool hasMonopoly) const override;
-  PropertyType getType() const override;
+  PropertyTileType getType() const override;
   int getCurrentMultiplier(int ownedUtilities) const;
 };
 

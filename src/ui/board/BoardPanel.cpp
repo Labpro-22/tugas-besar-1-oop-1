@@ -87,28 +87,28 @@ void BoardPanel::setup() {
 
   auto goTile = std::make_unique<CornerTilePanel>(
       position_ + size_ - sf::Vector2f(cornerSize, cornerSize), tileNum_,
-      CornerType::GO, Orientation::Bottom, "assets/icons/go.png", "MULAI",
-      "DAPAT UANG");
+      core::SpecialTileType::GO, Orientation::Bottom, "assets/icons/go.png",
+      "MULAI", "DAPAT UANG");
   goTile->setOnSelected(onTileSelected_);
   addChild(std::move(goTile));
 
   auto jailTile = std::make_unique<CornerTilePanel>(
       position_ + sf::Vector2f(0, size_.y - cornerSize), tileNum_,
-      CornerType::JAIL, Orientation::Left, "assets/icons/jail.png", "HANYA",
-      "BERKUNJUNG");
+      core::SpecialTileType::JAIL, Orientation::Left, "assets/icons/jail.png",
+      "HANYA", "BERKUNJUNG");
   jailTile->setOnSelected(onTileSelected_);
   addChild(std::move(jailTile));
 
   auto freeTile = std::make_unique<CornerTilePanel>(
-      position_, tileNum_, CornerType::FREE, Orientation::Top,
-      "assets/icons/free-park.png", "PARKIR", "GRATIS");
+      position_, tileNum_, core::SpecialTileType::FREE_PARKING,
+      Orientation::Top, "assets/icons/free-park.png", "PARKIR", "GRATIS");
   freeTile->setOnSelected(onTileSelected_);
   addChild(std::move(freeTile));
 
   auto goToJailTile = std::make_unique<CornerTilePanel>(
       position_ + sf::Vector2f(size_.x - cornerSize, 0), tileNum_,
-      CornerType::GO_TO_JAIL, Orientation::Right, "assets/icons/go-to-jail.png",
-      "PERGI", "KE PENJARA");
+      core::SpecialTileType::GO_TO_JAIL, Orientation::Right,
+      "assets/icons/go-to-jail.png", "PERGI", "KE PENJARA");
   goToJailTile->setOnSelected(onTileSelected_);
   addChild(std::move(goToJailTile));
 }

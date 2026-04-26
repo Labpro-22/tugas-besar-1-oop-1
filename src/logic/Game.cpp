@@ -191,11 +191,11 @@ void Game::handleTileAction(core::Tile* tile) {
   tile->onLanded(*p, *this);
 }
 
-void Game::buyProperty(core::Property* prop) {
+void Game::buyProperty(core::Property& prop) {
   core::Player* p = getCurrentPlayer();
-  int price = prop->getPrice();
+  int price = prop.getPrice();
 
-  if (prop->getOwner() != nullptr) {
+  if (prop.getOwner() != nullptr) {
     throw InvalidMoveException("owned property exception");
   }
 
@@ -206,22 +206,26 @@ void Game::buyProperty(core::Property* prop) {
   *p -= price;
   bank_.receive(price);
 
-  prop->setOwner(p);
+  prop.setOwner(p);
   p->addProperty(prop);
-  logEvent(data::LogAction::PROPERTY_PURCHASE, *p, *prop, price);
+  logEvent(data::LogAction::PROPERTY_PURCHASE, *p, prop, price);
 }
 
 void Game::buildHouse(core::Player* buyer, core::Tile* at) {
-  core::Property* prop = at->getProperty();
-  if (!prop) {
+  if (at == nullptr) {
+    throw InvalidPropertyTypeException("unknown", "bukan properti");
+  }
+  if (at->getType() != core::TileType::PROPERTY) {
     throw InvalidPropertyTypeException(at->getName(), "bukan properti");
   }
+  auto* propertyTile = static_cast<core::PropertyTile*>(at);
+  core::Property& prop = propertyTile->getProperty();
 
-  if (prop->getType() != core::PropertyType::STREET) {
-    throw InvalidPropertyTypeException(prop->getName(), "bukan Street");
+  if (prop.getType() != core::PropertyTileType::STREET) {
+    throw InvalidPropertyTypeException(prop.getName(), "bukan Street");
   }
 
-  core::Street* street = static_cast<core::Street*>(prop);
+  core::Street* street = static_cast<core::Street*>(&prop);
 
   if (street->getOwner() != buyer) {
     throw UnauthorizedActionException(
@@ -242,13 +246,17 @@ void Game::buildHouse(core::Player* buyer, core::Tile* at) {
 }
 
 void Game::sellHouse(core::Player* seller, core::Tile* at) {
-  core::Property* prop = at->getProperty();
+  if (at == nullptr || at->getType() != core::TileType::PROPERTY) {
+    throw InvalidMoveException("no house exception.");
+  }
+  auto* propertyTile = static_cast<core::PropertyTile*>(at);
+  core::Property& prop = propertyTile->getProperty();
 
-  if (prop->getType() != core::PropertyType::STREET) {
+  if (prop.getType() != core::PropertyTileType::STREET) {
     throw InvalidMoveException("no house exception.");
   }
 
-  core::Street* street = static_cast<core::Street*>(prop);
+  core::Street* street = static_cast<core::Street*>(&prop);
 
   if (street->getHouseCount() == 0 && street->getHotelCount() == 0) {
     throw InvalidMoveException("no building exception");
@@ -268,36 +276,36 @@ void Game::sellHouse(core::Player* seller, core::Tile* at) {
   logEvent(data::LogAction::SALE_HOUSE, *seller, *street, refund);
 }
 
-void Game::mortgageProperty(core::Property* prop) {
-  core::Player* p = prop->getOwner();
+void Game::mortgageProperty(core::Property& prop) {
+  core::Player* p = prop.getOwner();
 
   if (p != getCurrentPlayer()) {
     throw UnauthorizedActionException(getCurrentPlayer()->getName(),
                                       p ? p->getName() : "none",
-                                      prop->getName());
+                                      prop.getName());
   }
-  if (prop->isMortgagedStatus()) {
+  if (prop.isMortgagedStatus()) {
     throw InvalidMoveException("Properti sudah digadaikan.");
   }
 
-  prop->mortgage();
-  bank_.pay(*p, prop->getMortgageValue());
-  logEvent(data::LogAction::MORTGAGE, *p, *prop, prop->getMortgageValue());
+  prop.mortgage();
+  bank_.pay(*p, prop.getMortgageValue());
+  logEvent(data::LogAction::MORTGAGE, *p, prop, prop.getMortgageValue());
 }
 
-void Game::unmortgageProperty(core::Property* prop) {
-  core::Player* p = prop->getOwner();
+void Game::unmortgageProperty(core::Property& prop) {
+  core::Player* p = prop.getOwner();
 
   if (p != getCurrentPlayer()) {
     throw UnauthorizedActionException(getCurrentPlayer()->getName(),
                                       p ? p->getName() : "none",
-                                      prop->getName());
+                                      prop.getName());
   }
-  if (!prop->isMortgagedStatus()) {
+  if (!prop.isMortgagedStatus()) {
     throw InvalidMoveException("Properti tidak sedang digadaikan.");
   }
 
-  int cost = prop->getPrice();
+  int cost = prop.getPrice();
 
   if (!p->canAfford(cost)) {
     throw InsufficientFundsException(p->getBalance(), cost);
@@ -305,8 +313,8 @@ void Game::unmortgageProperty(core::Property* prop) {
 
   *p -= cost;
   bank_.receive(cost);
-  prop->unmortgage();
-  logEvent(data::LogAction::UNMORTGAGE, *p, *prop, cost);
+  prop.unmortgage();
+  logEvent(data::LogAction::UNMORTGAGE, *p, prop, cost);
 }
 
 void Game::giveCard(core::Player& player, core::ActionCard* card) {
@@ -319,8 +327,8 @@ void Game::giveCard(core::Player& player, core::ActionCard* card) {
   player.addCard(card);
 }
 
-void Game::startAuction(core::Property* prop) {
-  if (prop->getOwner() != nullptr) {
+void Game::startAuction(core::Property& prop) {
+  if (prop.getOwner() != nullptr) {
     throw InvalidMoveException("auction exception");
   }
 
@@ -331,13 +339,13 @@ void Game::startAuction(core::Property* prop) {
     }
   }
 
-  AuctionResult result = mediator_->runAuction(prop, eligiblePlayers);
+  AuctionResult result = mediator_->runAuction(&prop, eligiblePlayers);
   if (result.winner != nullptr) {
     *result.winner -= result.finalBid;
     bank_.receive(result.finalBid);
-    prop->setOwner(result.winner);
+    prop.setOwner(result.winner);
     result.winner->addProperty(prop);
-    logEvent(data::LogAction::AUCTION_RESULT, *result.winner, *prop,
+    logEvent(data::LogAction::AUCTION_RESULT, *result.winner, prop,
              result.finalBid);
   }
 }
@@ -369,17 +377,17 @@ int Game::getJailFine() const { return jailFine_; }
 void Game::offerProperty(core::Player& p, core::Property& prop) {
   bool accept = mediator_->offerPropertyUI(p, prop);
   if (accept) {
-    buyProperty(&prop);
+    buyProperty(prop);
   } else {
-    startAuction(&prop);
+    startAuction(prop);
   }
 }
 
 void Game::chargeRent(core::Player& p, core::Property& prop) {
   int rent = 0;
   int owned = 0;
-  if (prop.getType() == core::PropertyType::RAILROAD ||
-      prop.getType() == core::PropertyType::UTILITY) {
+  if (prop.getType() == core::PropertyTileType::RAILROAD ||
+      prop.getType() == core::PropertyTileType::UTILITY) {
     owned = static_cast<int>(prop.getOwner()->getOwnedProperties().size());
     rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, owned,
                               false);
@@ -427,15 +435,15 @@ void Game::activateFestival(core::Player& p) {
     throw InvalidMoveException("festival exception");
   }
   core::Property* selectedProp = mediator_->selectFestivalProperty(p);
-  resolveFestival(selectedProp);
+  if (selectedProp != nullptr) {
+    resolveFestival(*selectedProp);
+  }
 }
 
-void Game::resolveFestival(core::Property* selectedProp) {
-  if (selectedProp) {
-    selectedProp->applyFestival();
-    logEvent(data::LogAction::FESTIVAL_ACTIVATION, *getCurrentPlayer(),
-             *selectedProp, selectedProp->getFestMultiplier());
-  }
+void Game::resolveFestival(core::Property& selectedProp) {
+  selectedProp.applyFestival();
+  logEvent(data::LogAction::FESTIVAL_ACTIVATION, *getCurrentPlayer(),
+           selectedProp, selectedProp.getFestMultiplier());
 }
 
 void Game::drawChanceCard(core::Player& p) {
@@ -564,6 +572,24 @@ int Game::findNearestTileOfType(int from, core::TileType type) const {
     const core::Tile* tile = board_.getTile(idx);
     if (tile && tile->getType() == type) {
       return idx;
+    }
+  }
+  return -1;
+}
+
+int Game::findNearestPropertyTileType(int from,
+                                      core::PropertyTileType type) const {
+  int boardSize = board_.getTileCount();
+  if (boardSize <= 0) return -1;
+  int origin = ((from % boardSize) + boardSize) % boardSize;
+  for (int step = 1; step <= boardSize; ++step) {
+    int idx = (origin + step) % boardSize;
+    const core::Tile* tile = board_.getTile(idx);
+    if (tile && tile->getType() == core::TileType::PROPERTY) {
+      const auto* propertyTile = static_cast<const core::PropertyTile*>(tile);
+      if (propertyTile->getPropertyTileType() == type) {
+        return idx;
+      }
     }
   }
   return -1;

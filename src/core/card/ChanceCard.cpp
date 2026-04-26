@@ -77,8 +77,8 @@ std::unique_ptr<ActionCard> ChanceCard::makeAdvanceToNearestRailroad(
         if (n <= 0) {
           return;
         }
-        const int target =
-            ctx.findNearestTileOfType(player.getPosition(), TileType::RAILROAD);
+        const int target = ctx.findNearestPropertyTileType(
+            player.getPosition(), PropertyTileType::RAILROAD);
         if (target < 0) {
           return;
         }

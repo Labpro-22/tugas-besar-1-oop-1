@@ -128,29 +128,30 @@ void GameLoader::restoreProperties(const data::GameStateDTO& dto, Game& game) {
     core::Tile* tile = board.getTileByCode(dtoPtr->code);
     if (!tile) continue;
 
-    core::Property* prop = tile->getProperty();
-    if (!prop) continue;
+    if (tile->getType() != core::TileType::PROPERTY) continue;
+    auto* propertyTile = static_cast<core::PropertyTile*>(tile);
+    core::Property& prop = propertyTile->getProperty();
 
     // 1. Set owner DULU, mortgage() butuh isOwned() == true
     if (!dtoPtr->ownerName.empty()) {
       core::Player* owner = game.getPlayerByName(dtoPtr->ownerName);
       if (owner) {
-        prop->setOwner(owner);
+        prop.setOwner(owner);
         owner->addProperty(prop);
       }
     }
 
     // 2. Mortgage status
-    if (dtoPtr->isMortgaged && prop->isOwned()) prop->mortgage();
+    if (dtoPtr->isMortgaged && prop.isOwned()) prop.mortgage();
 
     // 3. Street-specific: building level + festival
     if (dtoPtr->getType() == "street" &&
-        prop->getType() == core::PropertyType::STREET) {
+        prop.getType() == core::PropertyTileType::STREET) {
       const auto* sDTO = static_cast<const data::StreetPropertyDTO*>(dtoPtr);
-      auto* street = static_cast<core::Street*>(prop);
+      auto* street = static_cast<core::Street*>(&prop);
       street->setLevel(sDTO->level);
       if (sDTO->festMult != 1 || sDTO->festDur != 0)
-        prop->setFestivalState(sDTO->festMult, sDTO->festDur);
+        prop.setFestivalState(sDTO->festMult, sDTO->festDur);
     }
   }
 }

@@ -33,19 +33,22 @@ core::ColorGroup PropertyConfig::colorFromString(const std::string& s) {
   return it->second;
 }
 
-std::unique_ptr<core::Property> StreetConfig::buildProperty() const {
+std::unique_ptr<core::Tile> StreetConfig::buildTile(int position) const {
   std::vector<int> rents(rent, rent + 6);
-  return std::make_unique<core::Street>(name, purchasePrice, mortgageValue,
-                                        colorFromString(color), rents,
-                                        houseUpgradeCost, hotelUpgradeCost);
+  return std::make_unique<core::StreetTile>(
+      position, name,
+      core::Street(name, purchasePrice, mortgageValue, colorFromString(color),
+                   rents, houseUpgradeCost, hotelUpgradeCost));
 }
 
-std::unique_ptr<core::Property> RailroadConfig::buildProperty() const {
-  return std::make_unique<core::Railroad>(name, mortgageValue, 0);
+std::unique_ptr<core::Tile> RailroadConfig::buildTile(int position) const {
+  return std::make_unique<core::RailroadTile>(
+      position, name, core::Railroad(name, mortgageValue, 0));
 }
 
-std::unique_ptr<core::Property> UtilityConfig::buildProperty() const {
-  return std::make_unique<core::Utility>(name, mortgageValue);
+std::unique_ptr<core::Tile> UtilityConfig::buildTile(int position) const {
+  return std::make_unique<core::UtilityTile>(
+      position, name, core::Utility(name, mortgageValue));
 }
 
 }  // namespace data

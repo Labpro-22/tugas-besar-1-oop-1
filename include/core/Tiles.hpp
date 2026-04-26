@@ -1,32 +1,23 @@
 #pragma once
 
-#include <memory>
 #include <string>
 
-#include "core/GameContext.hpp"
 #include "core/Property.hpp"
-#include "core/player/Player.hpp"
-
-namespace logic {
-class Game;
-}
 
 namespace core {
 
-enum class TileType : int {
-  BASE,
-  ACTION,
-  PROPERTY,
-  UTILITY,
-  RAILROAD,
-  GO,
-  JAIL,
-  FREE_PARKING,
-  GO_TO_JAIL,
-  TAX,
-  FESTIVAL,
-  CARD
-};
+class GameContext;
+class Player;
+
+enum class TileType : int { PROPERTY, ACTION };
+
+enum class ActionTileType : int { SPECIAL, CARD, TAX, FESTIVAL };
+
+enum class SpecialTileType : int { GO, JAIL, FREE_PARKING, GO_TO_JAIL };
+
+enum class PropertyTileType : int { STREET, RAILROAD, UTILITY };
+
+enum class TaxType : int { PPH, PBM };
 
 // abstact class Tile
 class Tile {
@@ -36,10 +27,8 @@ class Tile {
   virtual void onLanded(Player& p, GameContext& g) = 0;
   virtual void onPassed(Player& p, GameContext& g);
   virtual std::string getName() const;
-  virtual TileType getType() const;
+  virtual TileType getType() const = 0;
   virtual int getPosition() const;
-
-  virtual Property* getProperty() const { return nullptr; }
 
  protected:
   int position_;
@@ -48,64 +37,94 @@ class Tile {
 
 class ActionTile : public Tile {
  protected:
-  ActionTile(int position, const std::string& name);
+  ActionTile(int position, const std::string& name, ActionTileType actionType);
   virtual void onLanded(Player& p, GameContext& g) override = 0;
+
+  ActionTileType actionType_;
+
+ public:
+  TileType getType() const override;
+  ActionTileType getActionTileType() const;
+};
+
+class SpecialTile : public ActionTile {
+ public:
+  SpecialTile(int position, const std::string& name,
+              SpecialTileType specialType);
+  SpecialTileType getSpecialTileType() const;
+
+  SpecialTileType specialType_;
 };
 
 class PropertyTile : public Tile {
  public:
   PropertyTile(int position, const std::string& name,
-               std::unique_ptr<Property> property);
-  virtual Property* getProperty() const;
-  virtual void onLanded(Player& p, GameContext& g);
+               PropertyTileType propertyType);
+  virtual Property& getProperty() = 0;
+  virtual const Property& getProperty() const = 0;
+  TileType getType() const override;
+  PropertyTileType getPropertyTileType() const;
+  void onLanded(Player& p, GameContext& g) override;
 
- protected:
-  std::unique_ptr<Property> property_;
+ private:
+  PropertyTileType propertyType_;
+};
+
+class StreetTile : public PropertyTile {
+ public:
+  StreetTile(int position, const std::string& name, Street property);
+  Property& getProperty() override;
+  const Property& getProperty() const override;
+
+ private:
+  Street property_;
 };
 
 class UtilityTile : public PropertyTile {
  public:
-  UtilityTile(int position, const std::string& name,
-              std::unique_ptr<Property> property);
+  UtilityTile(int position, const std::string& name, Utility property);
+  Property& getProperty() override;
+  const Property& getProperty() const override;
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
+
+ private:
+  Utility property_;
 };
 
 class RailroadTile : public PropertyTile {
  public:
-  RailroadTile(int position, const std::string& name,
-               std::unique_ptr<Property> property);
+  RailroadTile(int position, const std::string& name, Railroad property);
+  Property& getProperty() override;
+  const Property& getProperty() const override;
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
+
+ private:
+  Railroad property_;
 };
 
-class GoTile : public ActionTile {
+class GoTile : public SpecialTile {
  public:
   GoTile(int position, const std::string& name);
   void onPassed(Player& p, GameContext& g) override;
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
 };
 
-class JailTile : public ActionTile {
+class JailTile : public SpecialTile {
  public:
   JailTile(int position, const std::string& name);
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
 };
 
-class FreeParkingTile : public ActionTile {
+class FreeParkingTile : public SpecialTile {
  public:
   FreeParkingTile(int position, const std::string& name);
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
 };
 
-class GoToJailTile : public ActionTile {
+class GoToJailTile : public SpecialTile {
  public:
   GoToJailTile(int position, const std::string& name);
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
 };
 
 class TaxTile : public ActionTile {
@@ -121,13 +140,11 @@ class TaxTile : public ActionTile {
   int getPercentageRate() const;
   TaxType getTaxType() const;
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
 };
 class FestivalTile : public ActionTile {
  public:
   FestivalTile(int position, const std::string& name);
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
 };
 
 class CardTile : public ActionTile {
@@ -138,7 +155,6 @@ class CardTile : public ActionTile {
   CardTile(int position, const std::string& name, bool isChance);
   bool isChance() const;
   void onLanded(Player& p, GameContext& g) override;
-  virtual TileType getType() const override;
 };
 
 }  // namespace core
