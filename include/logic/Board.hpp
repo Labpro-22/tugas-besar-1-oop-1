@@ -11,11 +11,11 @@ namespace logic {
 class Board {
 private:
     std::vector<std::unique_ptr<core::Tile>> tiles_;
-    std::map<std::string, int> codeIndex_;  // code → index di tiles_
+    std::map<std::string, int> codeIndex_;
 
 public:
     Board() = default;
-    ~Board() = default;
+    ~Board();
 
     /**
      * @brief Tambah tile ke board dan (opsional) registrasi code-nya.
