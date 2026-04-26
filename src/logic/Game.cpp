@@ -329,7 +329,17 @@ void Game::offerProperty(core::Player& p, core::Property& prop) {
 }
 
 void Game::chargeRent(core::Player& p, core::Property& prop) {
-  int rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
+  // int rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
+  // p -= rent;
+  // *(prop.getOwner()) += rent;
+  // if railroad and utility, rent is calculated based on number of property owned by owner 
+  int rent = 0, owned = 0; 
+  if (prop.getType() == core::PropertyType::RAILROAD || prop.getType() == core::PropertyType::UTILITY) { 
+    owned = p.getOwnedProperties().size();
+    rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, owned, false);
+  }else { 
+    rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, 1, false);
+  }
   p -= rent;
   *(prop.getOwner()) += rent;
 }
