@@ -111,7 +111,7 @@ bool Game::checkWinCondition() const {
 
 void Game::rollDice() {
   if (state_ != GameState::PRE_ROLL && state_ != GameState::WAITING_FOR_DICE) {
-    throw InvalidMoveException("state exception");
+    throw InvalidStateException("rollDice", std::to_string(static_cast<int>(state_)));
   }
 
   lastDiceRoll_.first = rng_.operator()() % 6 + 1;
@@ -195,17 +195,17 @@ void Game::buyProperty(core::Property *prop) {
 void Game::buildHouse(core::Player *buyer, core::Tile *at) {
   core::Property *prop = at->getProperty();
   if (!prop) {
-    throw InvalidMoveException("Bukan petak properti.");
+    throw InvalidPropertyTypeException(at->getName(), "bukan properti");
   }
 
   if (prop->getType() != core::PropertyType::STREET) {
-    throw InvalidMoveException("Hanya bisa membangun di properti tipe Street.");
+    throw InvalidPropertyTypeException(prop->getName(), "bukan Street");
   }
 
   core::Street *street = static_cast<core::Street *>(prop);
 
   if (street->getOwner() != buyer) {
-    throw InvalidMoveException("Anda bukan pemilik properti ini.");
+    throw UnauthorizedActionException(buyer->getName(), street->getOwner() ? street->getOwner()->getName() : "none", street->getName());
   }
 
   int cost = street->getHouseCost();
@@ -233,7 +233,7 @@ void Game::sellHouse(core::Player *seller, core::Tile *at) {
   }
 
   if (street->getOwner() != seller) {
-    throw InvalidMoveException("non owner exception.");
+    throw UnauthorizedActionException(seller->getName(), street->getOwner() ? street->getOwner()->getName() : "none", street->getName());
   }
 
   int refund = street->getHouseCost() / 2;
@@ -245,10 +245,10 @@ void Game::mortgageProperty(core::Property *prop) {
   core::Player *p = prop->getOwner();
 
   if (p != getCurrentPlayer()) {
-    throw InvalidMoveException("mortgage exception");
+    throw UnauthorizedActionException(getCurrentPlayer()->getName(), p ? p->getName() : "none", prop->getName());
   }
   if (prop->isMortgagedStatus()) {
-    throw InvalidMoveException("mortgage exception.");
+    throw InvalidMoveException("Properti sudah digadaikan.");
   }
 
   prop->mortgage();
@@ -259,10 +259,10 @@ void Game::unmortgageProperty(core::Property *prop) {
   core::Player *p = prop->getOwner();
 
   if (p != getCurrentPlayer()) {
-    throw InvalidMoveException("unmortgage exception");
+    throw UnauthorizedActionException(getCurrentPlayer()->getName(), p ? p->getName() : "none", prop->getName());
   }
   if (!prop->isMortgagedStatus()) {
-    throw InvalidMoveException("unmortgage exception");
+    throw InvalidMoveException("Properti tidak sedang digadaikan.");
   }
 
   int cost = prop->getPrice();  
