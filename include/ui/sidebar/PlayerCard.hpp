@@ -7,8 +7,13 @@
 #include <string>
 #include <vector>
 
+#include "core/player/Player.hpp"
+#include "ui/component/PropertyView.hpp"
 #include "ui/component/Widgets.hpp"
-#include "ui/sidebar/Game_temp.hpp"
+
+namespace logic {
+class Board;
+}
 
 namespace ui {
 
@@ -21,7 +26,7 @@ class PropertyWidget : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow&) override {}
 
-  void setProperty(const temp::PropertyTuple& property);
+  void setProperty(const PropertyView& property);
   void setOverflow(int remainingCount);
   void applyLayout(sf::Vector2f position, sf::Vector2f size,
                    float iconHeightRatio);
@@ -48,11 +53,12 @@ class PlayerCard : public Widget {
   void render(sf::RenderWindow& window) override;
   void update(sf::RenderWindow&) override {}
 
-  void setPlayer(temp::Player& player);
+  void setPlayer(core::Player& player, const logic::Board& board,
+                 bool isCurrentTurn, int turnNumber);
 
  private:
   void updateLayout();
-  void rebuildPropertyGrid(const std::vector<temp::PropertyTuple>& properties);
+  void rebuildPropertyGrid(const std::vector<PropertyView>& properties);
   static std::string formatBalance(long long balance);
 
   sf::Font& font_;
@@ -80,7 +86,7 @@ class PlayerCard : public Widget {
   sf::Texture& mapPinWhiteTexture_;
   sf::Text locationText_;
 
-  temp::Player* player_ = nullptr;
+  core::Player* player_ = nullptr;
   std::vector<PropertyWidget> propertyWidgets_;
 };
 

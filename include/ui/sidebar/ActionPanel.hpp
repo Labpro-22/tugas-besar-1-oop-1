@@ -7,10 +7,21 @@
 
 namespace ui {
 
+class DialogManager;
+}
+
+namespace logic {
+class Game;
+}
+
+namespace ui {
+
 class ActionPanel : public Panel {
  public:
   ActionPanel();
   ~ActionPanel() override = default;
+
+  void setGameContext(logic::Game* game, DialogManager* dialogManager);
 
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;
@@ -36,6 +47,8 @@ class ActionPanel : public Panel {
   std::unique_ptr<Button> sellButton_;
   std::unique_ptr<Button> mortgageButton_;
   std::unique_ptr<Button> unmortgageButton_;
+  logic::Game* game_ = nullptr;
+  DialogManager* dialogManager_ = nullptr;
 };
 
 }  // namespace ui

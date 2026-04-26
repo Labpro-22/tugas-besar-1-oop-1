@@ -20,7 +20,7 @@ class Tile;
 class Property;
 }  // namespace core
 namespace logic {
-class UIInputMediator;
+class InputMediator;
 }  // namespace logic
 
 namespace logic {
@@ -40,7 +40,7 @@ class Game : public core::GameContext, public core::PlayerTurnContext {
   Board board_;
   std::vector<core::Player*> players_;
   Bank bank_;
-  UIInputMediator* mediator_;
+  InputMediator* mediator_;
 
   int currentPlayerId_;
   GameState state_;
@@ -62,7 +62,7 @@ class Game : public core::GameContext, public core::PlayerTurnContext {
   core::CardDeck<core::ActionCard> communityChestDeck_;
   core::CardDeck<core::ActionCard> skillDeck_;
 
-  UIInputMediator& requireMediator() const;
+  InputMediator& requireMediator() const;
   void tickFestivalEffects();
   void resolveFestival(core::Property& selectedProp);
 
@@ -87,7 +87,7 @@ class Game : public core::GameContext, public core::PlayerTurnContext {
    */
   void initialize(int boardSize, const std::string& configPath);
   void startGame();
-  void setMediator(UIInputMediator* mediator);
+  void setMediator(InputMediator* mediator);
   void nextTurn();
   bool checkWinCondition() const;
 
@@ -104,10 +104,10 @@ class Game : public core::GameContext, public core::PlayerTurnContext {
 
   // Dice
   void setDice(int d1, int d2);
-  void rollDice();
+  void rollDice() override;
 
   // Movement
-  void moveCurrentPlayer();
+  void moveCurrentPlayer() override;
   void handleTileAction(core::Tile* tile);
 
  private:

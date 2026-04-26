@@ -3,9 +3,13 @@
 #include <memory>
 #include <vector>
 
+#include "core/player/Player.hpp"
 #include "ui/component/Widgets.hpp"
-#include "ui/sidebar/Game_temp.hpp"
 #include "ui/sidebar/PlayerCard.hpp"
+
+namespace logic {
+class Board;
+}
 
 namespace ui {
 
@@ -14,7 +18,8 @@ class PlayerInfoPanel : public Panel {
   PlayerInfoPanel();
   ~PlayerInfoPanel() override;
 
-  void setPlayers(const std::vector<temp::Player*>& players);
+  void setPlayers(const std::vector<core::Player*>& players,
+                  const logic::Board& board, core::Player* currentPlayer);
 
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;
   void render(sf::RenderWindow& window) override;

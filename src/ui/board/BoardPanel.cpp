@@ -1,18 +1,181 @@
 #include "ui/board/BoardPanel.hpp"
 
-#include <SFML/Graphics/Color.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <memory>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
+#include "core/Tiles.hpp"
+#include "logic/Board.hpp"
 #include "ui/board/ActionTilePanel.hpp"
 #include "ui/board/CornerTilePanel.hpp"
 #include "ui/board/StreetTilePanel.hpp"
 #include "ui/board/TileGeometry.hpp"
-#include "ui/board/TilePanel.hpp"
 #include "ui/component/Color.hpp"
 #include "ui/component/Constants.hpp"
+#include "ui/component/PropertyView.hpp"
 #include "ui/component/Widgets.hpp"
+
+namespace {
+
+std::string asMoney(int amount) { return "$ " + std::to_string(amount); }
+
+struct TilePlacement {
+  sf::Vector2f position;
+  ui::Orientation orientation;
+  bool isCorner;
+};
+
+TilePlacement placementForIndex(const sf::Vector2f& boardPos,
+                                const sf::Vector2f& boardSize, int tileNum,
+                                int index) {
+  const ui::TileGeometry geometry(tileNum);
+  const float corner = geometry.cornerSide();
+  const float tileW = geometry.sideWidth();
+  const int span = tileNum + 1;
+
+  if (index == 0) {
+    return {{boardPos.x + boardSize.x - corner, boardPos.y + boardSize.y - corner},
+            ui::Orientation::Bottom, true};
+  }
+
+  if (index < span) {
+    const int step = index - 1;
+    return {{boardPos.x + boardSize.x - corner - tileW - step * tileW,
+             boardPos.y + boardSize.y - corner},
+            ui::Orientation::Bottom, false};
+  }
+
+  if (index == span) {
+    return {{boardPos.x, boardPos.y + boardSize.y - corner},
+            ui::Orientation::Left, true};
+  }
+
+  if (index < 2 * span) {
+    const int step = index - span - 1;
+    return {{boardPos.x,
+             boardPos.y + boardSize.y - corner - tileW - step * tileW},
+            ui::Orientation::Left, false};
+  }
+
+  if (index == 2 * span) {
+    return {{boardPos.x, boardPos.y}, ui::Orientation::Top, true};
+  }
+
+  if (index < 3 * span) {
+    const int step = index - 2 * span - 1;
+    return {{boardPos.x + corner + step * tileW, boardPos.y},
+            ui::Orientation::Top, false};
+  }
+
+  if (index == 3 * span) {
+    return {{boardPos.x + boardSize.x - corner, boardPos.y},
+            ui::Orientation::Right, true};
+  }
+
+  const int step = index - 3 * span - 1;
+  return {{boardPos.x + boardSize.x - corner, boardPos.y + corner + step * tileW},
+          ui::Orientation::Right, false};
+}
+
+std::unique_ptr<ui::TilePanel> buildPropertyPanel(const core::PropertyTile& tile,
+                                                  const TilePlacement& place,
+                                                  int tileNum) {
+  const core::Property& property = tile.getProperty();
+  const ui::PropertyView view = ui::buildPropertyView(property);
+
+  if (tile.getPropertyTileType() == core::PropertyTileType::STREET) {
+    return std::make_unique<ui::StreetTilePanel>(
+        place.position, tileNum, place.orientation, view.groupColor, view.code,
+        asMoney(property.getPrice()));
+  }
+
+  std::string iconPath = "assets/icons/train.png";
+  if (tile.getPropertyTileType() == core::PropertyTileType::UTILITY) {
+    iconPath = view.utilityIconPath.empty() ? "assets/icons/electricity.png"
+                                            : view.utilityIconPath;
+  } else if (tile.getPropertyTileType() == core::PropertyTileType::RAILROAD) {
+    iconPath = "assets/icons/train-kai.png";
+  }
+
+  return std::make_unique<ui::ActionTilePanel>(
+      place.position, tileNum, place.orientation, iconPath, view.code,
+      asMoney(property.getPrice()));
+}
+
+std::unique_ptr<ui::TilePanel> buildActionPanel(const core::ActionTile& tile,
+                                                const TilePlacement& place,
+                                                int tileNum) {
+  if (place.isCorner) {
+    core::SpecialTileType specialType = core::SpecialTileType::GO;
+    std::string icon = "assets/icons/go.png";
+    std::string top = "PETAK";
+    std::string bottom = "UJUNG";
+
+    const auto* special = dynamic_cast<const core::SpecialTile*>(&tile);
+    if (special != nullptr) {
+      specialType = special->getSpecialTileType();
+      switch (specialType) {
+        case core::SpecialTileType::GO:
+          icon = "assets/icons/go.png";
+          top = "MULAI";
+          bottom = "DAPAT UANG";
+          break;
+        case core::SpecialTileType::JAIL:
+          icon = "assets/icons/jail.png";
+          top = "HANYA";
+          bottom = "BERKUNJUNG";
+          break;
+        case core::SpecialTileType::FREE_PARKING:
+          icon = "assets/icons/free-park.png";
+          top = "PARKIR";
+          bottom = "GRATIS";
+          break;
+        case core::SpecialTileType::GO_TO_JAIL:
+          icon = "assets/icons/go-to-jail.png";
+          top = "PERGI";
+          bottom = "KE PENJARA";
+          break;
+      }
+    }
+
+    return std::make_unique<ui::CornerTilePanel>(
+        place.position, tileNum, specialType, place.orientation, icon, top,
+        bottom);
+  }
+
+  std::string icon = "assets/icons/chance-pink.png";
+  std::string top = "AKSI";
+  std::string bottom = "";
+
+  if (const auto* card = dynamic_cast<const core::CardTile*>(&tile)) {
+    if (card->isChance()) {
+      icon = "assets/icons/chance-pink.png";
+      top = "KESEMPATAN";
+    } else {
+      icon = "assets/icons/community.png";
+      top = "DANA UMUM";
+    }
+  } else if (const auto* tax = dynamic_cast<const core::TaxTile*>(&tile)) {
+    icon = tax->getTaxType() == core::TaxType::PPH
+               ? "assets/icons/income-tax.png"
+               : "assets/icons/luxury-tax.png";
+    top = "PAJAK";
+    bottom = asMoney(tax->getFlatRate());
+  } else if (dynamic_cast<const core::FestivalTile*>(&tile) != nullptr) {
+    icon = "assets/icons/festival.png";
+    top = "FESTIVAL";
+  } else if (dynamic_cast<const core::SpecialTile*>(&tile) != nullptr) {
+    icon = "assets/icons/go.png";
+    top = "SPESIAL";
+  }
+
+  return std::make_unique<ui::ActionTilePanel>(
+      place.position, tileNum, place.orientation, icon, top, bottom);
+}
+
+}  // namespace
 
 namespace ui {
 
@@ -24,8 +187,9 @@ BoardPanel::BoardPanel(int tileNum)
   if (tileNum_ < minTilesPerSide || tileNum_ > maxTilesPerSide) {
     throw std::runtime_error("Invalid board configuration.");
   }
-  auto boardPanel = std::make_unique<Panel>(position(), size(), board::base);
-  addChild(std::move(boardPanel));
+
+  auto backgroundPanel = std::make_unique<Panel>(position(), size(), board::base);
+  addChild("board-bg", std::move(backgroundPanel));
   setup();
 }
 
@@ -42,75 +206,44 @@ void BoardPanel::setOnTileSelected(
 }
 
 void BoardPanel::setup() {
-  const TileGeometry geo(tileNum_);
-  const float cornerSize = geo.cornerSide();
-  const float tileWidth = geo.sideWidth();
+  // Populated through populateTiles(board) once game initialization is ready.
+}
 
-  // Top-left corner of each side's first tile.
-  const auto leftPos = sf::Vector2f(position_.x, position_.y + cornerSize);
-  const auto topPos = sf::Vector2f(position_.x + cornerSize, position_.y);
-  const auto rightPos = sf::Vector2f(position_.x + size_.x - cornerSize,
-                                     position_.y + cornerSize);
-  const auto bottomPos = sf::Vector2f(position_.x + cornerSize,
-                                      position_.y + size_.y - cornerSize);
+void BoardPanel::populateTiles(const logic::Board& gameBoard) {
+  clearChildren();
+  auto backgroundPanel = std::make_unique<Panel>(position(), size(), board::base);
+  addChild("board-bg", std::move(backgroundPanel));
 
-  // DEBUG
-  for (int i = 0; i < tileNum_; i++) {
-    // Left
-    auto leftTile = std::make_unique<ActionTilePanel>(
-        leftPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Left,
-        "assets/icons/train.png", "BANDUNG", "$ 100");
-    leftTile->setOnSelected(onTileSelected_);
-    addChild(std::move(leftTile));
+  const int total = gameBoard.getTileCount();
+  for (int index = 0; index < total; ++index) {
+    core::Tile* tile = gameBoard.getTile(index);
+    if (tile == nullptr) {
+      continue;
+    }
 
-    // Top
-    auto topTile = std::make_unique<ActionTilePanel>(
-        topPos + sf::Vector2f(i * tileWidth, 0), tileNum_, Orientation::Top,
-        "assets/icons/chance-pink.png", "KESEMPATAN", "$ 100");
-    topTile->setOnSelected(onTileSelected_);
-    addChild(std::move(topTile));
+    const TilePlacement placement =
+        placementForIndex(position_, size_, tileNum_, index);
 
-    // Right
-    auto rightTile = std::make_unique<StreetTilePanel>(
-        rightPos + sf::Vector2f(0, i * tileWidth), tileNum_, Orientation::Right,
-        board::property::red, "JAKARTA", "$ 100");
-    rightTile->setOnSelected(onTileSelected_);
-    addChild(std::move(rightTile));
+    std::unique_ptr<TilePanel> panel;
+    if (tile->getType() == core::TileType::PROPERTY) {
+      auto* propertyTile = dynamic_cast<core::PropertyTile*>(tile);
+      if (propertyTile != nullptr) {
+        panel = buildPropertyPanel(*propertyTile, placement, tileNum_);
+      }
+    } else {
+      auto* actionTile = dynamic_cast<core::ActionTile*>(tile);
+      if (actionTile != nullptr) {
+        panel = buildActionPanel(*actionTile, placement, tileNum_);
+      }
+    }
 
-    // Bottom
-    auto bottomTile = std::make_unique<StreetTilePanel>(
-        bottomPos + sf::Vector2f(i * tileWidth, 0), tileNum_,
-        Orientation::Bottom, board::property::lavender, "SOLO", "$ 100");
-    bottomTile->setOnSelected(onTileSelected_);
-    addChild(std::move(bottomTile));
+    if (!panel) {
+      continue;
+    }
+
+    panel->setOnSelected(onTileSelected_);
+    addChild(std::move(panel));
   }
-
-  auto goTile = std::make_unique<CornerTilePanel>(
-      position_ + size_ - sf::Vector2f(cornerSize, cornerSize), tileNum_,
-      core::SpecialTileType::GO, Orientation::Bottom, "assets/icons/go.png",
-      "MULAI", "DAPAT UANG");
-  goTile->setOnSelected(onTileSelected_);
-  addChild(std::move(goTile));
-
-  auto jailTile = std::make_unique<CornerTilePanel>(
-      position_ + sf::Vector2f(0, size_.y - cornerSize), tileNum_,
-      core::SpecialTileType::JAIL, Orientation::Left, "assets/icons/jail.png",
-      "HANYA", "BERKUNJUNG");
-  jailTile->setOnSelected(onTileSelected_);
-  addChild(std::move(jailTile));
-
-  auto freeTile = std::make_unique<CornerTilePanel>(
-      position_, tileNum_, core::SpecialTileType::FREE_PARKING,
-      Orientation::Top, "assets/icons/free-park.png", "PARKIR", "GRATIS");
-  freeTile->setOnSelected(onTileSelected_);
-  addChild(std::move(freeTile));
-
-  auto goToJailTile = std::make_unique<CornerTilePanel>(
-      position_ + sf::Vector2f(size_.x - cornerSize, 0), tileNum_,
-      core::SpecialTileType::GO_TO_JAIL, Orientation::Right,
-      "assets/icons/go-to-jail.png", "PERGI", "KE PENJARA");
-  goToJailTile->setOnSelected(onTileSelected_);
-  addChild(std::move(goToJailTile));
 }
 
 void BoardPanel::handleEvent(sf::Event& event, sf::RenderWindow& window) {

@@ -1,8 +1,14 @@
 #include "ui/sidebar/PlayerCard.hpp"
 
+#include <SFML/Graphics/Color.hpp>
 #include <algorithm>
+#include <cctype>
 #include <sstream>
+#include <string>
+#include <vector>
 
+#include "core/Tiles.hpp"
+#include "logic/Board.hpp"
 #include "ui/AssetsManager.hpp"
 #include "ui/component/Color.hpp"
 #include "ui/component/Constants.hpp"
@@ -12,6 +18,73 @@ namespace {
 bool isWhiteLike(const sf::Color& color) {
   return color == ui::board::property::white ||
          color == ui::board::property::defaultColor;
+}
+
+std::string avatarPathFor(core::Avatar avatar) {
+  switch (avatar) {
+    case core::Avatar::COPILOT:
+      return "assets/players/copilot.png";
+    case core::Avatar::CLAUDE:
+      return "assets/players/claude.png";
+    case core::Avatar::GEMINI:
+      return "assets/players/gemini.png";
+    case core::Avatar::CHATGPT:
+      return "assets/players/openai.png";
+    default:
+      return "assets/players/copilot.png";
+  }
+}
+
+std::string shortCode(const std::string& value) {
+  std::string code;
+  code.reserve(3);
+  bool pickNext = true;
+
+  for (char ch : value) {
+    if (std::isspace(static_cast<unsigned char>(ch))) {
+      pickNext = true;
+      continue;
+    }
+    if (pickNext && std::isalpha(static_cast<unsigned char>(ch))) {
+      code.push_back(static_cast<char>(
+          std::toupper(static_cast<unsigned char>(ch))));
+      pickNext = false;
+      if (code.size() == 3) return code;
+    }
+  }
+
+  if (code.empty()) {
+    for (char ch : value) {
+      if (std::isalnum(static_cast<unsigned char>(ch))) {
+        code.push_back(static_cast<char>(
+            std::toupper(static_cast<unsigned char>(ch))));
+        if (code.size() == 3) break;
+      }
+    }
+  }
+
+  return code.empty() ? std::string("N/A") : code;
+}
+
+sf::Color actionTileColor(const core::ActionTile& tile) {
+  switch (tile.getActionTileType()) {
+    case core::ActionTileType::SPECIAL: {
+      const auto* special = dynamic_cast<const core::SpecialTile*>(&tile);
+      if (special != nullptr &&
+          special->getSpecialTileType() == core::SpecialTileType::JAIL) {
+        return ui::board::property::black;
+      }
+      return ui::board::property::white;
+    }
+    case core::ActionTileType::CARD:
+      return ui::board::property::purple;
+    case core::ActionTileType::TAX:
+      return ui::board::property::red;
+    case core::ActionTileType::FESTIVAL:
+      return ui::board::property::orange;
+    default:
+      return ui::board::property::defaultColor;
+  }
 }
 
 }  // namespace
@@ -26,35 +99,31 @@ PropertyWidget::PropertyWidget(sf::Font& font)
   text_.setFillColor(palette::black);
 }
 
-void PropertyWidget::setProperty(const temp::PropertyTuple& property) {
+void PropertyWidget::setProperty(const PropertyView& property) {
   isOverflow_ = false;
   overflowCount_ = 0;
-  boxColor_ = std::get<0>(property);
-  const std::string& code = std::get<1>(property);
-  const int houseCount = std::get<2>(property);
-  const bool isRailroad = std::get<3>(property);
-  const bool isUtility = std::get<4>(property);
-  const std::string& utilityIconPath = std::get<5>(property);
+  boxColor_ = property.groupColor;
 
-  text_.setString(code);
+  text_.setString(property.code);
   text_.setFillColor(boxColor_ == board::property::black ? palette::white
-                                                         : palette::black);
+                                                          : palette::black);
 
   hasIcon_ = false;
   iconTexture_ = nullptr;
 
   AssetsManager& assets = AssetsManager::get();
-  if (isRailroad) {
+  if (property.isRailroad) {
     iconTexture_ = &assets.getTexture("assets/icons/train.png");
     hasIcon_ = true;
-  } else if (isUtility && !utilityIconPath.empty()) {
-    iconTexture_ = &assets.getTexture(utilityIconPath);
+  } else if (property.isUtility && !property.utilityIconPath.empty()) {
+    iconTexture_ = &assets.getTexture(property.utilityIconPath);
     hasIcon_ = true;
-  } else if (houseCount >= 1 && houseCount <= 4) {
-    iconTexture_ = &assets.getTexture(
-        "assets/icons/" + std::to_string(houseCount) + "-house.png");
+  } else if (property.houseCount >= 1 && property.houseCount <= 4) {
+    iconTexture_ = &assets.getTexture("assets/icons/" +
+                                      std::to_string(property.houseCount) +
+                                      "-house.png");
     hasIcon_ = true;
-  } else if (houseCount >= 5) {
+  } else if (property.houseCount >= 5) {
     iconTexture_ = &assets.getTexture("assets/icons/hotel.png");
     hasIcon_ = true;
   }
@@ -141,7 +210,6 @@ PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
   background_.setFillColor(palette::white);
 
   avatarBackground_.setFillColor(palette::lightGrey);
-
   namePlateBackground_.setFillColor(palette::lightGrey);
 
   nameText_.setFont(font_);
@@ -164,6 +232,7 @@ PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
   balanceText_.setFillColor(palette::black);
 
   locationBoxBackground_.setFillColor(board::property::defaultColor);
+
   locationText_.setFont(font_);
   locationText_.setCharacterSize(typography::playerCardBody);
   locationText_.setStyle(typography::titleStyle);
@@ -175,35 +244,64 @@ PlayerCard::PlayerCard(sf::Vector2f position, sf::Vector2f size)
   updateLayout();
 }
 
-void PlayerCard::setPlayer(temp::Player& player) {
+void PlayerCard::setPlayer(core::Player& player, const logic::Board& board,
+                           bool isCurrentTurn, int turnNumber) {
   player_ = &player;
 
-  nameText_.setString(player.name());
-  balanceText_.setString(formatBalance(player.balance()));
-  turnText_.setString(std::to_string(player.turnNumber()));
-  locationText_.setString(player.currentTileCode());
-  showStar_ = player.isPlayerTurn();
+  nameText_.setString(player.getName());
+  balanceText_.setString(formatBalance(player.getBalance()));
+  turnText_.setString(std::to_string(turnNumber));
+  showStar_ = isCurrentTurn;
 
-  locationBoxBackground_.setFillColor(player.currentTileColor());
+  sf::Color tileColor = board::property::defaultColor;
+  std::string tileCode = "N/A";
+
+  core::Tile* tile = board.getTile(player.getPosition());
+  if (tile != nullptr) {
+    if (tile->getType() == core::TileType::PROPERTY) {
+      auto* propertyTile = dynamic_cast<core::PropertyTile*>(tile);
+      if (propertyTile != nullptr) {
+        const PropertyView view = buildPropertyView(propertyTile->getProperty());
+        tileColor = view.groupColor;
+        tileCode = view.code;
+      }
+    } else {
+      auto* actionTile = dynamic_cast<core::ActionTile*>(tile);
+      if (actionTile != nullptr) {
+        tileColor = actionTileColor(*actionTile);
+      }
+      tileCode = shortCode(tile->getName());
+    }
+  }
+
+  locationText_.setString(tileCode);
+  locationBoxBackground_.setFillColor(tileColor);
   locationBoxBackground_.setOutlineThickness(0.0f);
   locationBoxBackground_.setOutlineColor(sf::Color::Transparent);
   locationText_.setFillColor(palette::black);
 
-  if (player.currentTileColor() == board::property::white) {
+  if (tileColor == board::property::white) {
     locationBoxBackground_.setOutlineColor(palette::black);
     locationBoxBackground_.setOutlineThickness(1.5f);
     mapPinSprite_.setTexture(mapPinBlackTexture_, true);
-  } else if (player.currentTileColor() == board::property::black) {
+  } else if (tileColor == board::property::black) {
     locationText_.setFillColor(palette::white);
     mapPinSprite_.setTexture(mapPinWhiteTexture_, true);
   } else {
     mapPinSprite_.setTexture(mapPinBlackTexture_, true);
   }
 
-  avatarTexture_ = &AssetsManager::get().getTexture(player.avatarPath());
+  avatarTexture_ =
+      &AssetsManager::get().getTexture(avatarPathFor(player.getAvatar()));
   avatarSprite_.setTexture(*avatarTexture_, true);
 
-  rebuildPropertyGrid(player.ownedProperties());
+  std::vector<PropertyView> views;
+  for (core::Property* property : player.getOwnedProperties()) {
+    if (property != nullptr) {
+      views.push_back(buildPropertyView(*property));
+    }
+  }
+  rebuildPropertyGrid(views);
   updateLayout();
 }
 
@@ -260,10 +358,10 @@ void PlayerCard::updateLayout() {
   sf::FloatRect turnBounds = turnText_.getLocalBounds();
   turnText_.setOrigin(turnBounds.left + turnBounds.width / 2.0f,
                       turnBounds.top + turnBounds.height / 2.0f);
-  const float turnCenterX = turnBoxBackground_.getPosition().x +
-                            turnBoxBackground_.getSize().x / 2.0f;
-  const float turnCenterY = turnBoxBackground_.getPosition().y +
-                            turnBoxBackground_.getSize().y / 2.0f;
+  const float turnCenterX =
+      turnBoxBackground_.getPosition().x + turnBoxBackground_.getSize().x / 2.0f;
+  const float turnCenterY =
+      turnBoxBackground_.getPosition().y + turnBoxBackground_.getSize().y / 2.0f;
   turnText_.setPosition(turnCenterX + (showStar_ ? turnBoxW * 0.12f : 0.0f),
                         turnCenterY);
 
@@ -282,8 +380,9 @@ void PlayerCard::updateLayout() {
 
   const float financeY =
       divider_.getPosition().y + divider_.getSize().y + padding * 0.30f;
-  const float financeH = std::max(12.0f, headerHeight - (financeY - innerY) -
-                                             layout::playerCard::propertyGap);
+  const float financeH =
+      std::max(12.0f,
+               headerHeight - (financeY - innerY) - layout::playerCard::propertyGap);
 
   sf::FloatRect balanceBounds = balanceText_.getLocalBounds();
   balanceText_.setOrigin(balanceBounds.left,
@@ -320,9 +419,10 @@ void PlayerCard::updateLayout() {
       innerY + headerHeight + layout::playerCard::propertyGap;
   const float propertiesW = innerWidth;
   const float propertiesH = bodyHeight - layout::playerCard::propertyGap;
-  const float cellW = (propertiesW - (layout::playerCard::propertyColumns - 1) *
-                                         layout::playerCard::propertyGap) /
-                      static_cast<float>(layout::playerCard::propertyColumns);
+  const float cellW =
+      (propertiesW -
+       (layout::playerCard::propertyColumns - 1) * layout::playerCard::propertyGap) /
+      static_cast<float>(layout::playerCard::propertyColumns);
   const float cellH = (propertiesH - layout::playerCard::propertyGap) / 2.0f;
 
   for (size_t i = 0; i < propertyWidgets_.size(); ++i) {
@@ -338,15 +438,14 @@ void PlayerCard::updateLayout() {
   }
 }
 
-void PlayerCard::rebuildPropertyGrid(
-    const std::vector<temp::PropertyTuple>& properties) {
+void PlayerCard::rebuildPropertyGrid(const std::vector<PropertyView>& properties) {
   propertyWidgets_.clear();
 
   const int maxSlots = layout::playerCard::maxPropertySlots;
   const int count = static_cast<int>(properties.size());
   if (count <= maxSlots) {
     propertyWidgets_.reserve(properties.size());
-    for (const temp::PropertyTuple& property : properties) {
+    for (const PropertyView& property : properties) {
       PropertyWidget widget(font_);
       widget.setProperty(property);
       propertyWidgets_.push_back(std::move(widget));

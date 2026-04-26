@@ -9,6 +9,10 @@
 #include "ui/board/TilePanel.hpp"
 #include "ui/component/Widgets.hpp"
 
+namespace logic {
+class Board;
+}
+
 namespace ui {
 
 class BoardPanel : public Panel {
@@ -16,6 +20,7 @@ class BoardPanel : public Panel {
   explicit BoardPanel(int tileNum = 9);
   ~BoardPanel() override = default;
 
+  void populateTiles(const logic::Board& board);
   void setOnTileSelected(std::function<void(const TileInfo&)> onTileSelected);
 
   void handleEvent(sf::Event& event, sf::RenderWindow& window) override;

@@ -156,3 +156,18 @@ const float houseSizeRatio = 0.16f;
 const float hotelSizeRatio = 0.20f;
 
 }  // namespace ui::layout::tileOverlay
+
+namespace ui::layout::dialog {
+
+const float modalWidth = 5.0f * size::multiplier;
+const float modalHeight = 6.0f * size::multiplier;
+const float padding = 0.25f * size::multiplier;
+const float titleHeight = 0.55f * size::multiplier;
+const float buttonHeight = 0.45f * size::multiplier;
+const float rowGap = 0.12f * size::multiplier;
+
+const float deedWidth = 2.8f * size::multiplier;
+const float deedHeight = 4.8f * size::multiplier;
+const float deedBandHeight = 0.9f * size::multiplier;
+
+}  // namespace ui::layout::dialog

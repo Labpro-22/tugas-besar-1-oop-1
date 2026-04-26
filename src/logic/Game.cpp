@@ -17,7 +17,7 @@
 #include "data/ConfigReader.hpp"
 #include "data/TransactionLogger.hpp"
 #include "logic/Auction.hpp"
-#include "logic/UIInputMediator.hpp"
+#include "logic/InputMediator.hpp"
 
 namespace logic {
 
@@ -32,9 +32,9 @@ Game::Game(std::vector<core::Player*> players)
       doubles_(0),
       hasExtraTurn_(false) {}
 
-UIInputMediator& Game::requireMediator() const {
+InputMediator& Game::requireMediator() const {
   if (mediator_ == nullptr) {
-    throw GameSetupException("UIInputMediator belum di-set.");
+    throw GameSetupException("InputMediator belum di-set.");
   }
   return *mediator_;
 }
@@ -95,7 +95,7 @@ void Game::startGame() {
 
 Board& Game::getBoard() { return board_; }
 
-void Game::setMediator(UIInputMediator* mediator) { mediator_ = mediator; }
+void Game::setMediator(InputMediator* mediator) { mediator_ = mediator; }
 
 void Game::nextTurn() {
   if (checkWinCondition()) {
@@ -303,13 +303,13 @@ void Game::startAuction(core::Property& prop) {
   }
 
   Auction auction(&prop, players_);
-  AuctionResult result =
+  auto [winner, finalBid] =
       requireMediator().runAuction(&prop, auction.getParticipants());
-  if (result.winner != nullptr) {
+  if (winner != nullptr) {
     auction.startBid(0);
-    auction.placeBid(*result.winner, result.finalBid);
-    const int finalBid = auction.resolveWinner(bank_);
-    logEvent(data::LogAction::AUCTION_RESULT, *result.winner, prop, finalBid);
+    auction.placeBid(*winner, finalBid);
+    const int awarded = auction.resolveWinner(bank_);
+    logEvent(data::LogAction::AUCTION_RESULT, *winner, prop, awarded);
   }
 }
 
@@ -338,7 +338,7 @@ int Game::getMaxTurn() const { return maxTurn_; }
 int Game::getJailFine() const { return jailFine_; }
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
-  bool accept = requireMediator().offerPropertyUI(p, prop);
+  bool accept = requireMediator().offerProperty(p, prop);
   if (accept) {
     buyProperty(prop);
   } else {
@@ -369,7 +369,7 @@ void Game::chargeTax(core::Player& p, int flatRate, int percentageRate,
   if (type == core::TaxType::PPH) {
     int percentageAmount = p.getBalance() * percentageRate / 100;
     bool usePercentage =
-      requireMediator().chooseTaxMethod(p, flatRate, percentageAmount);
+        requireMediator().chooseTaxMethod(p, flatRate, percentageAmount);
     int amount = usePercentage ? percentageAmount : flatRate;
     bank_.collectTax(p, amount);
     if (p.isBankrupted()) {

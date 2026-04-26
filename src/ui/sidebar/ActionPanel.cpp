@@ -6,12 +6,23 @@
 #include <memory>
 #include <string>
 
+#include "core/Tiles.hpp"
+#include "core/card/Card.hpp"
+#include "core/player/Player.hpp"
+#include "logic/Game.hpp"
 #include "ui/AssetsManager.hpp"
 #include "ui/component/Color.hpp"
 #include "ui/component/Constants.hpp"
 #include "ui/component/Style.hpp"
+#include "ui/dialog/DialogManager.hpp"
 
 namespace ui {
+
+void ActionPanel::setGameContext(logic::Game* game,
+                                                                 DialogManager* dialogManager) {
+    game_ = game;
+    dialogManager_ = dialogManager;
+}
 
 ActionPanel::ActionPanel()
     : Panel(
@@ -81,14 +92,41 @@ void ActionPanel::setupGameActionPanel(float width, float& currentY) {
         layout::actionPanel::topActionHeight + layout::actionPanel::rowGap;
   };
 
-  addTopButton("Lanjutkan | Lempar Dadu", nextTurnStyle, []() {
-    // TODO: Wire roll-dice action to game turn manager.
+    addTopButton("Lanjutkan | Lempar Dadu", nextTurnStyle, [this]() {
+        if (game_ == nullptr) return;
+        try {
+            game_->rollDice();
+            game_->moveCurrentPlayer();
+        } catch (...) {
+        }
   });
-  addTopButton("Lanjutkan | Atur Dadu", setDiceStyle, []() {
-    // TODO: Open manual dice input dialog.
+    addTopButton("Lanjutkan | Atur Dadu", setDiceStyle, [this]() {
+        if (game_ == nullptr || dialogManager_ == nullptr) return;
+        const auto [d1, d2] = dialogManager_->promptDiceOverride();
+        (void)d1;
+        (void)d2;
+        try {
+            game_->rollDice();
+            game_->moveCurrentPlayer();
+        } catch (...) {
+        }
   });
-  addTopButton("Gunakan Kartu", useCardStyle, []() {
-    // TODO: Open ability card selection dialog.
+    addTopButton("Gunakan Kartu", useCardStyle, [this]() {
+        if (game_ == nullptr || dialogManager_ == nullptr) return;
+        core::Player* current = game_->getCurrentPlayer();
+        if (current == nullptr) return;
+
+        auto hand = current->getHeldCards();
+        if (hand.empty()) return;
+
+        int chosenIdx = dialogManager_->promptCardChoice(*current);
+        chosenIdx = std::max(0, std::min(chosenIdx,
+                                                                         static_cast<int>(hand.size()) - 1));
+        core::ActionCard* chosenCard = hand[static_cast<size_t>(chosenIdx)];
+        auto owned = current->removeCard(chosenCard);
+        if (owned) {
+            owned->execute(*current, *game_);
+        }
   });
 
   currentY += layout::actionPanel::sectionGap - layout::actionPanel::rowGap;
@@ -156,32 +194,66 @@ void ActionPanel::setupTileOptionPanel(float width, float& currentY) {
       "BANGUN", font_, sf::Vector2f(x0, currentY),
       sf::Vector2f(tileActionButtonWidth,
                    layout::actionPanel::tileActionHeight),
-      buildStyle, []() {
-        // TODO: Wire build action for selected tile.
+            buildStyle, [this]() {
+                if (game_ == nullptr) return;
+                core::Player* current = game_->getCurrentPlayer();
+                if (current == nullptr) return;
+                core::Tile* tile = game_->getBoard().getTile(current->getPosition());
+                if (tile == nullptr) return;
+                try {
+                    game_->buildHouse(current, tile);
+                } catch (...) {
+                }
       });
 
   sellButton_ = std::make_unique<Button>(
       "JUAL", font_, sf::Vector2f(x1, currentY),
       sf::Vector2f(tileActionButtonWidth,
                    layout::actionPanel::tileActionHeight),
-      sellStyle, []() {
-        // TODO: Wire sell action for selected tile.
+            sellStyle, [this]() {
+                if (game_ == nullptr) return;
+                core::Player* current = game_->getCurrentPlayer();
+                if (current == nullptr) return;
+                core::Tile* tile = game_->getBoard().getTile(current->getPosition());
+                if (tile == nullptr) return;
+                try {
+                    game_->sellHouse(current, tile);
+                } catch (...) {
+                }
       });
 
   mortgageButton_ = std::make_unique<Button>(
       "SEWA", font_, sf::Vector2f(x2, currentY),
       sf::Vector2f(tileActionButtonWidth,
                    layout::actionPanel::tileActionHeight),
-      mortgageStyle, []() {
-        // TODO: Wire mortgage action for selected tile.
+            mortgageStyle, [this]() {
+                if (game_ == nullptr) return;
+                core::Player* current = game_->getCurrentPlayer();
+                if (current == nullptr) return;
+                core::Tile* tile = game_->getBoard().getTile(current->getPosition());
+                auto* propertyTile = dynamic_cast<core::PropertyTile*>(tile);
+                if (propertyTile == nullptr) return;
+                try {
+                    game_->mortgageProperty(propertyTile->getProperty());
+                } catch (...) {
+                }
       });
 
   unmortgageButton_ = std::make_unique<Button>(
       "GADAI", font_, sf::Vector2f(x3, currentY),
       sf::Vector2f(tileActionButtonWidth,
                    layout::actionPanel::tileActionHeight),
-      unmortgageStyle, []() {
-        // TODO: Wire unmortgage action for selected tile.
+            unmortgageStyle, [this]() {
+                if (game_ == nullptr) return;
+                core::Player* current = game_->getCurrentPlayer();
+                if (current == nullptr) return;
+                core::Tile* tile = game_->getBoard().getTile(current->getPosition());
+                auto* propertyTile = dynamic_cast<core::PropertyTile*>(tile);
+                if (propertyTile == nullptr) return;
+                try {
+                    game_->unmortgageProperty(propertyTile->getProperty());
+                } catch (...) {
+                }
       });
 
   if (buildButton_) buildButton_->setActive(false);

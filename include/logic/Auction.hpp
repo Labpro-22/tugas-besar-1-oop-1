@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "logic/Bank.hpp"
-#include "logic/UIInputMediator.hpp"
+#include "logic/InputMediator.hpp"
 
 namespace core {
 class Player;

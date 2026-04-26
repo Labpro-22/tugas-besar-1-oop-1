@@ -78,8 +78,11 @@ add_library(
   src/ui/sidebar/ActionPanel.cpp
   src/ui/sidebar/PlayerCard.cpp
   src/ui/sidebar/PlayerInfoPanel.cpp
-  src/ui/sidebar/Game_temp.cpp
   
+  src/ui/dialog/DialogManager.cpp
+  src/ui/dialog/DialogManagerMediator.cpp
+  src/ui/dialog/DialogManagerInfo.cpp
+  src/ui/dialog/DialogManagerAction.cpp
   src/ui/GameWindow.cpp
 )
 
