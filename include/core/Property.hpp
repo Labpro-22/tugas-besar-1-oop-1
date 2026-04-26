@@ -97,6 +97,7 @@ class Street : public Property {
 class Railroad : public Property {
 	private: 
 		int baseFare_; 
+		static map<int, int> Railroad::rentTable_;
 	public: 
 		Railroad(const std::string& name, int mortgageValue, int baseFare);
 		static void setRentTable(const std::map<int, int>& table);
