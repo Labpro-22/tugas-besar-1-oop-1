@@ -4,6 +4,7 @@
 
 #include "core/GameContext.hpp"
 #include "core/player/Player.hpp"
+#include "data/LogEntry.hpp"
 
 namespace core {
 
@@ -20,6 +21,7 @@ void TeleportCard::execute(Player& player, GameContext& ctx) {
   if (idx < 0) {
     idx += n;
   }
+  ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, idx);
   ctx.teleportPlayer(player, idx);
 }
 

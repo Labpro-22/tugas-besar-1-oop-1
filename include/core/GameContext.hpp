@@ -1,7 +1,9 @@
 #pragma once
-#include <string>
+
 #include <utility>
 #include <vector>
+
+#include "data/LogEntry.hpp"
 
 namespace core {
 class Player;
@@ -45,8 +47,8 @@ class GameContext {
   virtual void payPlayerFromBank(Player& p, int amount) = 0;
 
   // Logging
-  virtual void logEvent(const std::string& action, Player& p, int value) = 0;
-  virtual void logEvent(const std::string& action, Player& p, Property& prop,
+  virtual void logEvent(data::LogAction action, Player& p, int value) = 0;
+  virtual void logEvent(data::LogAction action, Player& p, Property& prop,
                         int value) = 0;
 
   // Config getters tiles need

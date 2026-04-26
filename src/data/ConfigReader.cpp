@@ -1,12 +1,43 @@
 #include "data/ConfigReader.hpp"
 
 #include <fstream>
+#include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 
 #include "core/GameException.hpp"
+#include "core/Tiles.hpp"
 
 namespace data {
+namespace {
+
+std::unique_ptr<ConfigReader> gReader;
+
+ActionTileType parseActionTileType(const std::string& value) {
+  if (value == "SPESIAL") return ActionTileType::SPECIAL;
+  if (value == "KARTU") return ActionTileType::CARD;
+  if (value == "PAJAK") return ActionTileType::TAX;
+  if (value == "FESTIVAL") return ActionTileType::FESTIVAL;
+  throw InvalidConfigException(
+      "aksi.txt",
+      "JENIS_PETAK must be SPESIAL|KARTU|PAJAK|FESTIVAL, got '" + value + "'");
+}
+
+}  // namespace
+
+void ConfigReader::initialize(const std::string& baseConfigPath,
+                              int boardSize) {
+  gReader = std::make_unique<ConfigReader>(baseConfigPath, boardSize);
+}
+
+ConfigReader& ConfigReader::get() {
+  if (!gReader) {
+    throw InvalidStateException("ConfigReader::get",
+                                "ConfigReader::initialize belum dipanggil");
+  }
+  return *gReader;
+}
 
 ConfigReader::ConfigReader(const std::string& baseConfigPath, int boardSize)
     : basePath_(baseConfigPath), boardSize_(boardSize) {}
@@ -27,13 +58,13 @@ static std::string trimCR(std::string s) {
   return s;
 }
 
-std::vector<PropertyConfig*> ConfigReader::readProperties() {
+std::vector<std::unique_ptr<PropertyConfig>> ConfigReader::readProperties() {
   std::ifstream file(filePath("property.txt"));
   if (!file.is_open())
     throw InvalidConfigException{
         "property.txt", "readable file at " + filePath("property.txt")};
 
-  std::vector<PropertyConfig*> configs;
+  std::vector<std::unique_ptr<PropertyConfig>> configs;
   std::string line;
   std::getline(file, line);  // skip header
 
@@ -47,7 +78,7 @@ std::vector<PropertyConfig*> ConfigReader::readProperties() {
     ss >> id >> code >> name >> type >> color;
 
     if (type == "STREET") {
-      auto* cfg = new StreetConfig();
+      auto cfg = std::make_unique<StreetConfig>();
       cfg->id = id;
       cfg->code = code;
       cfg->name = name;
@@ -57,14 +88,13 @@ std::vector<PropertyConfig*> ConfigReader::readProperties() {
           cfg->hotelUpgradeCost;
       for (int i = 0; i < 6; ++i) ss >> cfg->rent[i];
       if (ss.fail()) {
-        for (auto* c : configs) delete c;
         throw InvalidConfigException{"property.txt",
                                      "complete STREET row for " + code};
       }
-      configs.push_back(cfg);
+      configs.push_back(std::move(cfg));
 
     } else if (type == "RAILROAD") {
-      auto* cfg = new RailroadConfig();
+      auto cfg = std::make_unique<RailroadConfig>();
       cfg->id = id;
       cfg->code = code;
       cfg->name = name;
@@ -74,14 +104,13 @@ std::vector<PropertyConfig*> ConfigReader::readProperties() {
       int dummy;
       ss >> dummy >> cfg->mortgageValue;
       if (ss.fail()) {
-        for (auto* c : configs) delete c;
         throw InvalidConfigException{"property.txt",
                                      "complete RAILROAD row for " + code};
       }
-      configs.push_back(cfg);
+      configs.push_back(std::move(cfg));
 
     } else if (type == "UTILITY") {
-      auto* cfg = new UtilityConfig();
+      auto cfg = std::make_unique<UtilityConfig>();
       cfg->id = id;
       cfg->code = code;
       cfg->name = name;
@@ -91,14 +120,12 @@ std::vector<PropertyConfig*> ConfigReader::readProperties() {
       int dummy;
       ss >> dummy >> cfg->mortgageValue;
       if (ss.fail()) {
-        for (auto* c : configs) delete c;
         throw InvalidConfigException{"property.txt",
                                      "complete UTILITY row for " + code};
       }
-      configs.push_back(cfg);
+      configs.push_back(std::move(cfg));
 
     } else {
-      for (auto* c : configs) delete c;
       throw InvalidConfigException{
           "property.txt",
           "valid JENIS (STREET/RAILROAD/UTILITY), got '" + type + "'"};
@@ -223,27 +250,15 @@ std::vector<ActionTileConfig> ConfigReader::readActionTiles() {
 
     std::istringstream ss(line);
     ActionTileConfig cfg;
-    ss >> cfg.id >> cfg.code >> cfg.name >> cfg.tileType >> cfg.color;
+    std::string tileType;
+    ss >> cfg.id >> cfg.code >> cfg.name >> tileType >> cfg.color;
 
     if (ss.fail())
       throw InvalidConfigException{
           "aksi.txt", "complete row: ID KODE NAMA JENIS_PETAK WARNA (at id=" +
                           std::to_string(cfg.id) + ")"};
 
-    static const std::vector<std::string> validTypes = {"SPESIAL", "KARTU",
-                                                        "PAJAK", "FESTIVAL"};
-    bool typeValid = false;
-    for (const auto& t : validTypes)
-      if (cfg.tileType == t) {
-        typeValid = true;
-        break;
-      }
-
-    if (!typeValid)
-      throw InvalidConfigException{
-          "aksi.txt",
-          "JENIS_PETAK must be SPESIAL|KARTU|PAJAK|FESTIVAL, got '" +
-              cfg.tileType + "'"};
+    cfg.tileType = parseActionTileType(tileType);
 
     configs.push_back(cfg);
   }
@@ -291,6 +306,59 @@ BoardConfig ConfigReader::readBoardConfig() {
         std::to_string(tileCount) + " tile entries matching declared count"};
 
   return cfg;
+}
+
+std::vector<TileEntry> ConfigReader::buildBoard() {
+  auto propCfgs = readProperties();
+  auto actionCfgs = readActionTiles();
+  auto taxCfg = readTax();
+
+  std::map<int, TileEntry> tileMap;
+
+  for (const auto& cfg : propCfgs) {
+    if (!cfg) continue;
+
+    if (tileMap.count(cfg->id)) {
+      throw InvalidConfigException(
+          "property.txt", "duplicate position id=" + std::to_string(cfg->id));
+    }
+
+    const int pos = cfg->id - 1;
+    auto prop = cfg->buildProperty();
+
+    TileEntry entry;
+    entry.setCode(cfg->code);
+    if (cfg->getType() == "RAILROAD") {
+      entry.setTile(std::make_unique<core::RailroadTile>(pos, cfg->name,
+                                                         std::move(prop)));
+    } else if (cfg->getType() == "UTILITY") {
+      entry.setTile(
+          std::make_unique<core::UtilityTile>(pos, cfg->name, std::move(prop)));
+    } else {
+      entry.setTile(std::make_unique<core::PropertyTile>(pos, cfg->name,
+                                                         std::move(prop)));
+    }
+    tileMap[cfg->id] = std::move(entry);
+  }
+
+  for (const auto& cfg : actionCfgs) {
+    if (tileMap.count(cfg.id)) {
+      throw InvalidConfigException(
+          "aksi.txt", "duplicate position id=" + std::to_string(cfg.id));
+    }
+    TileEntry entry;
+    entry.setCode(cfg.code);
+    entry.setTile(cfg.buildTile(taxCfg));
+    tileMap[cfg.id] = std::move(entry);
+  }
+
+  std::vector<TileEntry> result;
+  result.reserve(tileMap.size());
+  for (auto& [id, entry] : tileMap) {
+    (void)id;
+    result.push_back(std::move(entry));
+  }
+  return result;
 }
 
 }  // namespace data

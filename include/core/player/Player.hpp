@@ -1,8 +1,9 @@
 #pragma once
 
-#include <logic/Game.hpp>
 #include <string>
 #include <vector>
+
+#include "logic/Game.hpp"
 
 namespace logic {
 

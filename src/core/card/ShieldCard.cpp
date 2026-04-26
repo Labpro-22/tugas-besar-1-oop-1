@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "core/GameContext.hpp"
+#include "data/LogEntry.hpp"
 
 namespace core {
 
@@ -10,9 +11,9 @@ ShieldCard::ShieldCard(std::string description)
     : SkillCard(std::move(description)) {}
 
 void ShieldCard::execute(Player& player, GameContext& ctx) {
-  (void)ctx;
   player.consumeSkillUse();
   player.useShield();
+  ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, 0);
 }
 
 std::string ShieldCard::getCardType() const { return "Shield"; }

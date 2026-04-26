@@ -18,7 +18,6 @@ class Tile;
 class Property;
 }  // namespace core
 namespace logic {
-class TransactionLogger;
 class UIInputMediator;
 }  // namespace logic
 
@@ -39,7 +38,6 @@ class Game : public core::GameContext {
   Board board_;
   std::vector<core::Player*> players_;
   Bank bank_;
-  TransactionLogger* logger_;
   UIInputMediator* mediator_;
 
   int currentPlayerId_;
@@ -70,11 +68,11 @@ class Game : public core::GameContext {
   void buildSkillDeck();
 
  public:
-  Game(std::vector<core::Player*> players, TransactionLogger* logger);
+  explicit Game(std::vector<core::Player*> players);
   ~Game() = default;
 
   /**
-   * @brief Baca config, bangun board via DomainBuilder, dan populate semua
+   * @brief Baca config, bangun board via ConfigReader, dan populate semua
    * deck.
    *
    * Dipanggil untuk New Game maupun Load Game (sebelum GameLoader::applyDTO).
@@ -146,9 +144,9 @@ class Game : public core::GameContext {
   void teleportPlayer(core::Player& p, int targetIndex) override;
   int findNearestTileOfType(int from, core::TileType type) const override;
 
-  void logEvent(const std::string& action, core::Player& p, int value) override;
-  void logEvent(const std::string& action, core::Player& p,
-                core::Property& prop, int value) override;
+  void logEvent(data::LogAction action, core::Player& p, int value) override;
+  void logEvent(data::LogAction action, core::Player& p, core::Property& prop,
+                int value) override;
 
   // Setters untuk GameLoader
   core::Player* getPlayerByName(const std::string& name) const;
@@ -156,7 +154,6 @@ class Game : public core::GameContext {
   void setMaxTurn(int max);
   void setCurrentPlayerIdx(int idx);
   void setTurnOrder(const std::vector<std::string>& order);
-  void restoreLog(const std::vector<data::LogEntry>& entries);
 
   /**
    * @brief Expose skill deck untuk GameLoader::restoreDeck().

@@ -13,6 +13,7 @@
 #include "core/card/ShieldCard.hpp"
 #include "core/card/TeleportCard.hpp"
 #include "core/player/Player.hpp"
+#include "data/TransactionLogger.hpp"
 #include "logic/Board.hpp"
 #include "logic/Game.hpp"
 
@@ -74,7 +75,7 @@ void GameLoader::restoreGameMeta(const data::GameStateDTO& dto, Game& game) {
     }
   }
   game.setCurrentPlayerIdx(idx);
-  game.restoreLog(dto.log);
+  data::TransactionLogger::get().restore(dto.log);
 }
 
 void GameLoader::restorePlayers(const data::GameStateDTO& dto, Game& game) {
@@ -120,18 +121,19 @@ void GameLoader::restorePlayers(const data::GameStateDTO& dto, Game& game) {
 void GameLoader::restoreProperties(const data::GameStateDTO& dto, Game& game) {
   Board& board = game.getBoard();
 
-  for (const auto* propDTO : dto.properties) {
-    if (!propDTO) continue;
+  for (const auto& propDTO : dto.properties) {
+    const auto* dtoPtr = propDTO.get();
+    if (!dtoPtr) continue;
 
-    core::Tile* tile = board.getTileByCode(propDTO->code);
+    core::Tile* tile = board.getTileByCode(dtoPtr->code);
     if (!tile) continue;
 
     core::Property* prop = tile->getProperty();
     if (!prop) continue;
 
     // 1. Set owner DULU, mortgage() butuh isOwned() == true
-    if (!propDTO->ownerName.empty()) {
-      core::Player* owner = game.getPlayerByName(propDTO->ownerName);
+    if (!dtoPtr->ownerName.empty()) {
+      core::Player* owner = game.getPlayerByName(dtoPtr->ownerName);
       if (owner) {
         prop->setOwner(owner);
         owner->addProperty(prop);
@@ -139,12 +141,12 @@ void GameLoader::restoreProperties(const data::GameStateDTO& dto, Game& game) {
     }
 
     // 2. Mortgage status
-    if (propDTO->isMortgaged && prop->isOwned()) prop->mortgage();
+    if (dtoPtr->isMortgaged && prop->isOwned()) prop->mortgage();
 
     // 3. Street-specific: building level + festival
-    if (propDTO->getType() == "street" &&
+    if (dtoPtr->getType() == "street" &&
         prop->getType() == core::PropertyType::STREET) {
-      const auto* sDTO = static_cast<const data::StreetPropertyDTO*>(propDTO);
+      const auto* sDTO = static_cast<const data::StreetPropertyDTO*>(dtoPtr);
       auto* street = static_cast<core::Street*>(prop);
       street->setLevel(sDTO->level);
       if (sDTO->festMult != 1 || sDTO->festDur != 0)

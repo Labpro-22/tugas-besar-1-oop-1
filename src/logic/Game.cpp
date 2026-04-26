@@ -15,15 +15,14 @@
 #include "core/card/TeleportCard.hpp"
 #include "core/player/Player.hpp"
 #include "data/ConfigReader.hpp"
-#include "data/DomainBuilder.hpp"
+#include "data/TransactionLogger.hpp"
 #include "logic/Auction.hpp"
-#include "logic/TransactionLogger.hpp"
 #include "logic/UIInputMediator.hpp"
+
 namespace logic {
 
-Game::Game(std::vector<core::Player*> players, TransactionLogger* logger)
-    : players_(players),
-      logger_(logger),
+Game::Game(std::vector<core::Player*> players)
+    : players_(std::move(players)),
       mediator_(nullptr),
       currentPlayerId_(0),
       state_(GameState::PRE_ROLL),
@@ -39,28 +38,20 @@ void Game::initialize(int boardSize, const std::string& configPath) {
 
   board_.clear();
 
-  // Step 1: baca semua config
-  data::ConfigReader reader(configPath, boardSize);
+  data::ConfigReader::initialize(configPath, boardSize);
+  auto& reader = data::ConfigReader::get();
 
-  auto propCfgs = reader.readProperties();
-  auto actionCfgs = reader.readActionTiles();
-  auto taxCfg = reader.readTax();
   auto specialCfg = reader.readSpecial();
   auto miscCfg = reader.readMisc();
   auto railRents = reader.readRailroadRents();
   auto utilMults = reader.readUtilityMultipliers();
 
-  // Step 2: bangun tiles
-  auto entries = data::DomainBuilder::buildBoard(propCfgs, actionCfgs, taxCfg);
+  auto entries = reader.buildBoard();
 
-  for (auto* cfg : propCfgs) delete cfg;
-
-  // Step 3: populate board
-  for (auto& entry : entries)
+  for (auto& entry : entries) {
     board_.addTile(entry.releaseTile(), entry.getCode());
-  // fixing the steps above
+  }
 
-  // Step 4: inject config ke static tables dan game fields
   core::Utility::setMultiplierTabel(utilMults);
   core::Railroad::setRentTable(railRents);
 
@@ -68,16 +59,10 @@ void Game::initialize(int boardSize, const std::string& configPath) {
   jailFine_ = specialCfg.jailFine;
   maxTurn_ = miscCfg.maxTurn;
 
-  // Step 5: set initial balance (dioverride oleh GameLoader::restorePlayers
-  // saat load)
-  for (auto* p : players_)
+  for (auto* p : players_) {
     if (p) p->setBalance(miscCfg.initialBalance);
+  }
 
-  // Step 6: bangun deck — setelah board siap (chance deck butuh posisi stasiun)
-  buildChanceDeck();
-  buildCommunityChestDeck();
-  buildSkillDeck();
-  // Step 6: bangun deck, setelah board siap (chance deck butuh posisi stasiun)
   buildChanceDeck();
   buildCommunityChestDeck();
   buildSkillDeck();
@@ -147,6 +132,9 @@ void Game::rollDice() {
     doubles_ = 0;
     hasExtraTurn_ = false;
   }
+
+  logEvent(data::LogAction::DICE_ROLL, *getCurrentPlayer(),
+           lastDiceRoll_.first + lastDiceRoll_.second);
 }
 
 void Game::moveCurrentPlayer() {
@@ -167,6 +155,7 @@ void Game::moveCurrentPlayer() {
   int newPos = (currentPos + steps) % boardSize;
 
   stepThrough(*p, currentPos, newPos, /*firePassed=*/true);
+  logEvent(data::LogAction::PIECE_MOVEMENT, *p, newPos);
 }
 
 void Game::stepThrough(core::Player& p, int from, int to, bool firePassed) {
@@ -175,7 +164,6 @@ void Game::stepThrough(core::Player& p, int from, int to, bool firePassed) {
     throw InvalidConfigException("Board", "at least 1 tile");
   }
 
-  // Normalise to [0, boardSize)
   int dest = ((to % boardSize) + boardSize) % boardSize;
   int origin = ((from % boardSize) + boardSize) % boardSize;
 
@@ -220,6 +208,7 @@ void Game::buyProperty(core::Property* prop) {
 
   prop->setOwner(p);
   p->addProperty(prop);
+  logEvent(data::LogAction::PROPERTY_PURCHASE, *p, *prop, price);
 }
 
 void Game::buildHouse(core::Player* buyer, core::Tile* at) {
@@ -249,6 +238,7 @@ void Game::buildHouse(core::Player* buyer, core::Tile* at) {
   *buyer -= cost;
   bank_.receive(cost);
   street->build();
+  logEvent(data::LogAction::BUILD_HOUSE, *buyer, *street, cost);
 }
 
 void Game::sellHouse(core::Player* seller, core::Tile* at) {
@@ -275,7 +265,9 @@ void Game::sellHouse(core::Player* seller, core::Tile* at) {
 
   street->demolish(1);
   bank_.pay(*seller, refund);
+  logEvent(data::LogAction::SALE_HOUSE, *seller, *street, refund);
 }
+
 void Game::mortgageProperty(core::Property* prop) {
   core::Player* p = prop->getOwner();
 
@@ -290,6 +282,7 @@ void Game::mortgageProperty(core::Property* prop) {
 
   prop->mortgage();
   bank_.pay(*p, prop->getMortgageValue());
+  logEvent(data::LogAction::MORTGAGE, *p, *prop, prop->getMortgageValue());
 }
 
 void Game::unmortgageProperty(core::Property* prop) {
@@ -313,6 +306,7 @@ void Game::unmortgageProperty(core::Property* prop) {
   *p -= cost;
   bank_.receive(cost);
   prop->unmortgage();
+  logEvent(data::LogAction::UNMORTGAGE, *p, *prop, cost);
 }
 
 void Game::giveCard(core::Player& player, core::ActionCard* card) {
@@ -343,20 +337,21 @@ void Game::startAuction(core::Property* prop) {
     bank_.receive(result.finalBid);
     prop->setOwner(result.winner);
     result.winner->addProperty(prop);
+    logEvent(data::LogAction::AUCTION_RESULT, *result.winner, *prop,
+             result.finalBid);
   }
 }
 
-void Game::logEvent(const std::string& action, core::Player& p, int value) {
-  if (logger_) {
-    logger_->log(turnCount_, action, p, value);
-  }
+void Game::logEvent(data::LogAction action, core::Player& p, int value) {
+  data::TransactionLogger::get().log(turnCount_, p.getName(), action,
+                                     "value=" + std::to_string(value));
 }
 
-void Game::logEvent(const std::string& action, core::Player& p,
+void Game::logEvent(data::LogAction action, core::Player& p,
                     core::Property& prop, int value) {
-  if (logger_) {
-    logger_->log(turnCount_, action, p, prop, value);
-  }
+  data::TransactionLogger::get().log(
+      turnCount_, p.getName(), action,
+      prop.getName() + " value=" + std::to_string(value));
 }
 
 core::Player* Game::getCurrentPlayer() const {
@@ -372,7 +367,6 @@ int Game::getMaxTurn() const { return maxTurn_; }
 int Game::getJailFine() const { return jailFine_; }
 
 void Game::offerProperty(core::Player& p, core::Property& prop) {
-  // use mediator
   bool accept = mediator_->offerPropertyUI(p, prop);
   if (accept) {
     buyProperty(&prop);
@@ -382,15 +376,11 @@ void Game::offerProperty(core::Player& p, core::Property& prop) {
 }
 
 void Game::chargeRent(core::Player& p, core::Property& prop) {
-  // int rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second,
-  // 1, false); p -= rent;
-  // *(prop.getOwner()) += rent;
-  // if railroad and utility, rent is calculated based on number of property
-  // owned by owner
-  int rent = 0, owned = 0;
+  int rent = 0;
+  int owned = 0;
   if (prop.getType() == core::PropertyType::RAILROAD ||
       prop.getType() == core::PropertyType::UTILITY) {
-    owned = p.getOwnedProperties().size();
+    owned = static_cast<int>(prop.getOwner()->getOwnedProperties().size());
     rent = prop.calculateRent(lastDiceRoll_.first + lastDiceRoll_.second, owned,
                               false);
   } else {
@@ -399,6 +389,7 @@ void Game::chargeRent(core::Player& p, core::Property& prop) {
   }
   p -= rent;
   *(prop.getOwner()) += rent;
+  logEvent(data::LogAction::RENT_PAYMENT, p, prop, rent);
 }
 
 void Game::sendToJail(core::Player& p) {
@@ -418,12 +409,15 @@ void Game::chargeTax(core::Player& p, int flatRate, int percentageRate,
     int amount = usePercentage ? percentageAmount : flatRate;
     p -= amount;
     bank_.receive(amount);
+    logEvent(data::LogAction::TAX_PAYMENT, p, amount);
   } else {
     if (p.canAfford(flatRate)) {
       p -= flatRate;
       bank_.receive(flatRate);
+      logEvent(data::LogAction::TAX_PAYMENT, p, flatRate);
     } else {
       p.setBankrupted(true);
+      logEvent(data::LogAction::BANKRUPTCY, p, flatRate);
     }
   }
 }
@@ -439,12 +433,13 @@ void Game::activateFestival(core::Player& p) {
 void Game::resolveFestival(core::Property* selectedProp) {
   if (selectedProp) {
     selectedProp->applyFestival();
-    logEvent("FESTIVAL_ACTIVATED", *getCurrentPlayer(), *selectedProp,
-             selectedProp->getFestMultiplier());
+    logEvent(data::LogAction::FESTIVAL_ACTIVATION, *getCurrentPlayer(),
+             *selectedProp, selectedProp->getFestMultiplier());
   }
 }
 
 void Game::drawChanceCard(core::Player& p) {
+  logEvent(data::LogAction::CHANCE_CARD_DRAW, p, 0);
   core::ActionCard* card = chanceDeck_.draw();
   if (card) {
     card->execute(p, *this);
@@ -452,6 +447,7 @@ void Game::drawChanceCard(core::Player& p) {
 }
 
 void Game::drawCommunityChestCard(core::Player& p) {
+  logEvent(data::LogAction::COMMUNITY_CARD_DRAW, p, 0);
   core::ActionCard* card = communityChestDeck_.draw();
   if (card) {
     card->execute(p, *this);
@@ -488,14 +484,9 @@ void Game::setTurnOrder(const std::vector<std::string>& order) {
   if (reordered.size() == players_.size()) players_ = reordered;
 }
 
-void Game::restoreLog(const std::vector<data::LogEntry>& entries) {
-  if (logger_) logger_->restore(entries);
-}
-
 core::CardDeck<core::ActionCard>& Game::getSkillDeck() { return skillDeck_; }
 
 void Game::buildChanceDeck() {
-  // Spec card list
   std::vector<std::unique_ptr<core::ActionCard>> cards;
   cards.push_back(core::ChanceCard::makeAdvanceToNearestRailroad(
       "Pergi ke stasiun terdekat."));
@@ -506,7 +497,6 @@ void Game::buildChanceDeck() {
 }
 
 void Game::buildCommunityChestDeck() {
-  // Spec card list
   std::vector<std::unique_ptr<core::ActionCard>> cards;
   cards.push_back(core::CommunityChestCard::makeCollectFromAll(
       100, "Ulang tahun: dapat M100 dari tiap pemain."));
@@ -519,7 +509,6 @@ void Game::buildCommunityChestDeck() {
 }
 
 void Game::buildSkillDeck() {
-  // Spec card counts
   std::vector<std::unique_ptr<core::ActionCard>> cards;
   std::uniform_int_distribution<int> stepDist(1, 6);
 

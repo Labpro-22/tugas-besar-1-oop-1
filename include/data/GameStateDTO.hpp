@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -71,15 +72,13 @@ class GameStateDTO {
   std::vector<std::string> turnOrder;
   std::string activePlayerName;
 
-  std::vector<PropertyDTO*> properties;  // owned pointers
+  std::vector<std::unique_ptr<PropertyDTO>> properties;
   std::vector<std::string> skillDeckOrder;
   std::vector<LogEntry> log;
 
   GameStateDTO() = default;
 
-  ~GameStateDTO() {
-    for (auto* p : properties) delete p;
-  }
+  ~GameStateDTO() = default;
 
   GameStateDTO(const GameStateDTO&) = delete;
   GameStateDTO& operator=(const GameStateDTO&) = delete;
@@ -94,13 +93,10 @@ class GameStateDTO {
         activePlayerName(std::move(o.activePlayerName)),
         properties(std::move(o.properties)),
         skillDeckOrder(std::move(o.skillDeckOrder)),
-        log(std::move(o.log)) {
-    o.properties.clear();
-  }
+        log(std::move(o.log)) {}
 
   GameStateDTO& operator=(GameStateDTO&& o) noexcept {
     if (this != &o) {
-      for (auto* p : properties) delete p;
       boardSize = o.boardSize;
       turnCount = o.turnCount;
       maxTurn = o.maxTurn;
@@ -111,7 +107,6 @@ class GameStateDTO {
       properties = std::move(o.properties);
       skillDeckOrder = std::move(o.skillDeckOrder);
       log = std::move(o.log);
-      o.properties.clear();
     }
     return *this;
   }

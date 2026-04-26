@@ -42,7 +42,6 @@ add_library(
   src/logic/Bank.cpp
   src/logic/Board.cpp
   src/logic/Game.cpp
-  src/logic/TransactionLogger.cpp
   src/logic/Bank.cpp
   src/logic/Auction.cpp
   src/logic/Board.cpp
@@ -53,10 +52,11 @@ add_library(
 
 add_library(
   nimonspoli_data STATIC
+  src/data/ConfigStructs.cpp
   src/data/ConfigReader.cpp
+  src/data/TransactionLogger.cpp
   src/data/SaveLoadManager.cpp
-  src/data/LogSerializer.cpp
-  src/data/DomainBuilder.cpp
+  src/data/PropertyConfig.cpp
   # etc. lanjut sendiri
 )
 

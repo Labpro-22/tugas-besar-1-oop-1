@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "core/GameContext.hpp"
+#include "data/LogEntry.hpp"
 
 namespace core {
 
@@ -11,9 +12,10 @@ DiscountCard::DiscountCard(float discountRate, std::string description)
     : SkillCard(std::move(description)), discountRate_(discountRate) {}
 
 void DiscountCard::execute(Player& player, GameContext& ctx) {
-  (void)ctx;
   player.consumeSkillUse();
   player.applyDiscount(discountRate_);
+  ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player,
+               static_cast<int>(discountRate_ * 100.0F));
 }
 
 std::string DiscountCard::getCardType() const { return "Discount"; }

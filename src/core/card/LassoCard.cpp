@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "core/GameContext.hpp"
+#include "data/LogEntry.hpp"
 
 namespace core {
 
@@ -44,7 +45,8 @@ void LassoCard::execute(Player& player, GameContext& ctx) {
   }
   if (victim != nullptr) {
     ctx.teleportPlayer(*victim, myPos);
-    ctx.logEvent("LASSO", player, victim->getPosition());
+    ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player,
+                 victim->getPosition());
   }
 }
 

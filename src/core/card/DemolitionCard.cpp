@@ -6,6 +6,7 @@
 
 #include "core/GameContext.hpp"
 #include "core/Property.hpp"
+#include "data/LogEntry.hpp"
 
 namespace core {
 
@@ -24,7 +25,7 @@ void DemolitionCard::execute(Player& player, GameContext& ctx) {
     victims.push_back(candidate);
   }
   if (victims.empty()) {
-    ctx.logEvent("DEMOLITION_MISS", player, 0);
+    ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, 0);
     return;
   }
 
@@ -37,7 +38,7 @@ void DemolitionCard::execute(Player& player, GameContext& ctx) {
 
   const std::vector<Property*>& props = victim->getOwnedProperties();
   if (props.empty()) {
-    ctx.logEvent("DEMOLITION_MISS", player, 0);
+    ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, 0);
     return;
   }
   const int propChoice = player.promptChoice("DemolitionProperty", 0,
@@ -47,16 +48,16 @@ void DemolitionCard::execute(Player& player, GameContext& ctx) {
   }
   Property* prop = props[static_cast<std::size_t>(propChoice)];
   if (prop == nullptr || prop->getType() != PropertyType::STREET) {
-    ctx.logEvent("DEMOLITION_MISS", player, 0);
+    ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, 0);
     return;
   }
   auto* street = static_cast<Street*>(prop);
   if (street->getHouseCount() == 0 && street->getHotelCount() == 0) {
-    ctx.logEvent("DEMOLITION_MISS", player, 0);
+    ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, 0);
     return;
   }
   street->demolish(1);
-  ctx.logEvent("DEMOLITION", player, *prop, 0);
+  ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, *prop, 0);
 }
 
 std::string DemolitionCard::getCardType() const { return "Demolition"; }

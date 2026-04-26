@@ -1,5 +1,7 @@
 #include "core/Tiles.hpp"
 
+#include "data/LogEntry.hpp"
+
 namespace core {
 Tile::Tile(int position, const std::string& name)
     : position_(position), name_(name) {}
@@ -47,7 +49,7 @@ void UtilityTile::onLanded(Player& p, GameContext& g) {
   if (property_->isAvailable()) {
     property_->setOwner(&p);
     p.addProperty(property_.get());
-    g.logEvent("UTILITY", p, *property_, 0);
+    g.logEvent(data::LogAction::PROPERTY_PURCHASE, p, *property_, 0);
   } else if (property_->getOwner() != &p && !property_->isMortgagedStatus()) {
     g.chargeRent(p, *property_.get());
   }
@@ -75,13 +77,13 @@ GoTile::GoTile(int position, const std::string& name)
 void GoTile::onLanded(Player& p, GameContext& g) {
   // get salary added to their inventoryt
   g.payPlayerFromBank(p, g.getGoSalary());
-  g.logEvent("GO_SALARY", p, g.getGoSalary());
+  g.logEvent(data::LogAction::PIECE_MOVEMENT, p, g.getGoSalary());
 }
 
 void GoTile::onPassed(Player& p, GameContext& g) {
   // get salary again
   g.payPlayerFromBank(p, g.getGoSalary());
-  g.logEvent("GO_SALARY", p, g.getGoSalary());
+  g.logEvent(data::LogAction::PIECE_MOVEMENT, p, g.getGoSalary());
 }
 
 TileType GoTile::getType() const { return TileType::GO; }
@@ -107,7 +109,7 @@ GoToJailTile::GoToJailTile(int position, const std::string& name)
 
 void GoToJailTile::onLanded(Player& p, GameContext& g) {
   g.sendToJail(p);
-  g.logEvent("GO_TO_JAIL", p, 0);
+  g.logEvent(data::LogAction::PIECE_MOVEMENT, p, 0);
 }
 
 TileType GoToJailTile::getType() const { return TileType::GO_TO_JAIL; }

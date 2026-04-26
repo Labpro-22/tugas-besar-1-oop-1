@@ -1,5 +1,8 @@
 #pragma once
+#include <memory>
 #include <string>
+
+#include "core/Property.hpp"
 
 namespace data {
 // dibaca dari property.txt
@@ -15,6 +18,10 @@ class PropertyConfig {
 
   virtual ~PropertyConfig() = default;
   virtual std::string getType() const = 0;
+  virtual std::unique_ptr<core::Property> buildProperty() const = 0;
+
+ protected:
+  static core::ColorGroup colorFromString(const std::string& s);
 };
 
 // kolom property.txt setelah mortgageValue:
@@ -26,17 +33,20 @@ class StreetConfig : public PropertyConfig {
   int rent[6] = {};  // index 0 = unimproved ... 5 = hotel
 
   std::string getType() const override { return "STREET"; }
+  std::unique_ptr<core::Property> buildProperty() const override;
 };
 
 // dilihat dari railroad.txt
 class RailroadConfig : public PropertyConfig {
  public:
   std::string getType() const override { return "RAILROAD"; }
+  std::unique_ptr<core::Property> buildProperty() const override;
 };
 
 // dilihat dari utility.txt
 class UtilityConfig : public PropertyConfig {
  public:
   std::string getType() const override { return "UTILITY"; }
+  std::unique_ptr<core::Property> buildProperty() const override;
 };
 }  // namespace data

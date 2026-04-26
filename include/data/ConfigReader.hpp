@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -9,13 +10,21 @@
 namespace data {
 class ConfigReader {
  public:
+  ConfigReader(const ConfigReader&) = delete;
+  ConfigReader& operator=(const ConfigReader&) = delete;
+  ConfigReader(ConfigReader&&) = delete;
+  ConfigReader& operator=(ConfigReader&&) = delete;
+
+  static void initialize(const std::string& baseConfigPath, int boardSize = 40);
+  static ConfigReader& get();
+
   /**
    * @param baseConfigPath Path ke folder config (misal: "config/")
    * @param boardSize Ukuran papan (20, 24, ..., 60). Default 40.
    */
   explicit ConfigReader(const std::string& baseConfigPath, int boardSize = 40);
 
-  std::vector<PropertyConfig*> readProperties();
+  std::vector<std::unique_ptr<PropertyConfig>> readProperties();
   std::map<int, int> readRailroadRents();
   std::map<int, int> readUtilityMultipliers();
   TaxConfig readTax();
@@ -23,6 +32,7 @@ class ConfigReader {
   MiscConfig readMisc();
   std::vector<ActionTileConfig> readActionTiles();
   BoardConfig readBoardConfig();
+  std::vector<TileEntry> buildBoard();
 
  private:
   std::string basePath_;

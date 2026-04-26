@@ -4,6 +4,7 @@
 
 #include "core/GameContext.hpp"
 #include "core/player/Player.hpp"
+#include "data/LogEntry.hpp"
 
 namespace core {
 
@@ -21,6 +22,7 @@ void MoveCard::execute(Player& player, GameContext& ctx) {
   if (target < 0) {
     target += n;
   }
+  ctx.logEvent(data::LogAction::SPECIAL_CARD_USE, player, steps_);
   ctx.movePlayer(player, target);
 }
 
