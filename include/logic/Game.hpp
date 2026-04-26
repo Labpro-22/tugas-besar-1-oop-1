@@ -9,6 +9,7 @@
 
 #include "core/GameContext.hpp"
 #include "core/card/CardDeck.hpp"
+#include "core/player/PlayerTurnContext.hpp"
 #include "data/LogEntry.hpp"
 #include "logic/Bank.hpp"
 #include "logic/Board.hpp"
@@ -34,7 +35,7 @@ enum class GameState {
   GAME_OVER
 };
 
-class Game : public core::GameContext {
+class Game : public core::GameContext, public core::PlayerTurnContext {
  private:
   Board board_;
   std::vector<core::Player*> players_;
@@ -124,8 +125,10 @@ class Game : public core::GameContext {
   // Property operations
   void buyProperty(core::Property& prop);
   void buildHouse(core::Player* buyer, core::Tile* at);
+  void buildHouse(core::Player& buyer, core::Property& property) override;
   void sellHouse(core::Player* seller, core::Tile* at);
   void mortgageProperty(core::Property& prop);
+  void mortgageProperty(core::Player& actor, core::Property& prop) override;
   void unmortgageProperty(core::Property& prop);
   void startAuction(core::Property& prop);
 

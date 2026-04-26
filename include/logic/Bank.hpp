@@ -19,6 +19,7 @@ class Bank {
   bool processPayment(core::Player& payer, int amount,
                       core::Player* creditor = nullptr);
   int buyProperty(core::Player& buyer, core::Property& prop);
+  int awardAuction(core::Player& winner, core::Property& prop, int amount);
   int buildHouse(core::Player& buyer, core::Street& street);
   int sellHouse(core::Player& seller, core::Street& street);
   int mortgageProperty(core::Player& actor, core::Property& prop);

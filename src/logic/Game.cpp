@@ -222,6 +222,16 @@ void Game::buyProperty(core::Property& prop) {
   logEvent(data::LogAction::PROPERTY_PURCHASE, *p, prop, price);
 }
 
+void Game::buildHouse(core::Player& buyer, core::Property& property) {
+  if (property.getType() != core::PropertyTileType::STREET) {
+    throw InvalidPropertyTypeException(property.getName(), "bukan Street");
+  }
+
+  auto& street = static_cast<core::Street&>(property);
+  int cost = bank_.buildHouse(buyer, street);
+  logEvent(data::LogAction::BUILD_HOUSE, buyer, street, cost);
+}
+
 void Game::buildHouse(core::Player* buyer, core::Tile* at) {
   if (at == nullptr) {
     throw InvalidPropertyTypeException("unknown", "bukan properti");
@@ -238,8 +248,7 @@ void Game::buildHouse(core::Player* buyer, core::Tile* at) {
 
   core::Street* street = static_cast<core::Street*>(&prop);
 
-  int cost = bank_.buildHouse(*buyer, *street);
-  logEvent(data::LogAction::BUILD_HOUSE, *buyer, *street, cost);
+  buildHouse(*buyer, *street);
 }
 
 void Game::sellHouse(core::Player* seller, core::Tile* at) {
@@ -260,9 +269,12 @@ void Game::sellHouse(core::Player* seller, core::Tile* at) {
 }
 
 void Game::mortgageProperty(core::Property& prop) {
-  core::Player* actor = getCurrentPlayer();
-  const int proceeds = bank_.mortgageProperty(*actor, prop);
-  logEvent(data::LogAction::MORTGAGE, *actor, prop, proceeds);
+  mortgageProperty(*getCurrentPlayer(), prop);
+}
+
+void Game::mortgageProperty(core::Player& actor, core::Property& prop) {
+  const int proceeds = bank_.mortgageProperty(actor, prop);
+  logEvent(data::LogAction::MORTGAGE, actor, prop, proceeds);
 }
 
 void Game::unmortgageProperty(core::Property& prop) {
@@ -290,21 +302,14 @@ void Game::startAuction(core::Property& prop) {
     throw InvalidMoveException("auction exception");
   }
 
-  std::vector<core::Player*> eligiblePlayers;
-  for (auto* p : players_) {
-    if (p != nullptr && !p->isBankrupted()) {
-      eligiblePlayers.push_back(p);
-    }
-  }
-
-  AuctionResult result = requireMediator().runAuction(&prop, eligiblePlayers);
+  Auction auction(&prop, players_);
+  AuctionResult result =
+      requireMediator().runAuction(&prop, auction.getParticipants());
   if (result.winner != nullptr) {
-    *result.winner -= result.finalBid;
-    bank_.receive(result.finalBid);
-    prop.setOwner(result.winner);
-    result.winner->addProperty(prop);
-    logEvent(data::LogAction::AUCTION_RESULT, *result.winner, prop,
-             result.finalBid);
+    auction.startBid(0);
+    auction.placeBid(*result.winner, result.finalBid);
+    const int finalBid = auction.resolveWinner(bank_);
+    logEvent(data::LogAction::AUCTION_RESULT, *result.winner, prop, finalBid);
   }
 }
 

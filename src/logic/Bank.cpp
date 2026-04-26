@@ -64,6 +64,24 @@ int Bank::buyProperty(core::Player& buyer, core::Property& prop) {
   return price;
 }
 
+int Bank::awardAuction(core::Player& winner, core::Property& prop, int amount) {
+  if (prop.getOwner() != nullptr) {
+    throw InvalidMoveException("owned property exception");
+  }
+  if (amount <= 0) {
+    throw InvalidMoveException("auction bid must be positive");
+  }
+  if (!winner.canAfford(amount)) {
+    throw InsufficientFundsException(winner.getBalance(), amount);
+  }
+
+  winner -= amount;
+  receive(amount);
+  prop.setOwner(&winner);
+  winner.addProperty(prop);
+  return amount;
+}
+
 int Bank::buildHouse(core::Player& buyer, core::Street& street) {
   if (street.getOwner() != &buyer) {
     throw UnauthorizedActionException(

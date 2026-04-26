@@ -3,28 +3,8 @@
 #include <utility>
 
 #include "core/Property.hpp"
-#include "core/Tiles.hpp"
-#include "logic/Board.hpp"
-#include "logic/Game.hpp"
 
 namespace core {
-
-namespace {
-
-core::Tile* findTileFor(logic::Board& board, Property& target) {
-  for (int i = 0; i < board.getTileCount(); ++i) {
-    core::Tile* t = board.getTile(i);
-    if (t != nullptr && t->getType() == core::TileType::PROPERTY) {
-      auto* propertyTile = static_cast<core::PropertyTile*>(t);
-      if (&propertyTile->getProperty() == &target) {
-        return t;
-      }
-    }
-  }
-  return nullptr;
-}
-
-}  // namespace
 
 COMPlayer::COMPlayer(std::string name, Avatar avatar,
                      std::unique_ptr<COMStrategy> strategy)
@@ -45,10 +25,10 @@ int COMPlayer::promptChoice(const std::string& context, int defaultIndex,
   return Player::promptChoice(context, defaultIndex, optionCount);
 }
 
-void COMPlayer::takeTurn(logic::Game& game) {
+void COMPlayer::takeTurn(PlayerTurnContext& turnContext) {
   resetPerTurnFlags();
-  game.rollDice();
-  game.moveCurrentPlayer();
+  turnContext.rollDice();
+  turnContext.moveCurrentPlayer();
 
   if (strategy_ == nullptr) {
     return;
@@ -56,7 +36,7 @@ void COMPlayer::takeTurn(logic::Game& game) {
 
   for (Property* lot : getOwnedProperties()) {
     if (lot != nullptr && strategy_->shouldMortgage(lot, *this)) {
-      game.mortgageProperty(*lot);
+      turnContext.mortgageProperty(*this, *lot);
     }
   }
 
@@ -64,11 +44,8 @@ void COMPlayer::takeTurn(logic::Game& game) {
     if (lot == nullptr || !strategy_->shouldBuild(lot, *this)) {
       continue;
     }
-    core::Tile* at = findTileFor(game.getBoard(), *lot);
-    if (at != nullptr) {
-      game.buildHouse(this, at);
-      break;
-    }
+    turnContext.buildHouse(*this, *lot);
+    break;
   }
 }
 

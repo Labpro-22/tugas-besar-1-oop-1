@@ -1,5 +1,9 @@
 #pragma once
+
 #include <vector>
+
+#include "logic/Bank.hpp"
+#include "logic/UIInputMediator.hpp"
 
 namespace core {
 class Player;
@@ -24,11 +28,12 @@ class Auction {
   bool placeBid(core::Player& p, int amount);
   void passBid(core::Player& p);
 
-  void resolveWinner();
+  int resolveWinner(Bank& bank);
   bool isFinished() const;
 
   int getCurrentBid() const;
   core::Player* getCurrentWinner() const;
+  const std::vector<core::Player*>& getParticipants() const;
 };
 
 }  // namespace logic

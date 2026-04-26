@@ -24,6 +24,8 @@ Player::Player(std::string name, Avatar avatar)
       usedSkillThisTurn_(false),
       discountRate_(0.0F) {}
 
+    Player::~Player() = default;
+
 int Player::getNetWorth() const noexcept {
   int total = balance_;
   for (Property* p : ownedProperties_) {

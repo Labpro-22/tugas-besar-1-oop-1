@@ -4,11 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace logic {
-
-class Game;
-
-}
+#include "core/player/PlayerTurnContext.hpp"
 
 namespace core {
 
@@ -43,13 +39,13 @@ class Player {
   Player(Player&&) = delete;
   Player& operator=(Player&&) = delete;
 
-  virtual ~Player() = default;
+  virtual ~Player();
 
   /**
    * @brief Drive one full turn for this controller.
-   * @param game Singleton game instance coordinating state transitions.
+    * @param turnContext Narrow command surface for player-controlled turn flow.
    */
-  virtual void takeTurn(logic::Game& game) = 0;
+    virtual void takeTurn(PlayerTurnContext& turnContext) = 0;
 
   /**
    * @brief Report whether this controller represents a human UI client.

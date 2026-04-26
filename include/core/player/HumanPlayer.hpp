@@ -19,9 +19,9 @@ class HumanPlayer : public Player {
 
   ~HumanPlayer() override = default;
 
-  void takeTurn(logic::Game& game) override {
+  void takeTurn(PlayerTurnContext& turnContext) override {
     resetPerTurnFlags();
-    (void)game;
+    (void)turnContext;
     // UI layer is responsible for issuing commands; this stub simply yields.
   }
 

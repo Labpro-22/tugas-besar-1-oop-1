@@ -23,7 +23,7 @@ class COMPlayer : public Player {
 
   ~COMPlayer() override = default;
 
-  void takeTurn(logic::Game& game) override;
+    void takeTurn(PlayerTurnContext& turnContext) override;
 
   bool isHuman() override;
 
