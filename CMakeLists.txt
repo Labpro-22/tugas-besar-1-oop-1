@@ -48,8 +48,10 @@ add_library(
   src/ui/board/CornerTilePanel.cpp
   src/ui/board/BoardPanel.cpp
  
-  src/ui/ActionPanel.cpp
-  src/ui/PlayerInfoPanel.cpp
+  src/ui/sidebar/ActionPanel.cpp
+  src/ui/sidebar/PlayerCard.cpp
+  src/ui/sidebar/PlayerInfoPanel.cpp
+  src/ui/sidebar/Game_temp.cpp
   
   src/ui/GameWindow.cpp
 )

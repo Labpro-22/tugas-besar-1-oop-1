@@ -1,4 +1,4 @@
-#include "ui/ActionPanel.hpp"
+#include "ui/sidebar/ActionPanel.hpp"
 
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>

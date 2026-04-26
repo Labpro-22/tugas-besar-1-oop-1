@@ -6,12 +6,11 @@
 #include <SFML/Window/Event.hpp>
 #include <memory>
 
-#include "logic/Game.hpp"
-#include "ui/ActionPanel.hpp"
 #include "ui/DialogManager.hpp"
-#include "ui/PlayerInfoPanel.hpp"
 #include "ui/board/BoardPanel.hpp"
 #include "ui/component/Constants.hpp"
+#include "ui/sidebar/ActionPanel.hpp"
+#include "ui/sidebar/PlayerInfoPanel.hpp"
 
 namespace ui {
 class GameWindow : public sf::RenderWindow {
@@ -34,7 +33,7 @@ class GameWindow : public sf::RenderWindow {
   sf::View mainView_;
 
   // Components
-  logic::Game game_;
+  temp::Game game_;
   BoardPanel boardPanel_;           /**< Main (center) panel */
   PlayerInfoPanel playerInfoPanel_; /**< Right Panel */
   ActionPanel actionPanel_;         /**< Left Panel */
