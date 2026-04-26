@@ -22,7 +22,16 @@ add_library(
   src/core/Railroad.cpp
   src/core/Street.cpp
   src/core/Utility.cpp
-  # etc. lanjut sendiri
+  src/core/ActionCard.cpp
+  src/core/ChanceCard.cpp
+  src/core/CommunityChestCard.cpp
+  src/core/SkillCard.cpp
+  src/core/TeleportCard.cpp
+  src/core/MoveCard.cpp
+  src/core/ShieldCard.cpp
+  src/core/DiscountCard.cpp
+  src/core/LassoCard.cpp
+  src/core/DemolitionCard.cpp
 )
 
 add_library(
@@ -35,6 +44,7 @@ add_library(
   src/logic/Auction.cpp
   src/logic/Board.cpp
   src/logic/GameLoader.cpp
+  src/logic/BankruptcyHandler.cpp
   # etc. lanjut sendiri
 )
 
