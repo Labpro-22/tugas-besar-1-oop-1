@@ -150,7 +150,7 @@ void Game::moveCurrentPlayer() {
   int currentPos = p->getPosition();
   int newPos = (currentPos + steps) % boardSize;
 
-  if (newPos < currentPos && newPos != 0) {
+  if (currentPos + steps >= boardSize) {
     core::Tile* goTile = board_.getTile(0);
     if (goTile) {
       goTile->onPassed(*p, *this);
